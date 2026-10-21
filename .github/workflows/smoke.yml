@@ -1,0 +1,32 @@
+name: smoke
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  schedule:
+    # 每周一次：上游的变化（重定向、认证、下线）也会让镜像站失效
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Validate compose
+        run: docker compose config -q
+      - name: Start
+        run: docker compose up -d
+      - name: Smoke test
+        run: scripts/smoke.sh
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail 200
+      - name: Stop
+        if: always()
+        run: docker compose down -v

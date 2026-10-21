@@ -69,7 +69,10 @@ git clone https://github.com/openlinkos/registry-mirrors.git
 cd registry-mirrors
 docker compose up -d
 docker pull localhost:5001/library/hello-world   # 测试
+scripts/smoke.sh                                 # 自检：五个上游各拉一个镜像并与上游比对摘要，检查只放行拉取、存储互相隔离
 ```
+
+仓库的 CI 每次提交和每周都会跑同一个自检，上游变化导致的失效能及时发现。
 
 对外提供服务时，请在前面加一层负责 TLS 的反向代理或 CDN，并把每个域名转发到对应的端口。默认匿名回源：Docker Hub 对匿名拉取有频率限制（按出口 IP 计算），已缓存的镜像不会重复消耗限额。
 
