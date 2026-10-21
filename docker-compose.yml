@@ -1,111 +1,77 @@
-version: '3'
+# LinkOS Mirrors：每个上游一个独立的拉取缓存（pull-through cache），各自独立存储，
+# 前面由 registry-gate 统一把关：只放行拉取（GET、HEAD），拒绝写入和 /v2/_catalog。
+# 端口 5001-5005 依次对应 Docker Hub、gcr.io、ghcr.io、registry.k8s.io、quay.io。
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 50m
+    max-file: "3"
+
+x-registry: &registry
+  image: registry:3.1.2
+  restart: always
+  environment:
+    OTEL_TRACES_EXPORTER: none
+    OTEL_SDK_DISABLED: "true"
+  logging: *logging
+  networks: [registry-net]
 
 services:
-  registry-dockerhub:
-    container_name: registry-dockerhub
-    image: registry:latest
+  registry-gate:
+    container_name: registry-gate
+    image: nginx:1.30.6-alpine
     restart: always
     volumes:
-      - ./registry-dockerhub.yml:/etc/docker/registry/config.yml
-      - /data/registry:/var/lib/registry
+      - ./gate.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
-      - 5001:5000
-    networks:
-      - registry-net
+      - 5001:8001
+      - 5002:8002
+      - 5003:8003
+      - 5004:8004
+      - 5005:8005
+    depends_on: [registry-dockerhub, registry-gcr, registry-ghcr, registry-k8s, registry-quay]
+    logging: *logging
+    networks: [registry-net]
+
+  registry-dockerhub:
+    <<: *registry
+    container_name: registry-dockerhub
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./registry-dockerhub.yml:/etc/distribution/config.yml:ro
+      - ./data/dockerhub:/var/lib/registry
 
   registry-gcr:
+    <<: *registry
     container_name: registry-gcr
-    image: registry:latest
-    restart: always
     volumes:
-      - ./registry-gcr.yml:/etc/docker/registry/config.yml
-      - /data/registry:/var/lib/registry
-    ports:
-      - 5002:5000
-    networks:
-      - registry-net
+      - /etc/localtime:/etc/localtime:ro
+      - ./registry-gcr.yml:/etc/distribution/config.yml:ro
+      - ./data/gcr:/var/lib/registry
 
   registry-ghcr:
+    <<: *registry
     container_name: registry-ghcr
-    image: registry:latest
-    restart: always
     volumes:
-      - ./registry-ghcr.yml:/etc/docker/registry/config.yml
-      - /data/registry:/var/lib/registry
-    ports:
-      - 5003:5000
-    networks:
-      - registry-net
+      - /etc/localtime:/etc/localtime:ro
+      - ./registry-ghcr.yml:/etc/distribution/config.yml:ro
+      - ./data/ghcr:/var/lib/registry
 
   registry-k8s:
+    <<: *registry
     container_name: registry-k8s
-    image: registry:latest
-    restart: always
     volumes:
-      - ./registry-k8s.yml:/etc/docker/registry/config.yml
-      - /data/registry:/var/lib/registry
-    ports:
-      - 5004:5000
-    networks:
-      - registry-net
+      - /etc/localtime:/etc/localtime:ro
+      - ./registry-k8s.yml:/etc/distribution/config.yml:ro
+      - ./data/k8s:/var/lib/registry
 
   registry-quay:
+    <<: *registry
     container_name: registry-quay
-    image: registry:latest
-    restart: always
     volumes:
-      - ./registry-quay.yml:/etc/docker/registry/config.yml
-      - /data/registry:/var/lib/registry
-    ports:
-      - 5005:5000
-    networks:
-      - registry-net
-
-  registry-local:
-    container_name: registry-local
-    image: registry:latest
-    restart: always
-    volumes:
-      - ./registry-local.yml:/etc/docker/registry/config.yml
-      - /data/registry:/var/lib/registry
-    networks:
-      - registry-net
-
-  registry-ui:
-    container_name: registry-ui
-    image: joxit/docker-registry-ui:latest
-    restart: always
-    links:
-      - registry-local:registry-local
-    ports:
-      - 5080:80
-    environment:
-      - REGISTRY_TITLE=LinkOS Registry Mirrors
-      - NGINX_PROXY_PASS_URL=http://registry-local:5000
-      - DELETE_IMAGES=false
-      - SHOW_CONTENT_DIGEST=true
-      - SINGLE_REGISTRY=true
-    networks:
-      - registry-net
-
-  registry-admin-ui:
-    container_name: registry-admin-ui
-    image: joxit/docker-registry-ui:latest
-    restart: always
-    links:
-      - registry-local:registry-local
-    ports:
-      - 5180:80
-    environment:
-      - REGISTRY_TITLE=LinkOS Registry Mirrors
-      - NGINX_PROXY_PASS_URL=http://registry-local:5000
-      - DELETE_IMAGES=true
-      - SHOW_CONTENT_DIGEST=true
-      - SINGLE_REGISTRY=true
-    networks:
-      - registry-net
+      - /etc/localtime:/etc/localtime:ro
+      - ./registry-quay.yml:/etc/distribution/config.yml:ro
+      - ./data/quay:/var/lib/registry
 
 networks:
-  registry-net:
-    name: registry-net
-    driver: bridge
+  registry-net: {}
