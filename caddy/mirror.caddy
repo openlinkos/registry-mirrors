@@ -7,6 +7,7 @@
 #   3. 给仓库加上前缀再交给 zot：docker.<域名>/v2/library/nginx/... → /v2/docker.io/library/nginx/...
 #      前缀总由这里加，客户端写什么都出不了这个上游。
 #   4. zot 不发认证质询，客户端不需要令牌，和直接用 Docker Hub 匿名拉取一样。
+#      需要登录的入口（auth-*.caddy）在这里之前先由 Caddy 校验口令；客户端的 Authorization 头不转给 zot。
 (mirror) {
 	route {
 		request_body {
@@ -18,12 +19,15 @@
 			respond 405
 		}
 		handle /v2/ {
-			reverse_proxy {$ZOT_ADDR:127.0.0.1:5100}
+			reverse_proxy {$ZOT_ADDR:127.0.0.1:5100} {
+				header_up -Authorization
+			}
 		}
 		@repo path_regexp repo ^/v2/(.+/(?:manifests|blobs)/[^/]+|.+/tags/list)$
 		handle @repo {
 			rewrite * /v2/{args[0]}/{re.repo.1}
 			reverse_proxy {$ZOT_ADDR:127.0.0.1:5100} {
+				header_up -Authorization
 				# tags/list 的分页链接里带着前缀，改回客户端看到的路径
 				header_down Link "</v2/{args[0]}/" "</v2/"
 			}

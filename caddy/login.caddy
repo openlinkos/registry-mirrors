@@ -1,0 +1,8 @@
+# 需要登录的入口共用的 Basic Auth。用户在 users.caddy 里，一行一个：<用户名> <bcrypt 哈希>，
+# 哈希用 `docker compose run --rm caddy caddy hash-password` 生成；htpasswd -B 生成的 $2y$ 哈希也能直接用。
+# Docker 客户端先 `docker login <域名>`，之后每次拉取都会带上口令。
+(login) {
+	basic_auth {
+		import users.caddy
+	}
+}

@@ -2,6 +2,7 @@
 # 冒烟测试：以 http 模式部署后（MODE=http docker compose up -d）在本机运行，检查每个上游都能正确拉取，
 # 并且入口只放行拉取。
 # 用法：scripts/smoke.sh [主机，默认 localhost]；端口与 .env 一致，可用 PORT_DOCKER 等环境变量覆盖。
+# 开了需要登录的入口（AUTH_MODE=http）时，再给 AUTH_USER、AUTH_PASS 一起检查。
 set -euo pipefail
 
 HOST="${1:-localhost}"
@@ -90,6 +91,23 @@ case "$link" in
   "</v2/library/hello-world/tags/list?"*) ok "Link: $link" ;;
   *) bad "Link 应以 </v2/library/hello-world/ 开头，实际 '${link:-无}'" ;;
 esac
+
+# 需要登录的入口（AUTH_MODE=http）：给了 AUTH_USER、AUTH_PASS 才检查，端口可用 AUTH_PORT_DOCKER 等覆盖
+if [ -n "${AUTH_USER:-}" ] && [ -n "${AUTH_PASS:-}" ]; then
+  echo "需要登录的入口"
+  for c in "${AUTH_PORT_DOCKER:-15001} library/hello-world latest" "${AUTH_PORT_QUAY:-15005} coreos/etcd v3.5.0"; do
+    read -r port repo ref <<<"$c"
+    if curl -s -D - -o /dev/null "http://$HOST:$port/v2/" | grep -qi '^www-authenticate: basic'; then
+      ok "$port 不带口令返回 Basic 质询"
+    else
+      bad "$port 不带口令没有返回 Basic 质询"
+    fi
+    s="$(status -u "$AUTH_USER:wrong-$AUTH_PASS" "http://$HOST:$port/v2/")"
+    [ "$s" = 401 ] && ok "$port 口令错误返回 401" || bad "$port 口令错误返回 $s，应为 401"
+    s="$(status -u "$AUTH_USER:$AUTH_PASS" -H "Accept: $accept" "http://$HOST:$port/v2/$repo/manifests/$ref")"
+    [ "$s" = 200 ] && ok "$port 带口令拉取 $repo:$ref 返回 200" || bad "$port 带口令拉取 $repo:$ref 返回 $s，应为 200"
+  done
+fi
 
 if [ "$fail" = 0 ]; then echo "全部通过"; else echo "有检查失败"; fi
 exit "$fail"

@@ -108,6 +108,31 @@ docker pull localhost:5001/library/hello-world   # Docker 默认允许以明文�
 scripts/smoke.sh                                 # 自检：五个上游各拉一个镜像并与上游比对摘要，检查只放行拉取、上游互相隔离
 ```
 
+### 需要登录的入口（可选）
+
+想让一部分入口只给自己人用（例如走更贵的线路），可以再开一组需要登录的入口。它和公开入口共用同一个 zot 缓存，只是 Caddy 多校验一道 Basic Auth 口令。
+
+```bash
+cp caddy/users.caddy.sample caddy/users.caddy
+docker compose run --rm caddy caddy hash-password    # 输入口令，得到 bcrypt 哈希
+# 在 caddy/users.caddy 里写一行：<用户名> <哈希>；已有 htpasswd 文件时：sed 's/:/ /' htpasswd > caddy/users.caddy
+```
+
+然后在 `.env` 中设置 `AUTH_MODE`：
+
+- `AUTH_MODE=http`：明文端口 15001–15005（依次对应 Docker Hub、gcr.io、ghcr.io、registry.k8s.io、quay.io），放在 CDN 或反向代理之后。
+- `AUTH_MODE=tls`：五个域名 `docker`、`gcr`、`ghcr`、`k8s`、`quay.<AUTH_DOMAIN>`，自动申请证书；`AUTH_DOMAIN` 要和 `DOMAIN` 不同。
+- 只要需要登录的镜像站时，再设 `MODE=off` 关掉公开入口。
+
+客户端先登录，再照常拉取：
+
+```bash
+docker login docker.example.net
+docker pull docker.example.net/library/hello-world
+```
+
+`caddy/users.caddy` 不存在时 Caddy 启动失败；文件为空时所有请求都返回 401。修改用户后执行 `docker compose restart caddy`。
+
 ### 从旧版升级
 
 旧版是每个上游一个 CNCF Distribution 容器，加一个 nginx 入口。升级时：
@@ -140,6 +165,7 @@ docker compose up -d --remove-orphans   # 删除旧的 registry-* 容器
 
 - **只读。** 只放行 GET、HEAD，其他方法返回 405；`/v2/_catalog`（会列出所有用户拉取过的仓库）和 zot 自身的接口返回 404。zot 本身也配置为匿名只读。
 - **各上游不会串。** 前缀总是由 Caddy 加上，客户端无法指定别的上游；zot 只在对应上游的前缀下查找。修改 `zot/config.yaml` 时，**每个上游都必须写 `destination`**，漏写的那一条会匹配所有仓库，等于让各上游的镜像互相串。
+- **需要登录的入口**由 Caddy 校验口令，客户端的 `Authorization` 头不会转给 zot，也不会转给上游。
 - **zot、管理接口和指标只在本机监听。**
 - 2026-10 之前的版本存在多个上游共用存储、带无认证的本地 registry 和管理界面的问题，自建过的用户请更新到当前配置。
 

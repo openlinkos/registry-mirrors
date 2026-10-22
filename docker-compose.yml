@@ -1,5 +1,6 @@
 # LinkOS Mirrors（缓存版）：一个 Caddy 加一个 zot。
-# Caddy 使用宿主机网络（仅 Linux）：tls 模式监听 80、443，http 模式监听 5001–5005；
+# Caddy 使用宿主机网络（仅 Linux）：tls 模式监听 80、443，http 模式监听 5001–5005，
+# 需要登录的入口（AUTH_MODE=http）另外监听 15001–15005；
 # 指标只在 127.0.0.1:9180，管理接口只在 localhost:2019。
 # zot 只在 127.0.0.1:5100 上给 Caddy 用，镜像缓存在 ./data/zot。配置项见 .env.sample。
 x-logging: &logging
@@ -25,6 +26,13 @@ services:
       PORT_GHCR: ${PORT_GHCR:-5003}
       PORT_K8S: ${PORT_K8S:-5004}
       PORT_QUAY: ${PORT_QUAY:-5005}
+      AUTH_MODE: ${AUTH_MODE:-off}
+      AUTH_DOMAIN: ${AUTH_DOMAIN:-}
+      AUTH_PORT_DOCKER: ${AUTH_PORT_DOCKER:-15001}
+      AUTH_PORT_GCR: ${AUTH_PORT_GCR:-15002}
+      AUTH_PORT_GHCR: ${AUTH_PORT_GHCR:-15003}
+      AUTH_PORT_K8S: ${AUTH_PORT_K8S:-15004}
+      AUTH_PORT_QUAY: ${AUTH_PORT_QUAY:-15005}
     volumes:
       - ./caddy:/etc/caddy:ro
       - ./data/caddy:/data # 证书和 ACME 账号

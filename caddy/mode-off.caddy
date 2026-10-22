@@ -1,0 +1,1 @@
+# 不开公开入口（MODE=off）。只要需要登录的入口时使用，见 auth-tls.caddy、auth-http.caddy。
