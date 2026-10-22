@@ -1,0 +1,28 @@
+# 回源模式（MODE=http）：明文 HTTP，由前面的 CDN 或反向代理负责 TLS。
+# 默认端口 5001 Docker Hub、5002 gcr.io、5003 ghcr.io、5004 registry.k8s.io、5005 quay.io，和旧版相同，
+# CDN 的回源配置不用改。和旧版在同一台机器上并行测试时，可以用 PORT_* 改成别的端口。
+
+http://:{$PORT_DOCKER:5001} {
+	import access_log
+	import mirror docker.io
+}
+
+http://:{$PORT_GCR:5002} {
+	import access_log
+	import mirror gcr.io
+}
+
+http://:{$PORT_GHCR:5003} {
+	import access_log
+	import mirror ghcr.io
+}
+
+http://:{$PORT_K8S:5004} {
+	import access_log
+	import mirror registry.k8s.io
+}
+
+http://:{$PORT_QUAY:5005} {
+	import access_log
+	import mirror quay.io
+}

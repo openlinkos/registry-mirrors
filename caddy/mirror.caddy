@@ -1,0 +1,50 @@
+# 一个上游的站点逻辑，由 mode-tls.caddy（按域名）和 mode-http.caddy（按端口）共用。
+# 参数 {args[0]} 是这个上游在 zot 里的前缀：docker.io、gcr.io、ghcr.io、registry.k8s.io、quay.io。
+#
+#   1. 只放行拉取：GET、HEAD，其他方法返回 405；请求体最多 1 KB。
+#   2. 只转发拉取用到的路径：/v2/、/v2/<仓库>/manifests/<引用>、/v2/<仓库>/blobs/<摘要>、
+#      /v2/<仓库>/tags/list。/v2/_catalog（会列出所有拉过的仓库）、zot 自己的接口一律 404。
+#   3. 给仓库加上前缀再交给 zot：docker.<域名>/v2/library/nginx/... → /v2/docker.io/library/nginx/...
+#      前缀总由这里加，客户端写什么都出不了这个上游。
+#   4. zot 不发认证质询，客户端不需要令牌，和直接用 Docker Hub 匿名拉取一样。
+(mirror) {
+	route {
+		request_body {
+			max_size 1KB
+		}
+		@not_pull not method GET HEAD
+		handle @not_pull {
+			header Allow "GET, HEAD"
+			respond 405
+		}
+		handle /v2/ {
+			reverse_proxy {$ZOT_ADDR:127.0.0.1:5100}
+		}
+		@repo path_regexp repo ^/v2/(.+/(?:manifests|blobs)/[^/]+|.+/tags/list)$
+		handle @repo {
+			rewrite * /v2/{args[0]}/{re.repo.1}
+			reverse_proxy {$ZOT_ADDR:127.0.0.1:5100} {
+				# tags/list 的分页链接里带着前缀，改回客户端看到的路径
+				header_down Link "</v2/{args[0]}/" "</v2/"
+			}
+		}
+		# 给探活和状态页用
+		handle / {
+			respond "ok" 200
+		}
+		handle {
+			respond 404
+		}
+	}
+}
+
+# 访问日志：JSON，按大小轮转，保留 30 天。目录默认 /var/log/caddy，可用环境变量 LOG_DIR 覆盖
+(access_log) {
+	log {
+		output file {$LOG_DIR:/var/log/caddy}/access.log {
+			roll_size 100MiB
+			roll_keep 10
+			roll_keep_for 720h
+		}
+	}
+}

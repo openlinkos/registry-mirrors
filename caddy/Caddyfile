@@ -1,0 +1,28 @@
+# LinkOS Mirrors（缓存版）：Caddy 在前，zot 在后。
+#
+# Caddy 负责 TLS、只放行拉取，并按访问的域名或端口给请求加上上游前缀；zot 去对应的上游取镜像并缓存。
+# 运行模式由环境变量 MODE 选择，其余变量见 .env.sample：
+#   tls（默认）：直接对外，五个域名 docker/gcr/ghcr/k8s/quay.<DOMAIN>，自动 HTTPS（mode-tls.caddy）
+#   http      ：放在 CDN 或反向代理之后，明文端口 5001–5005（mode-http.caddy）
+# 转发规则在 mirror.caddy。
+{
+	# 管理接口只在本机
+	admin localhost:2019
+	metrics
+	# BIND 为空时监听所有地址；反向代理在同一台机器上时可设为 127.0.0.1
+	default_bind {$BIND}
+	servers {
+		# 只信任这些来源发来的 X-Forwarded-For，用于在访问日志里记录真实客户端 IP
+		trusted_proxies static {$TRUSTED_PROXIES:private_ranges}
+		client_ip_headers X-Forwarded-For X-Real-IP
+	}
+}
+
+import mirror.caddy
+import mode-{$MODE:tls}.caddy
+
+# Prometheus 指标，只在本机回环地址监听，不要对公网开放
+http://:9180 {
+	bind 127.0.0.1
+	metrics /metrics
+}

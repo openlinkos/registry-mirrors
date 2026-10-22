@@ -1,0 +1,89 @@
+# zot：一个进程按需代理五个上游，镜像缓存在本地磁盘。
+#
+# 每个上游的镜像放在自己的前缀下（docker.io/、gcr.io/、ghcr.io/、registry.k8s.io/、quay.io/），
+# 前缀由前面的 Caddy 按访问的域名或端口加上。客户端请求 docker.<域名>/v2/library/nginx/...，
+# 到这里是 /v2/docker.io/library/nginx/...，zot 去掉前缀后向 Docker Hub 请求 library/nginx。
+#
+# 每个上游都必须写 content.destination。漏写的那一条会匹配所有仓库，别的上游拉不到时会去它那里找，
+# 等于让各上游的镜像互相串。
+
+distSpecVersion: "1.1.1"
+
+storage:
+  rootDirectory: /var/lib/registry
+  # 不同仓库的相同层只存一份
+  dedupe: true
+  gc: true
+  gcDelay: 1h
+  gcInterval: 24h
+  # 7 天内没人拉过、也没重新同步过的 tag 删除，再由 GC 回收没人引用的层
+  retention:
+    delay: 24h
+    policies:
+      - repositories: ["**"]
+        deleteReferrers: true
+        deleteUntagged: true
+        keepTags:
+          - patterns: [".*"]
+            pulledWithin: 168h
+            pushedWithin: 168h
+        keepUntagged:
+          pulledWithin: 168h
+          pushedWithin: 168h
+
+http:
+  address: 0.0.0.0
+  port: "5000"
+  # 按上游原样保存 Docker 格式的镜像，digest 与上游一致
+  compat: [docker2s2]
+  # 匿名只读：不需要登录，也不发认证质询；写入在 Caddy 那里已经拒绝，这里再拒绝一次
+  accessControl:
+    repositories:
+      "**":
+        anonymousPolicy: [read]
+
+log:
+  level: info
+
+extensions:
+  sync:
+    enable: true
+    # onDemand：有人拉了才去上游取，取到后缓存。
+    # manifestCheckInterval：同一个 tag 5 分钟内不再向上游确认是否更新；确认时只发 HEAD，
+    # 不计入 Docker Hub 的拉取次数。
+    registries:
+      - urls: ["https://index.docker.io"]
+        onDemand: true
+        tlsVerify: true
+        manifestCheckInterval: 5m
+        content:
+          - prefix: "**"
+            destination: /docker.io
+      - urls: ["https://gcr.io"]
+        onDemand: true
+        tlsVerify: true
+        manifestCheckInterval: 5m
+        content:
+          - prefix: "**"
+            destination: /gcr.io
+      - urls: ["https://ghcr.io"]
+        onDemand: true
+        tlsVerify: true
+        manifestCheckInterval: 5m
+        content:
+          - prefix: "**"
+            destination: /ghcr.io
+      - urls: ["https://registry.k8s.io"]
+        onDemand: true
+        tlsVerify: true
+        manifestCheckInterval: 5m
+        content:
+          - prefix: "**"
+            destination: /registry.k8s.io
+      - urls: ["https://quay.io"]
+        onDemand: true
+        tlsVerify: true
+        manifestCheckInterval: 5m
+        content:
+          - prefix: "**"
+            destination: /quay.io

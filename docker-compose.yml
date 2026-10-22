@@ -1,77 +1,46 @@
-# LinkOS Mirrors：每个上游一个独立的拉取缓存（pull-through cache），各自独立存储，
-# 前面由 registry-gate 统一把关：只放行拉取（GET、HEAD），拒绝写入和 /v2/_catalog。
-# 端口 5001-5005 依次对应 Docker Hub、gcr.io、ghcr.io、registry.k8s.io、quay.io。
+# LinkOS Mirrors（缓存版）：一个 Caddy 加一个 zot。
+# Caddy 使用宿主机网络（仅 Linux）：tls 模式监听 80、443，http 模式监听 5001–5005；
+# 指标只在 127.0.0.1:9180，管理接口只在 localhost:2019。
+# zot 只在 127.0.0.1:5100 上给 Caddy 用，镜像缓存在 ./data/zot。配置项见 .env.sample。
 x-logging: &logging
   driver: json-file
   options:
     max-size: 50m
     max-file: "3"
 
-x-registry: &registry
-  image: registry:3.1.2
-  restart: always
-  environment:
-    OTEL_TRACES_EXPORTER: none
-    OTEL_SDK_DISABLED: "true"
-  logging: *logging
-  networks: [registry-net]
-
 services:
-  registry-gate:
-    container_name: registry-gate
-    image: nginx:1.30.6-alpine
+  caddy:
+    container_name: mirrors-caddy
+    image: caddy:2.11.7-alpine
     restart: always
+    network_mode: host
+    environment:
+      MODE: ${MODE:-tls}
+      DOMAIN: ${DOMAIN:-}
+      BIND: ${BIND:-}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-private_ranges}
+      ZOT_ADDR: 127.0.0.1:${ZOT_PORT:-5100}
+      PORT_DOCKER: ${PORT_DOCKER:-5001}
+      PORT_GCR: ${PORT_GCR:-5002}
+      PORT_GHCR: ${PORT_GHCR:-5003}
+      PORT_K8S: ${PORT_K8S:-5004}
+      PORT_QUAY: ${PORT_QUAY:-5005}
     volumes:
-      - ./gate.conf:/etc/nginx/conf.d/default.conf:ro
-    ports:
-      - 5001:8001
-      - 5002:8002
-      - 5003:8003
-      - 5004:8004
-      - 5005:8005
-    depends_on: [registry-dockerhub, registry-gcr, registry-ghcr, registry-k8s, registry-quay]
+      - ./caddy:/etc/caddy:ro
+      - ./data/caddy:/data # 证书和 ACME 账号
+      - ./data/caddy-config:/config
+      - ./logs:/var/log/caddy # 访问日志，Caddy 自行轮转
+    depends_on: [zot]
     logging: *logging
-    networks: [registry-net]
 
-  registry-dockerhub:
-    <<: *registry
-    container_name: registry-dockerhub
+  zot:
+    container_name: mirrors-zot
+    image: ghcr.io/project-zot/zot:v2.1.22
+    restart: always
+    command: ["serve", "/etc/zot/config.yaml"]
+    ports:
+      - 127.0.0.1:${ZOT_PORT:-5100}:5000
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./registry-dockerhub.yml:/etc/distribution/config.yml:ro
-      - ./data/dockerhub:/var/lib/registry
-
-  registry-gcr:
-    <<: *registry
-    container_name: registry-gcr
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./registry-gcr.yml:/etc/distribution/config.yml:ro
-      - ./data/gcr:/var/lib/registry
-
-  registry-ghcr:
-    <<: *registry
-    container_name: registry-ghcr
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./registry-ghcr.yml:/etc/distribution/config.yml:ro
-      - ./data/ghcr:/var/lib/registry
-
-  registry-k8s:
-    <<: *registry
-    container_name: registry-k8s
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./registry-k8s.yml:/etc/distribution/config.yml:ro
-      - ./data/k8s:/var/lib/registry
-
-  registry-quay:
-    <<: *registry
-    container_name: registry-quay
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./registry-quay.yml:/etc/distribution/config.yml:ro
-      - ./data/quay:/var/lib/registry
-
-networks:
-  registry-net: {}
+      - ./zot/config.yaml:/etc/zot/config.yaml:ro
+      - ./data/zot:/var/lib/registry
+    logging: *logging

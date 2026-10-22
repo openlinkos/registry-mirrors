@@ -58,30 +58,90 @@ docker pull k8s.linkos.org/<镜像>:<标签>               # 对应 registry.k8s
 
 ## 自行部署
 
-本仓库就是线上服务所用的配置，会在本地缓存镜像。磁盘小、想快速搭一套，或者前面已有 CDN 时，也可以用零磁盘版 [registry-mirrors-caddy](https://github.com/openlinkos/registry-mirrors-caddy)：只有一个 Caddy，内置自动 HTTPS，每次拉取都回源。
+本仓库就是线上服务所用的配置，会在本地缓存镜像。磁盘小、想快速搭一套，或者前面已有 CDN 时，也可以用零磁盘版 [registry-mirrors-caddy](https://github.com/openlinkos/registry-mirrors-caddy)：只有一个 Caddy，每次拉取都回源。
 
-本仓库的组成：
+本仓库只有两个容器：
 
-- 每个上游一个 [CNCF Distribution](https://distribution.github.io/distribution/) 拉取缓存（`registry:3.1.2`，pull-through cache），**各自使用独立的存储目录** `./data/<上游>`，缓存 168 小时后过期。
-- 前面是一个 `registry-gate`（nginx），只放行拉取请求（GET、HEAD），拒绝任何写入，并关闭会列出全部已缓存仓库的 `/v2/_catalog`。
-- 宿主机端口 5001–5005 依次对应 Docker Hub、gcr.io、ghcr.io、registry.k8s.io、quay.io。
+- **[zot](https://zotregistry.dev)**（CNCF 项目）：一个进程按需代理五个上游，有人拉取时才去上游取，取到后缓存在 `./data/zot`。每个上游的镜像放在自己的前缀下（`docker.io/`、`gcr.io/` 等），互不相通。7 天内没人拉过的镜像自动清理。
+- **Caddy**：自动 HTTPS；只放行拉取（GET、HEAD），关闭 `/v2/_catalog`；按访问的域名或端口给请求加上上游前缀，再交给 zot。
+
+客户端的用法和上面「快速使用」完全一样，不需要登录。
+
+需要一台能正常访问上述上游的 Linux 服务器，并装好 Docker 和 Docker Compose。
 
 ```bash
 git clone https://github.com/openlinkos/registry-mirrors.git
 cd registry-mirrors
+cp .env.sample .env    # 按下面的说明修改
 docker compose up -d
-docker pull localhost:5001/library/hello-world   # 测试
-scripts/smoke.sh                                 # 自检：五个上游各拉一个镜像并与上游比对摘要，检查只放行拉取、存储互相隔离
 ```
 
-对外提供服务时，请在前面加一层负责 TLS 的反向代理或 CDN，并把每个域名转发到对应的端口。默认匿名回源：Docker Hub 对匿名拉取有频率限制（按出口 IP 计算），已缓存的镜像不会重复消耗限额。
+### 方式一：直接对外（默认，MODE=tls）
+
+1. 为 `docker`、`gcr`、`ghcr`、`k8s`、`quay` 五个子域名添加 A/AAAA 记录，指向服务器，例如 `docker.example.com`。
+2. 在 `.env` 中设置 `DOMAIN=example.com`。
+3. 确保 80、443 端口能从公网访问，然后执行 `docker compose up -d`。Caddy 会为每个子域名单独申请证书（HTTP-01 / TLS-ALPN-01），不需要通配符证书，也不需要 DNS 服务商的 API 密钥。
+4. 测试：`docker pull docker.example.com/library/hello-world`。
+
+### 方式二：放在 CDN 或反向代理之后（MODE=http）
+
+此时 Caddy 只监听明文端口，由前面的 CDN 或反向代理负责 TLS，并把每个加速域名回源到对应端口：
+
+| 端口 | 上游 |
+| --- | --- |
+| 5001 | Docker Hub |
+| 5002 | gcr.io |
+| 5003 | ghcr.io |
+| 5004 | registry.k8s.io |
+| 5005 | quay.io |
+
+- 上游按端口区分，回源时不需要保留 Host 头。
+- 想在访问日志里记录真实客户端 IP，请把 CDN 的回源地址段写进 `TRUSTED_PROXIES`。
+- 反向代理与本服务在同一台机器上时，可以设置 `BIND=127.0.0.1`，避免这些端口暴露到公网。
+- 端口可以用 `PORT_DOCKER`、`PORT_GCR` 等改掉，见 `.env.sample`。
+
+本地试用：
+
+```bash
+MODE=http BIND=127.0.0.1 docker compose up -d
+docker pull localhost:5001/library/hello-world   # Docker 默认允许以明文访问 localhost
+scripts/smoke.sh                                 # 自检：五个上游各拉一个镜像并与上游比对摘要，检查只放行拉取、上游互相隔离
+```
+
+### 从旧版升级
+
+旧版是每个上游一个 CNCF Distribution 容器，加一个 nginx 入口。升级时：
+
+```bash
+git pull
+cp .env.sample .env    # 线上放在 CDN 后面时设置 MODE=http，端口不变
+docker compose up -d --remove-orphans   # 删除旧的 registry-* 容器
+```
+
+新版不读旧的缓存，会从空开始重新缓存。确认新版正常后，可以删除旧的 `./data/dockerhub`、`./data/gcr` 等目录。
+
+### 日志与监控
+
+- 访问日志：`./logs/access.log`，JSON 格式，每 100 MiB 轮转一次，最多保留 10 个文件、30 天。
+- zot 日志：`docker compose logs zot`。
+- Caddy 指标：Prometheus 格式，`http://127.0.0.1:9180/metrics`，只在本机监听。管理接口 `localhost:2019` 同样只在本机。
+- zot 只在 `127.0.0.1:5100` 监听，供 Caddy 使用，不要对外开放。
+
+### 限制
+
+- **首次拉取大镜像要等较久。** 现在用的 zot v2.1.22 要先把整个镜像（一个平台）从上游取完，才返回给客户端；镜像很大时，客户端或 CDN 可能先超时。超时不影响后台同步，稍后重试就会直接从缓存拉取。zot v2.1.23 起支持边取边发，届时会更新。
+- **`tags/list` 只列出已缓存的 tag。** 拉取镜像不受影响。
+- **不存在的镜像返回 503**，而不是 404。
+- **tag 更新最多晚 5 分钟。** 同一个 tag 5 分钟内不再向上游确认。
+- **不按磁盘容量淘汰。** 只按「7 天内没人拉过」清理，请给磁盘留出余量并监控。
+- 默认匿名回源：Docker Hub 对匿名拉取有频率限制（按出口 IP 计算），已缓存的镜像不会重复消耗限额；向上游确认 tag 是否更新时只发 HEAD，不计入限额。
 
 ### 安全说明
 
-- **不要让多个上游共用一个存储目录。** Distribution 的拉取缓存在上游请求失败时，会退回本地已有的同名标签；共用存储时，一个上游的请求可能拿到另一个上游的镜像。
-- **不要在同一个存储上运行可写的 registry。** 否则任何能推送的人都能把镜像放进缓存的回退路径，分发给拉取的用户。
-- **关闭 `/v2/_catalog`。** 它会列出所有用户拉取过的仓库。
-- 2026-10 之前的版本存在上述问题（共用存储、带无认证的本地 registry 和管理界面），自建过的用户请更新到当前配置。
+- **只读。** 只放行 GET、HEAD，其他方法返回 405；`/v2/_catalog`（会列出所有用户拉取过的仓库）和 zot 自身的接口返回 404。zot 本身也配置为匿名只读。
+- **各上游不会串。** 前缀总是由 Caddy 加上，客户端无法指定别的上游；zot 只在对应上游的前缀下查找。修改 `zot/config.yaml` 时，**每个上游都必须写 `destination`**，漏写的那一条会匹配所有仓库，等于让各上游的镜像互相串。
+- **zot、管理接口和指标只在本机监听。**
+- 2026-10 之前的版本存在多个上游共用存储、带无认证的本地 registry 和管理界面的问题，自建过的用户请更新到当前配置。
 
 ## 使用须知
 
