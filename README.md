@@ -58,7 +58,9 @@ docker pull k8s.linkos.org/<镜像>:<标签>               # 对应 registry.k8s
 
 ## 自行部署
 
-本仓库就是线上服务所用的配置：
+本仓库就是线上服务所用的配置，会在本地缓存镜像。磁盘小、想快速搭一套，或者前面已有 CDN 时，也可以用零磁盘版 [registry-mirrors-caddy](https://github.com/openlinkos/registry-mirrors-caddy)：只有一个 Caddy，内置自动 HTTPS，每次拉取都回源。
+
+本仓库的组成：
 
 - 每个上游一个 [CNCF Distribution](https://distribution.github.io/distribution/) 拉取缓存（`registry:3.1.2`，pull-through cache），**各自使用独立的存储目录** `./data/<上游>`，缓存 168 小时后过期。
 - 前面是一个 `registry-gate`（nginx），只放行拉取请求（GET、HEAD），拒绝任何写入，并关闭会列出全部已缓存仓库的 `/v2/_catalog`。
