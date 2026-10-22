@@ -34,6 +34,9 @@ storage:
 http:
   address: 0.0.0.0
   port: "5000"
+  # zot 默认 60 秒写超时：一个响应 60 秒内没写完就断开。大层发给慢客户端，或者首次拉取时从上游取得久，
+  # 都会被切断，所以关掉。zot 只在本机给 Caddy 用，超时由 Caddy 和客户端处理
+  writeTimeout: 0s
   # 按上游原样保存 Docker 格式的镜像，digest 与上游一致
   compat: [docker2s2]
   # 匿名只读：不需要登录，也不发认证质询；写入在 Caddy 那里已经拒绝，这里再拒绝一次
