@@ -35,6 +35,7 @@ services:
       AUTH_PORT_QUAY: ${AUTH_PORT_QUAY:-15005}
     volumes:
       - ./caddy:/etc/caddy:ro
+      - ./web:/srv/web:ro # 浏览器打开域名时的用法页
       - ./data/caddy:/data # 证书和 ACME 账号
       - ./data/caddy-config:/config
       - ./logs:/var/log/caddy # 访问日志，Caddy 自行轮转

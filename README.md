@@ -145,8 +145,19 @@ docker compose up -d --remove-orphans   # 删除旧的 registry-* 容器
 
 新版不读旧的缓存，会从空开始重新缓存。确认新版正常后，可以删除旧的 `./data/dockerhub`、`./data/gcr` 等目录。
 
+### 用法页
+
+用浏览器打开任一加速域名（如 `https://docker.example.com/`），会看到用法页：五个加速地址、镜像地址转换，以及 Docker、containerd、k3s、Podman 的配置写法。页面在 `web/`，纯静态，由 Caddy 直接提供，不加载任何外部资源。
+
+加速域名默认由当前地址推导：打开 `docker.example.com` 时，五个地址就是 `docker.`、`gcr.`、`ghcr.`、`k8s.`、`quay.example.com`。域名不符合这个规律，或者想在页脚放上状态页、使用须知、隐私说明等链接时，复制一份配置再修改，修改后刷新页面即可，不用重启：
+
+```bash
+cp web/site.json.sample web/site.json
+```
+
 ### 日志与监控
 
+- 探活：`GET /healthz`，Caddy 和 zot 都正常时返回 200，可以用于 Upptime 等监控。
 - 访问日志：`./logs/access.log`，JSON 格式，每 100 MiB 轮转一次，最多保留 10 个文件、30 天。
 - zot 日志：`docker compose logs zot`。
 - Caddy 指标：Prometheus 格式，`http://127.0.0.1:9180/metrics`，只在本机监听。管理接口 `localhost:2019` 同样只在本机。

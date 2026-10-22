@@ -1,0 +1,553 @@
+<!doctype html>
+<!-- LinkOS Mirrors 用法页。浏览器打开任一加速域名时由 Caddy 提供，纯静态，不加载任何外部资源。
+     data-variant：cache = 缓存版（registry-mirrors），direct = 零磁盘版（registry-mirrors-caddy），只影响常见问题的措辞。
+     加速域名默认由当前地址推导（docker.example.com → *.example.com），可用同目录的 site.json 覆盖，见 site.json.sample。
+     URL 参数：?lang=en|zh 指定语言，?image=<镜像> 预填地址转换。 -->
+<html lang="zh-CN" data-variant="cache">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>LinkOS Mirrors</title>
+<meta name="description" content="容器镜像加速：Docker Hub、gcr.io、ghcr.io、registry.k8s.io、quay.io。">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="/">
+<style>
+:root {
+  --bg: #ffffff; --fg: #0f172a; --muted: #475569; --border: #e2e8f0; --card: #f8fafc; --code: #f1f5f9;
+  --accent: #0d9b76; --accent-fg: #ffffff; --ink: #0f172a; --hl: #ecfdf5; --warn: #b45309; --warn-bg: #fffbeb;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b1120; --fg: #e2e8f0; --muted: #94a3b8; --border: #1e293b; --card: #0f172a; --code: #111827;
+    --accent: #34d399; --accent-fg: #052e22; --ink: #e2e8f0; --hl: #052e22; --warn: #fbbf24; --warn-bg: #1f1a0b;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); line-height: 1.65;
+  font: 15px/1.65 system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, pre, input, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+code { background: var(--code); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.92em; overflow-wrap: anywhere; }
+.wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+header.top { border-bottom: 1px solid var(--border); }
+header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--fg); font-weight: 650; font-size: 18px; letter-spacing: 0.01em; }
+.brand:hover { text-decoration: none; }
+.brand svg { width: 30px; height: 30px; flex: none; }
+.brand .ink { stroke: var(--ink); } .brand .accent { stroke: var(--accent); }
+.brand b { color: var(--accent); font-weight: 650; }
+.top nav { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+.top nav a.sec { color: var(--muted); }
+button { font: inherit; cursor: pointer; }
+.lang { border: 1px solid var(--border); background: var(--card); color: var(--fg); border-radius: 6px; padding: 3px 10px; font-size: 13px; }
+main { padding: 8px 0 40px; }
+section { padding: 28px 0 8px; }
+h1 { font-size: 28px; line-height: 1.3; margin: 28px 0 10px; }
+h2 { font-size: 20px; margin: 0 0 12px; }
+h3 { font-size: 16px; margin: 20px 0 8px; }
+p { margin: 8px 0; }
+.lead { color: var(--muted); font-size: 16px; max-width: 760px; }
+.notice { border: 1px solid var(--warn); background: var(--warn-bg); color: var(--fg); border-radius: 8px; padding: 10px 14px; margin: 14px 0; font-size: 14px; }
+.notice strong { color: var(--warn); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+th { color: var(--muted); font-weight: 600; font-size: 13px; }
+tr.current td { background: var(--hl); }
+tr.current td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+.tag { display: inline-block; font-size: 12px; color: var(--accent-fg); background: var(--accent); border-radius: 999px; padding: 0 8px; margin-left: 6px; vertical-align: 1px; }
+.cell { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.cell .mono { overflow-wrap: anywhere; }
+.cell .nowrap { white-space: nowrap; }
+.copy { flex: none; border: 1px solid var(--border); background: var(--bg); color: var(--muted); border-radius: 6px; padding: 1px 8px; font-size: 12px; line-height: 20px; }
+.copy:hover { color: var(--accent); border-color: var(--accent); }
+.copy.done { color: var(--accent); border-color: var(--accent); }
+.card { border: 1px solid var(--border); background: var(--card); border-radius: 10px; padding: 16px; }
+.conv { display: flex; gap: 8px; }
+.conv input { flex: 1; min-width: 0; font-size: 15px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--fg); }
+.conv input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.examples { font-size: 13px; color: var(--muted); margin-top: 8px; }
+.examples button { border: 0; background: none; color: var(--accent); padding: 0 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+.result { margin-top: 14px; }
+.result .err { color: var(--warn); }
+.result .note { color: var(--muted); font-size: 13.5px; margin: 6px 0; }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; align-items: center; font-size: 14px; margin: 8px 0; }
+.kv > span:nth-child(odd) { color: var(--muted); }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--border); margin: 10px 0 0; }
+.tabs button { border: 0; border-bottom: 2px solid transparent; background: none; color: var(--muted); padding: 7px 12px; font-size: 14px; margin-bottom: -1px; }
+.tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+.panel { padding-top: 6px; }
+.panel[hidden] { display: none; }
+.code { position: relative; margin: 10px 0; }
+.code pre { margin: 0; background: var(--code); border: 1px solid var(--border); border-radius: 8px; padding: 12px 64px 12px 14px; overflow-x: auto; font-size: 13px; line-height: 1.55; }
+.code .copy { position: absolute; top: 8px; right: 8px; }
+.code .label { font-size: 12.5px; color: var(--muted); margin-bottom: 4px; }
+ul { padding-left: 20px; margin: 8px 0; }
+details { border-bottom: 1px solid var(--border); padding: 10px 0; }
+details summary { cursor: pointer; font-weight: 600; }
+details p { color: var(--muted); margin: 8px 0 2px; }
+footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; padding: 22px 0 36px; }
+footer .links { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 10px; }
+footer p { margin: 4px 0; }
+@media (max-width: 720px) {
+  h1 { font-size: 23px; }
+  .top nav a.sec { display: none; }
+  table, thead, tbody, tr, td { display: block; }
+  thead { display: none; }
+  tr { border: 1px solid var(--border); border-radius: 8px; margin: 10px 0; overflow: hidden; }
+  td { border: 0; padding: 6px 12px; }
+  td:first-child { font-weight: 600; padding-top: 10px; }
+  td:last-child { padding-bottom: 10px; }
+  .cell .nowrap { white-space: normal; }
+  .conv { flex-direction: column; }
+  .kv { grid-template-columns: 1fr; }
+  .kv > span:nth-child(odd) { margin-top: 6px; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="LinkOS Mirrors">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><g fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path class="ink" d="M25.912 19.463A10 10 0 1 1 21.349 14.995"/><path class="accent" d="M22.088 28.537A10 10 0 1 1 26.651 33.005"/></g></svg>
+      <span>LinkOS <b>Mirrors</b></span>
+    </a>
+    <nav>
+      <a class="sec" href="#endpoints" data-i18n="navEndpoints">加速地址</a>
+      <a class="sec" href="#convert" data-i18n="navConvert">地址转换</a>
+      <a class="sec" href="#configure" data-i18n="navConfigure">配置</a>
+      <a class="sec" href="#faq" data-i18n="navFaq">常见问题</a>
+      <button class="lang" id="lang" type="button">English</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="title">容器镜像加速</h1>
+  <p class="lead" data-i18n="lead">把镜像地址里的上游域名换成下面对应的加速地址，就能经由本站拉取。只支持拉取（pull），不支持推送、搜索和列出仓库。</p>
+  <p class="lead" id="operator-line" hidden></p>
+  <noscript><p class="notice">本页需要 JavaScript 来生成地址和命令。基本用法：把上游域名换成本站对应的 docker、gcr、ghcr、k8s、quay 子域名，Docker Hub 官方镜像要写成 library/&lt;名称&gt;。</p></noscript>
+  <div class="notice" id="placeholder-notice" hidden></div>
+
+  <section id="endpoints">
+    <h2 data-i18n="endpoints">加速地址</h2>
+    <table>
+      <thead><tr><th data-i18n="colUpstream">上游</th><th data-i18n="colMirror">加速地址</th><th data-i18n="colExample">示例</th></tr></thead>
+      <tbody id="endpoint-rows"></tbody>
+    </table>
+    <p class="note" style="color:var(--muted);font-size:13.5px" data-i18n="endpointsNote">Docker Hub 的官方镜像（如 nginx、mysql）要写成 library/&lt;名称&gt;。k8s.gcr.io 已于 2023 年冻结，请改用 registry.k8s.io。</p>
+  </section>
+
+  <section id="convert">
+    <h2 data-i18n="convert">地址转换</h2>
+    <div class="card">
+      <form class="conv" id="conv-form" autocomplete="off">
+        <input id="conv-input" type="text" spellcheck="false" aria-label="image" placeholder="nginx:1.27">
+      </form>
+      <div class="examples"><span data-i18n="tryThese">试试：</span><span id="example-list"></span></div>
+      <div class="result" id="conv-result" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="configure">
+    <h2 data-i18n="configure">配置镜像加速</h2>
+    <p class="lead" style="font-size:15px" data-i18n="configureLead">配置后不用改镜像地址，拉取会自动经过本站。下面的域名已按本站填好，可直接复制。</p>
+    <div class="tabs" role="tablist" id="cfg-tabs"></div>
+    <div id="cfg-panels"></div>
+  </section>
+
+  <section id="faq">
+    <h2 data-i18n="faq">常见问题</h2>
+    <div id="faq-list"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="links" id="footer-links"></div>
+    <p id="footer-operator"></p>
+    <p data-i18n="trademark">Docker、Kubernetes、GitHub、Google、Red Hat 等名称和商标归各自所有者，本服务与它们没有关联。</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  'use strict';
+
+  const KEYS = ['docker', 'gcr', 'ghcr', 'k8s', 'quay'];
+  const UP = {
+    docker: { label: 'Docker Hub', registry: 'docker.io', server: 'https://registry-1.docker.io', example: 'library/nginx:1.27' },
+    gcr: { label: 'gcr.io', registry: 'gcr.io', server: 'https://gcr.io', example: 'distroless/static:nonroot' },
+    ghcr: { label: 'ghcr.io', registry: 'ghcr.io', server: 'https://ghcr.io', example: 'containerd/busybox:1.36' },
+    k8s: { label: 'registry.k8s.io', registry: 'registry.k8s.io', server: 'https://registry.k8s.io', example: 'pause:3.10' },
+    quay: { label: 'quay.io', registry: 'quay.io', server: 'https://quay.io', example: 'coreos/etcd:v3.5.0' },
+  };
+  const DOCKER_ALIASES = ['docker.io', 'index.docker.io', 'registry-1.docker.io', 'registry.hub.docker.com', 'hub.docker.com'];
+  const EXAMPLES = ['nginx', 'nginx:1.27', 'bitnami/redis:7', 'ghcr.io/containerd/busybox:1.36', 'quay.io/coreos/etcd:v3.5.0',
+    'registry.k8s.io/pause:3.10', 'gcr.io/distroless/static:nonroot', 'k8s.gcr.io/pause:3.2'];
+  const VARIANT = document.documentElement.dataset.variant === 'direct' ? 'direct' : 'cache';
+
+  const T = {
+    zh: {
+      navEndpoints: '加速地址', navConvert: '地址转换', navConfigure: '配置', navFaq: '常见问题', langButton: 'English',
+      title: '容器镜像加速',
+      lead: '把镜像地址里的上游域名换成下面对应的加速地址，就能经由本站拉取。只支持拉取（pull），不支持推送、搜索和列出仓库。',
+      operated: (o) => `由 ${o} 运营。`,
+      placeholder: '没能从当前地址推导出加速域名（例如用 IP 或 localhost 访问），下面用 <code>docker.&lt;你的域名&gt;</code> 占位。部署时可以在 <code>web/site.json</code> 的 <code>domains</code> 里配置。',
+      yourDomain: '你的域名',
+      endpoints: '加速地址', colUpstream: '上游', colMirror: '加速地址', colExample: '示例', current: '当前',
+      endpointsNote: 'Docker Hub 的官方镜像（如 nginx、mysql）要写成 <code>library/&lt;名称&gt;</code>。k8s.gcr.io 已于 2023 年冻结，请改用 registry.k8s.io。',
+      convert: '地址转换', tryThese: '试试：', inputPlaceholder: '输入镜像，例如 nginx:1.27、ghcr.io/org/app:tag',
+      outMirror: '加速地址', outUpstream: '原地址', cmds: '命令', tool: '工具',
+      noteLatest: '没写标签，默认是 latest。',
+      noteLibrary: 'Docker Hub 官方镜像已补上 library/。',
+      noteAlias: (d) => `${d} 是 Docker Hub 的别名，按 docker.io 处理。`,
+      noteK8sGcr: 'k8s.gcr.io 已于 2023 年冻结，已改用 registry.k8s.io；如果拉不到，说明这个版本没有迁移过去，请换用新版本。',
+      noteDigestOnly: '按 digest 拉取时没有标签，tag 那一步请自己指定，例如 <code>docker tag &lt;加速地址&gt; myimage:pinned</code>。',
+      noteMirrorInput: '输入的已经是加速地址。',
+      hubLink: '在 Docker Hub 上查看可用的标签',
+      quayLink: '在 quay.io 上查看可用的标签',
+      errEmpty: '',
+      errUpper: '镜像名只能用小写字母、数字和 . _ - /，请检查大小写。',
+      errBad: '看不懂这个地址，请检查格式，例如 nginx:1.27 或 ghcr.io/org/app:tag。',
+      errTag: '标签不合法：只能用字母、数字和 . _ -，最长 128 个字符。',
+      errDigest: 'digest 不合法，应该形如 sha256:<64 位十六进制>。',
+      errUnsupported: (d) => `暂不支持 ${d}：本站只加速 Docker Hub、gcr.io、ghcr.io、registry.k8s.io 和 quay.io。`,
+      errRegionalGcr: (d) => `暂不支持 ${d}：本站只加速 gcr.io，不含 us.gcr.io、eu.gcr.io、asia.gcr.io 等区域地址和 *.pkg.dev。`,
+      configure: '配置镜像加速',
+      configureLead: '配置后不用改镜像地址，拉取会自动经过本站。下面的域名已按本站填好，可直接复制。',
+      cfgDocker: 'Docker', cfgContainerd: 'containerd', cfgK3s: 'k3s / RKE2', cfgPodman: 'Podman / CRI-O', cfgK8s: 'Kubernetes 工具',
+      dockerIntro: '编辑 <code>/etc/docker/daemon.json</code>。文件里已有内容时把 <code>registry-mirrors</code> 合并进去，不要整体覆盖：',
+      dockerAfter: '然后重启 Docker（会重启正在运行的容器，除非开了 <code>live-restore</code>）：',
+      dockerNote: '<strong>只对 Docker Hub 生效。</strong>ghcr.io、quay.io、gcr.io、registry.k8s.io 的镜像，请用上面「地址转换」改写地址后再拉。',
+      containerdIntro: '1. 让 containerd 读取 <code>/etc/containerd/certs.d</code>。containerd 2.x 在 <code>/etc/containerd/config.toml</code> 中：',
+      containerd1: 'containerd 1.x 写法：',
+      containerdHosts: '2. 为五个上游各写一个 <code>hosts.toml</code>（直接运行下面的命令）：',
+      containerdAfter: '3. 重启 containerd：',
+      containerdNote: '本站不可用时，containerd 会自动退回直连上游。',
+      k3sIntro: '编辑 <code>/etc/rancher/k3s/registries.yaml</code>（RKE2 是 <code>/etc/rancher/rke2/registries.yaml</code>），每个节点都要配置：',
+      k3sAfter: '然后在每个节点重启服务：',
+      podmanIntro: '在 <code>/etc/containers/registries.conf</code>（或 <code>/etc/containers/registries.conf.d/</code> 下新建文件）中追加：',
+      podmanAfter: 'Podman 立即生效；CRI-O 需要 <code>sudo systemctl restart crio</code>。',
+      k8sKubeadm: 'kubeadm：控制面镜像改从本站拉取。',
+      k8sKind: 'kind：节点用的是 containerd，把上面 containerd 的 <code>certs.d</code> 目录挂进节点，并让 containerd 读取它：',
+      k8sOther: '其他发行版：只要底层是 containerd 或 CRI-O，按对应标签页配置即可。',
+      faq: '常见问题',
+      footerStatus: '服务状态', footerTerms: '使用须知', footerPrivacy: '隐私说明', footerAbuse: '举报', footerSource: '源代码', footerHome: '主页',
+      footerOperated: (o) => `LinkOS Mirrors 由 ${o} 运营。`,
+      trademark: 'Docker、Kubernetes、GitHub、Google、Red Hat 等名称和商标归各自所有者，本服务与它们没有关联。',
+      copy: '复制', copied: '已复制',
+      faqs: () => [
+        ['拉取时报 404、manifest unknown 或 503', '多半是镜像名写错了：Docker Hub 的官方镜像要写成 <code>library/&lt;名称&gt;</code>，例如 <code>library/nginx</code>；其他镜像请确认在上游确实存在这个名称和标签。可以先用上面的「地址转换」检查。'],
+        ['报 429 Too Many Requests', VARIANT === 'cache'
+          ? '上游（尤其是 Docker Hub）按本站的出口 IP 限流。已缓存的镜像不受影响；没缓存过的请稍后重试。'
+          : '上游（尤其是 Docker Hub）按本站的出口 IP 限流，所有用户共用这个额度，请稍后重试。'],
+        ['报 5xx、超时或下载中断', '一般是上游或网络临时波动，重试即可；服务状态见页脚的状态页。'],
+        ['镜像会缓存吗？', VARIANT === 'cache'
+          ? '会。首次拉取时从上游取回并缓存，之后直接从本站返回；7 天内没人拉过的镜像会自动清理。同一个标签 5 分钟内不再向上游确认是否更新。'
+          : '不会。本站不在本地保存镜像，每次拉取都回源到上游，再把内容转发给你。'],
+        ['标签更新后拉到的是旧版本？', VARIANT === 'cache'
+          ? 'latest 这类可变标签，上游更新后最多 5 分钟才能拉到新版本。需要确定版本时，请用 <code>@sha256:...</code> 按 digest 拉取。'
+          : '本站每次都回源，拉到的就是上游当前的版本。需要确定版本时，请用 <code>@sha256:...</code> 按 digest 拉取。'],
+        ['能推送镜像或搜索吗？', '不能。本站只读，只放行拉取；<code>docker push</code>、<code>docker search</code> 和列出仓库都不支持。'],
+        ['会记录什么？', '会记录访问日志（来源 IP、请求的镜像、时间、状态），只用于运维和防止滥用，详见隐私说明。'],
+      ],
+    },
+    en: {
+      navEndpoints: 'Endpoints', navConvert: 'Convert', navConfigure: 'Configure', navFaq: 'FAQ', langButton: '中文',
+      title: 'Container image mirror',
+      lead: 'Replace the registry in an image reference with the matching mirror below to pull through this site. Pull only: no push, search, or catalog.',
+      operated: (o) => `Operated by ${o}.`,
+      placeholder: 'Could not work out the mirror domains from this address (for example an IP or localhost), so <code>docker.&lt;your-domain&gt;</code> is used as a placeholder. Set <code>domains</code> in <code>web/site.json</code> when deploying.',
+      yourDomain: 'your-domain',
+      endpoints: 'Endpoints', colUpstream: 'Upstream', colMirror: 'Mirror', colExample: 'Example', current: 'this site',
+      endpointsNote: 'Official Docker Hub images (nginx, mysql, …) are written as <code>library/&lt;name&gt;</code>. k8s.gcr.io was frozen in 2023; use registry.k8s.io.',
+      convert: 'Convert an image', tryThese: 'Try: ', inputPlaceholder: 'Image, e.g. nginx:1.27 or ghcr.io/org/app:tag',
+      outMirror: 'Mirror', outUpstream: 'Upstream', cmds: 'Commands', tool: 'Tool',
+      noteLatest: 'No tag given, so latest is used.',
+      noteLibrary: 'Added library/ for an official Docker Hub image.',
+      noteAlias: (d) => `${d} is an alias of Docker Hub and is treated as docker.io.`,
+      noteK8sGcr: 'k8s.gcr.io was frozen in 2023, so this uses registry.k8s.io. If the pull fails, that version was never migrated; use a newer one.',
+      noteDigestOnly: 'A digest has no tag, so choose one yourself, e.g. <code>docker tag &lt;mirror&gt; myimage:pinned</code>.',
+      noteMirrorInput: 'This is already a mirror address.',
+      hubLink: 'See the available tags on Docker Hub',
+      quayLink: 'See the available tags on quay.io',
+      errEmpty: '',
+      errUpper: 'Image names may only use lowercase letters, digits, and . _ - /. Check the case.',
+      errBad: 'Could not read this reference. Try something like nginx:1.27 or ghcr.io/org/app:tag.',
+      errTag: 'Invalid tag: letters, digits, and . _ - only, up to 128 characters.',
+      errDigest: 'Invalid digest; it should look like sha256:<64 hex digits>.',
+      errUnsupported: (d) => `${d} is not supported. This site mirrors Docker Hub, gcr.io, ghcr.io, registry.k8s.io, and quay.io only.`,
+      errRegionalGcr: (d) => `${d} is not supported. Only gcr.io is mirrored, not regional hosts such as us.gcr.io or *.pkg.dev.`,
+      configure: 'Configure a mirror',
+      configureLead: 'With a mirror configured you keep the original image names and pulls go through this site. The domains below are already filled in.',
+      cfgDocker: 'Docker', cfgContainerd: 'containerd', cfgK3s: 'k3s / RKE2', cfgPodman: 'Podman / CRI-O', cfgK8s: 'Kubernetes tools',
+      dockerIntro: 'Edit <code>/etc/docker/daemon.json</code>. If it already has content, merge <code>registry-mirrors</code> in instead of replacing the file:',
+      dockerAfter: 'Then restart Docker (running containers restart too unless <code>live-restore</code> is on):',
+      dockerNote: '<strong>This only covers Docker Hub.</strong> For ghcr.io, quay.io, gcr.io, and registry.k8s.io, rewrite the address with “Convert an image” above.',
+      containerdIntro: '1. Point containerd at <code>/etc/containerd/certs.d</code>. For containerd 2.x, in <code>/etc/containerd/config.toml</code>:',
+      containerd1: 'For containerd 1.x:',
+      containerdHosts: '2. Write a <code>hosts.toml</code> for each of the five upstreams (run the commands below):',
+      containerdAfter: '3. Restart containerd:',
+      containerdNote: 'If this site is unavailable, containerd falls back to the upstream registry.',
+      k3sIntro: 'Edit <code>/etc/rancher/k3s/registries.yaml</code> (<code>/etc/rancher/rke2/registries.yaml</code> for RKE2) on every node:',
+      k3sAfter: 'Then restart the service on each node:',
+      podmanIntro: 'Append to <code>/etc/containers/registries.conf</code> (or a new file in <code>/etc/containers/registries.conf.d/</code>):',
+      podmanAfter: 'Podman picks it up right away; CRI-O needs <code>sudo systemctl restart crio</code>.',
+      k8sKubeadm: 'kubeadm: pull the control-plane images through this site.',
+      k8sKind: 'kind: nodes run containerd. Mount the containerd <code>certs.d</code> directory above into the nodes and point containerd at it:',
+      k8sOther: 'Other distributions: if they run containerd or CRI-O, follow that tab.',
+      faq: 'FAQ',
+      footerStatus: 'Status', footerTerms: 'Terms', footerPrivacy: 'Privacy', footerAbuse: 'Report abuse', footerSource: 'Source', footerHome: 'Home',
+      footerOperated: (o) => `LinkOS Mirrors is operated by ${o}.`,
+      trademark: 'Docker, Kubernetes, GitHub, Google, Red Hat, and other names and marks belong to their owners. This service is not affiliated with them.',
+      copy: 'Copy', copied: 'Copied',
+      faqs: () => [
+        ['404, manifest unknown, or 503', 'Usually a wrong name. Official Docker Hub images are <code>library/&lt;name&gt;</code>, e.g. <code>library/nginx</code>; for other images, check that the name and tag exist upstream. “Convert an image” above can help.'],
+        ['429 Too Many Requests', VARIANT === 'cache'
+          ? 'The upstream, Docker Hub in particular, rate-limits this site’s IP. Cached images are not affected; for others, try again later.'
+          : 'The upstream, Docker Hub in particular, rate-limits this site’s IP, and every user shares that limit. Try again later.'],
+        ['5xx, timeouts, or interrupted downloads', 'Usually a temporary upstream or network problem. Retry, and see the status page linked below.'],
+        ['Are images cached?', VARIANT === 'cache'
+          ? 'Yes. The first pull fetches from upstream and caches the image; later pulls are served from here. Images nobody pulled for 7 days are removed. A tag is rechecked upstream at most every 5 minutes.'
+          : 'No. Nothing is stored here; every pull is fetched from upstream and passed through.'],
+        ['I get an old version after a tag was updated', VARIANT === 'cache'
+          ? 'Mutable tags such as latest can lag the upstream by up to 5 minutes. Pull by digest (<code>@sha256:...</code>) when you need an exact version.'
+          : 'Every pull goes upstream, so you get the current version. Pull by digest (<code>@sha256:...</code>) when you need an exact version.'],
+        ['Can I push or search?', 'No. This site is read-only: <code>docker push</code>, <code>docker search</code>, and the catalog are not supported.'],
+        ['What is logged?', 'Access logs (client IP, image, time, status), used only to run the service and prevent abuse. See the privacy notice.'],
+      ],
+    },
+  };
+
+  // 语言：?lang= 优先，其次是上次手动切换的选择（localStorage），默认中文
+  const params = new URLSearchParams(location.search);
+  let lang = 'zh';
+  try { lang = localStorage.getItem('lm-lang') === 'en' ? 'en' : 'zh'; } catch (_) { /* storage blocked */ }
+  if (params.get('lang') === 'en' || params.get('lang') === 'zh') lang = params.get('lang');
+  let site = {};
+  let domains = {};
+  let placeholder = false;
+  let current = null;
+  let tool = 'docker';
+  let cfgTab = 'docker';
+
+  const $ = (id) => document.getElementById(id);
+  const t = (k) => T[lang][k];
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  // 加速域名：site.json 的 domains 优先，否则由当前地址推导（docker.example.com → <上游>.example.com）
+  function computeDomains() {
+    const host = location.hostname.toLowerCase();
+    const labels = host.split('.');
+    const isIp = /^[\d.]+$/.test(host) || host.includes(':');
+    const base = !isIp && labels.length >= 3 ? labels.slice(1).join('.') : null;
+    current = base && KEYS.includes(labels[0]) ? labels[0] : null;
+    placeholder = false;
+    domains = {};
+    for (const k of KEYS) {
+      const fromSite = site.domains && typeof site.domains[k] === 'string' && site.domains[k].trim();
+      if (fromSite) domains[k] = fromSite.trim().toLowerCase();
+      else if (base) domains[k] = `${k}.${base}`;
+      else { domains[k] = `${k}.<${t('yourDomain')}>`; placeholder = true; }
+    }
+    if (!current) for (const k of KEYS) if (domains[k] === host) current = k;
+  }
+
+  function copyText(text, btn) {
+    const done = () => { btn.textContent = t('copied'); btn.classList.add('done'); setTimeout(() => { btn.textContent = t('copy'); btn.classList.remove('done'); }, 1400); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, () => fallback());
+    else fallback();
+    function fallback() {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (_) { /* nothing more to do */ }
+      ta.remove();
+    }
+  }
+  const copyBtn = (text) => `<button type="button" class="copy" data-copy="${esc(text)}">${esc(t('copy'))}</button>`;
+  const codeBlock = (text, label) => `<div class="code">${label ? `<div class="label">${label}</div>` : ''}<pre><code>${esc(text)}</code></pre>${copyBtn(text)}</div>`;
+
+  function renderEndpoints() {
+    $('endpoint-rows').innerHTML = KEYS.map((k) => {
+      const ex = `docker pull ${domains[k]}/${UP[k].example}`;
+      const cur = k === current ? `<span class="tag">${esc(t('current'))}</span>` : '';
+      const sub = UP[k].label === UP[k].registry ? '' : `<div style="color:var(--muted);font-size:12.5px">${esc(UP[k].registry)}</div>`;
+      return `<tr class="${k === current ? 'current' : ''}"><td>${esc(UP[k].label)}${cur}${sub}</td>` +
+        `<td><div class="cell"><span class="mono nowrap">${esc(domains[k])}</span>${copyBtn(domains[k])}</div></td>` +
+        `<td><div class="cell"><span class="mono">${esc(ex)}</span>${copyBtn(ex)}</div></td></tr>`;
+    }).join('');
+  }
+
+  // 按 distribution/reference 的规则拆解镜像地址
+  function parseRef(raw) {
+    let s = raw.trim();
+    if (!s) return { empty: true };
+    if (/\s/.test(s)) { const parts = s.split(/\s+/); s = parts[parts.length - 1]; } // 粘贴了整条 docker pull 命令
+    s = s.replace(/^[a-z]+:\/\//i, '').replace(/\/+$/, '');
+    const notes = [];
+    let digest = '';
+    const at = s.indexOf('@');
+    if (at >= 0) { digest = s.slice(at + 1); s = s.slice(0, at); if (!/^[a-z0-9]+(?:[.+_-][a-z0-9]+)*:[a-fA-F0-9]{32,}$/.test(digest)) return { error: t('errDigest') }; }
+    let tag = '';
+    const slash = s.lastIndexOf('/');
+    const colon = s.lastIndexOf(':');
+    if (colon > slash) { tag = s.slice(colon + 1); s = s.slice(0, colon); if (!/^[\w][\w.-]{0,127}$/.test(tag)) return { error: t('errTag') }; }
+    let domain = 'docker.io';
+    let path = s;
+    const first = s.split('/')[0];
+    if (s.includes('/') && (first.includes('.') || first.includes(':') || first === 'localhost')) { domain = first.toLowerCase(); path = s.slice(first.length + 1); }
+    let key = null;
+    for (const k of KEYS) if (domains[k] === domain) { key = k; notes.push(t('noteMirrorInput')); }
+    if (!key) {
+      if (DOCKER_ALIASES.includes(domain)) { if (domain !== 'docker.io') notes.push(T[lang].noteAlias(domain)); domain = 'docker.io'; }
+      if (domain === 'k8s.gcr.io') { notes.push(t('noteK8sGcr')); domain = 'registry.k8s.io'; }
+      if (/^[a-z]+\.gcr\.io$/.test(domain) || /\.pkg\.dev$/.test(domain)) return { error: T[lang].errRegionalGcr(domain) };
+      key = KEYS.find((k) => UP[k].registry === domain) || null;
+      if (!key) return { error: T[lang].errUnsupported(domain) };
+    }
+    if (!path) return { error: t('errBad') };
+    if (/[A-Z]/.test(path)) return { error: t('errUpper') };
+    if (!/^[a-z0-9]+(?:(?:[._]|__|-+)[a-z0-9]+)*(?:\/[a-z0-9]+(?:(?:[._]|__|-+)[a-z0-9]+)*)*$/.test(path)) return { error: t('errBad') };
+    if (key === 'docker' && !path.includes('/')) { path = `library/${path}`; notes.push(t('noteLibrary')); }
+    if (!tag && !digest) notes.push(t('noteLatest'));
+    return { key, path, tag, digest, notes };
+  }
+
+  function renderConvert() {
+    const input = $('conv-input');
+    input.placeholder = t('inputPlaceholder');
+    const r = parseRef(input.value);
+    const out = $('conv-result');
+    if (r.empty) { out.innerHTML = ''; return; }
+    if (r.error) { out.innerHTML = `<p class="err">${esc(r.error)}</p>`; return; }
+    const reg = UP[r.key].registry;
+    const suffix = (r.tag ? `:${r.tag}` : '') + (r.digest ? `@${r.digest}` : '');
+    const mirror = `${domains[r.key]}/${r.path}${suffix}`;
+    const upstream = `${reg}/${r.path}${suffix}`;
+    const shortName = r.key === 'docker' ? (r.path.startsWith('library/') ? r.path.slice(8) : r.path) : `${reg}/${r.path}`;
+    const localName = tool === 'podman' ? `${reg}/${r.path}` : shortName;
+    const lines = [`${tool} pull ${mirror}`];
+    if (!r.digest || r.tag) {
+      lines.push(`${tool} tag ${mirror} ${localName}:${r.tag || 'latest'}`);
+      lines.push(`${tool} rmi ${mirror}`);
+    }
+    const tools = ['docker', 'nerdctl', 'podman'].map((x) => `<button type="button" data-tool="${x}" aria-selected="${x === tool}">${x}</button>`).join('');
+    let more = '';
+    if (r.key === 'docker') {
+      const name = r.path.startsWith('library/') ? `_/${r.path.slice(8)}` : `r/${r.path}`;
+      more = `<p class="note"><a href="https://hub.docker.com/${esc(name)}/tags" target="_blank" rel="noopener noreferrer">${esc(t('hubLink'))} ↗</a></p>`;
+    } else if (r.key === 'quay') {
+      more = `<p class="note"><a href="https://quay.io/repository/${esc(r.path)}?tab=tags" target="_blank" rel="noopener noreferrer">${esc(t('quayLink'))} ↗</a></p>`;
+    }
+    out.innerHTML =
+      `<div class="kv"><span>${esc(t('outUpstream'))}</span><span class="mono">${esc(upstream)}</span>` +
+      `<span>${esc(t('outMirror'))}</span><div class="cell"><span class="mono">${esc(mirror)}</span>${copyBtn(mirror)}</div></div>` +
+      r.notes.map((n) => `<p class="note">${esc(n)}</p>`).join('') +
+      (r.digest && !r.tag ? `<p class="note">${t('noteDigestOnly')}</p>` : '') +
+      `<div class="tabs" role="tablist" id="tool-tabs">${tools}</div>` +
+      codeBlock(lines.join('\n')) + more;
+  }
+
+  function configs() {
+    const d = domains;
+    const pairs = KEYS.map((k) => [UP[k].registry, UP[k].server, d[k]]);
+    const hostsScript = pairs.map(([reg, server, mirror]) =>
+      `sudo mkdir -p /etc/containerd/certs.d/${reg}\n` +
+      `sudo tee /etc/containerd/certs.d/${reg}/hosts.toml >/dev/null <<'EOF'\nserver = "${server}"\n\n[host."https://${mirror}"]\n  capabilities = ["pull", "resolve"]\nEOF`).join('\n\n');
+    const k3s = 'mirrors:\n' + pairs.map(([reg, , mirror]) => `  ${reg}:\n    endpoint:\n      - "https://${mirror}"`).join('\n');
+    const podman = pairs.map(([reg, , mirror]) => `[[registry]]\nprefix = "${reg}"\nlocation = "${reg}"\n\n[[registry.mirror]]\nlocation = "${mirror}"`).join('\n\n');
+    return {
+      docker: `<p>${t('dockerIntro')}</p>` + codeBlock(`{\n  "registry-mirrors": ["https://${d.docker}"]\n}`) +
+        `<p>${t('dockerAfter')}</p>` + codeBlock('sudo systemctl restart docker') + `<p class="notice">${t('dockerNote')}</p>`,
+      containerd: `<p>${t('containerdIntro')}</p>` +
+        codeBlock('[plugins."io.containerd.cri.v1.images".registry]\n  config_path = "/etc/containerd/certs.d"') +
+        codeBlock('[plugins."io.containerd.grpc.v1.cri".registry]\n  config_path = "/etc/containerd/certs.d"', t('containerd1')) +
+        `<p>${t('containerdHosts')}</p>` + codeBlock(hostsScript) +
+        `<p>${t('containerdAfter')}</p>` + codeBlock('sudo systemctl restart containerd') + `<p style="color:var(--muted);font-size:13.5px">${t('containerdNote')}</p>`,
+      k3s: `<p>${t('k3sIntro')}</p>` + codeBlock(k3s) + `<p>${t('k3sAfter')}</p>` +
+        codeBlock('sudo systemctl restart k3s        # server\nsudo systemctl restart k3s-agent  # agent'),
+      podman: `<p>${t('podmanIntro')}</p>` + codeBlock(podman) + `<p>${t('podmanAfter')}</p>`,
+      k8s: `<p>${t('k8sKubeadm')}</p>` + codeBlock(`sudo kubeadm init --image-repository ${d.k8s}\n# ${lang === 'zh' ? '或在 ClusterConfiguration 中' : 'or in ClusterConfiguration'}: imageRepository: ${d.k8s}`) +
+        `<p>${t('k8sKind')}</p>` +
+        codeBlock(`kind: Cluster\napiVersion: kind.x-k8s.io/v1alpha4\ncontainerdConfigPatches:\n  - |-\n    [plugins."io.containerd.grpc.v1.cri".registry]\n      config_path = "/etc/containerd/certs.d"\nnodes:\n  - role: control-plane\n    extraMounts:\n      - hostPath: /etc/containerd/certs.d\n        containerPath: /etc/containerd/certs.d`) +
+        `<p style="color:var(--muted);font-size:13.5px">${t('k8sOther')}</p>`,
+    };
+  }
+
+  function renderConfig() {
+    const names = { docker: 'cfgDocker', containerd: 'cfgContainerd', k3s: 'cfgK3s', podman: 'cfgPodman', k8s: 'cfgK8s' };
+    $('cfg-tabs').innerHTML = Object.keys(names).map((k) => `<button type="button" role="tab" data-cfg="${k}" aria-selected="${k === cfgTab}">${esc(t(names[k]))}</button>`).join('');
+    const c = configs();
+    $('cfg-panels').innerHTML = Object.keys(names).map((k) => `<div class="panel" role="tabpanel" data-panel="${k}"${k === cfgTab ? '' : ' hidden'}>${c[k]}</div>`).join('');
+  }
+
+  function renderFaq() {
+    $('faq-list').innerHTML = T[lang].faqs().map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${a}</p></details>`).join('');
+  }
+
+  function renderFooter() {
+    const L = site.links || {};
+    const items = [['status', 'footerStatus'], ['terms', 'footerTerms'], ['privacy', 'footerPrivacy'], ['abuse', 'footerAbuse'], ['source', 'footerSource'], ['home', 'footerHome']];
+    $('footer-links').innerHTML = items.filter(([k]) => typeof L[k] === 'string' && /^https?:\/\//.test(L[k]))
+      .map(([k, label]) => `<a href="${esc(L[k])}" rel="noopener">${esc(t(label))}</a>`).join('');
+    const op = typeof site.operator === 'string' && site.operator.trim();
+    $('footer-operator').textContent = op ? T[lang].footerOperated(op) : '';
+    $('operator-line').hidden = !op;
+    $('operator-line').textContent = op ? T[lang].operated(op) : '';
+  }
+
+  function render() {
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    for (const el of document.querySelectorAll('[data-i18n]')) {
+      const v = T[lang][el.dataset.i18n];
+      if (typeof v === 'string') el.innerHTML = v;
+    }
+    $('lang').textContent = t('langButton');
+    computeDomains();
+    $('placeholder-notice').hidden = !placeholder;
+    $('placeholder-notice').innerHTML = placeholder ? t('placeholder') : '';
+    $('example-list').innerHTML = EXAMPLES.map((e) => `<button type="button" data-example="${esc(e)}">${esc(e)}</button>`).join(' ');
+    renderEndpoints();
+    renderConvert();
+    renderConfig();
+    renderFaq();
+    renderFooter();
+  }
+
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.copy !== undefined) copyText(b.dataset.copy, b);
+    else if (b.dataset.example) { $('conv-input').value = b.dataset.example; renderConvert(); }
+    else if (b.dataset.tool) { tool = b.dataset.tool; renderConvert(); }
+    else if (b.dataset.cfg) {
+      cfgTab = b.dataset.cfg;
+      for (const x of document.querySelectorAll('[data-cfg]')) x.setAttribute('aria-selected', String(x.dataset.cfg === cfgTab));
+      for (const p of document.querySelectorAll('[data-panel]')) p.hidden = p.dataset.panel !== cfgTab;
+    } else if (b.id === 'lang') {
+      lang = lang === 'zh' ? 'en' : 'zh';
+      try { localStorage.setItem('lm-lang', lang); } catch (_) { /* storage blocked */ }
+      render();
+    }
+  });
+  $('conv-input').addEventListener('input', renderConvert);
+  $('conv-form').addEventListener('submit', (e) => { e.preventDefault(); renderConvert(); });
+  document.querySelector('link[rel="canonical"]').href = `${location.protocol}//${location.host}/`;
+  if (params.get('image')) $('conv-input').value = params.get('image'); // 例如 /?image=nginx:1.27
+
+  render();
+  fetch('/site.json', { cache: 'no-cache' })
+    .then((r) => (r.ok ? r.json() : {}))
+    .then((j) => { site = j && typeof j === 'object' ? j : {}; render(); })
+    .catch(() => { /* site.json is optional */ });
+})();
+</script>
+</body>
+</html>

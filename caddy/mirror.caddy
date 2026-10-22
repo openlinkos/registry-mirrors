@@ -6,7 +6,8 @@
 #      /v2/<仓库>/tags/list。/v2/_catalog（会列出所有拉过的仓库）、zot 自己的接口一律 404。
 #   3. 给仓库加上前缀再交给 zot：docker.<域名>/v2/library/nginx/... → /v2/docker.io/library/nginx/...
 #      前缀总由这里加，客户端写什么都出不了这个上游。
-#   4. zot 不发认证质询，客户端不需要令牌，和直接用 Docker Hub 匿名拉取一样。
+#   4. 浏览器打开 / 看到用法页（web/），/healthz 给监控探活；其他路径 404。
+#   5. zot 不发认证质询，客户端不需要令牌，和直接用 Docker Hub 匿名拉取一样。
 #      需要登录的入口（auth-*.caddy）在这里之前先由 Caddy 校验口令；客户端的 Authorization 头不转给 zot。
 (mirror) {
 	route {
@@ -32,9 +33,19 @@
 				header_down Link "</v2/{args[0]}/" "</v2/"
 			}
 		}
-		# 给探活和状态页用
-		handle / {
-			respond "ok" 200
+		# 探活：Caddy 和 zot 都正常时返回 200，给 Upptime 等监控用
+		handle /healthz {
+			rewrite * /readyz
+			reverse_proxy {$ZOT_ADDR:127.0.0.1:5100} {
+				header_up -Authorization
+			}
+		}
+		# 浏览器打开域名时看到的用法页（仓库的 web/ 目录），只提供这几个文件
+		@web path / /index.html /favicon.svg /favicon.ico /robots.txt /site.json
+		handle @web {
+			root * {$WEB_ROOT:/srv/web}
+			header Cache-Control "no-cache"
+			file_server
 		}
 		handle {
 			respond 404

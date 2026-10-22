@@ -1,0 +1,18 @@
+{
+  "operator": "OpenLinkOS",
+  "domains": {
+    "docker": "",
+    "gcr": "",
+    "ghcr": "",
+    "k8s": "",
+    "quay": ""
+  },
+  "links": {
+    "home": "https://linkos.org",
+    "status": "https://uptime.linkos.org",
+    "terms": "https://linkos.org/terms",
+    "privacy": "https://linkos.org/privacy",
+    "abuse": "https://linkos.org/abuse",
+    "source": "https://github.com/openlinkos/registry-mirrors"
+  }
+}

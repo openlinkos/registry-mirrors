@@ -83,6 +83,19 @@ for port in "$P_GCR" "$P_GHCR" "$P_K8S" "$P_QUAY"; do
   esac
 done
 
+echo "用法页与探活"
+for port in "$P_DOCKER" "$P_GCR" "$P_GHCR" "$P_K8S" "$P_QUAY"; do
+  ct="$(curl -s -o /dev/null -w '%{http_code} %{content_type}' "http://$HOST:$port/")"
+  case "$ct" in
+    "200 text/html"*) ok "$port / 返回用法页" ;;
+    *) bad "$port / 返回 '$ct'，应为 200 text/html" ;;
+  esac
+  s="$(status "http://$HOST:$port/healthz")"
+  [ "$s" = 200 ] && ok "$port /healthz 返回 200" || bad "$port /healthz 返回 $s，应为 200"
+done
+s="$(status "http://$HOST:$P_DOCKER/robots.txt")"
+[ "$s" = 200 ] && ok "/robots.txt 返回 200" || bad "/robots.txt 返回 $s，应为 200"
+
 # zot 内部的仓库带着上游前缀（docker.io/...），tags/list 的分页链接要改回客户端看到的路径
 echo "分页链接"
 status -I -H "Accept: $accept" "http://$HOST:$P_DOCKER/v2/library/hello-world/manifests/linux" >/dev/null

@@ -2,3 +2,4 @@ data/
 logs/
 .env
 caddy/users.caddy
+web/site.json
