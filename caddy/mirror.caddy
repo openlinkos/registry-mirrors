@@ -9,6 +9,17 @@
 #   4. 浏览器打开 / 看到用法页（web/），/healthz 给监控探活；其他路径 404。
 #   5. zot 不发认证质询，客户端不需要令牌，和直接用 Docker Hub 匿名拉取一样。
 #      需要登录的入口（auth-*.caddy）在这里之前先由 Caddy 校验口令；客户端的 Authorization 头不转给 zot。
+#   6. zot 重启时（升级、改配置、换存储）新请求等它回来再转发，不返回 502。
+
+# 转给 zot 的公共设置（在 reverse_proxy 块内使用）
+(to_zot) {
+	header_up -Authorization
+	# zot 重启的几秒内端口连不上：每 250 毫秒重试一次，最多等 30 秒。
+	# 只重试还没连上 zot 的请求，正在下载的连接断开后由客户端重试
+	lb_try_duration 30s
+	lb_try_interval 250ms
+}
+
 (mirror) {
 	route {
 		request_body {
@@ -21,14 +32,14 @@
 		}
 		handle /v2/ {
 			reverse_proxy {$ZOT_ADDR:127.0.0.1:5100} {
-				header_up -Authorization
+				import to_zot
 			}
 		}
 		@repo path_regexp repo ^/v2/(.+/(?:manifests|blobs)/[^/]+|.+/tags/list)$
 		handle @repo {
 			rewrite * /v2/{args[0]}/{re.repo.1}
 			reverse_proxy {$ZOT_ADDR:127.0.0.1:5100} {
-				header_up -Authorization
+				import to_zot
 				# tags/list 的分页链接里带着前缀，改回客户端看到的路径
 				header_down Link "</v2/{args[0]}/" "</v2/"
 			}
@@ -37,7 +48,7 @@
 		handle /healthz {
 			rewrite * /readyz
 			reverse_proxy {$ZOT_ADDR:127.0.0.1:5100} {
-				header_up -Authorization
+				import to_zot
 			}
 		}
 		# 浏览器打开域名时看到的用法页（仓库的 web/ 目录），只提供这几个文件
