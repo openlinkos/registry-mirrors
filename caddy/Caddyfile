@@ -19,6 +19,8 @@
 		trusted_proxies static {$TRUSTED_PROXIES:private_ranges}
 		client_ip_headers X-Forwarded-For X-Real-IP
 	}
+		# 从右往左取第一个不受信任的地址：客户端自己带的 X-Forwarded-For（例如公司内网代理加的内网地址）在最左边，不能当真
+		trusted_proxies_strict
 }
 
 import mirror.caddy
