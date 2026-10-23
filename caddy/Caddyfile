@@ -3,10 +3,12 @@
 # Caddy 负责 TLS、只放行拉取，并按访问的域名或端口给请求加上上游前缀；zot 去对应的上游取镜像并缓存。
 # 公开入口由环境变量 MODE 选择，其余变量见 .env.sample：
 #   tls（默认）：直接对外，五个域名 docker/gcr/ghcr/k8s/quay.<DOMAIN>，自动 HTTPS（mode-tls.caddy）
-#   http      ：放在 CDN 或反向代理之后，明文端口 5001–5005（mode-http.caddy）
+#   vhost     ：放在 CDN 或反向代理之后，一个明文端口 HTTP_PORT，按域名区分上游（mode-vhost.caddy）
+#   http      ：放在 CDN 或反向代理之后，每个上游一个明文端口 5001–5005（mode-http.caddy）
 #   off       ：不开公开入口
 # 需要登录的入口由 AUTH_MODE 选择，和公开入口共用同一个 zot：
-#   off（默认）、tls（五个域名 *.<AUTH_DOMAIN>）、http（明文端口 15001–15005），用户在 users.caddy
+#   off（默认）、tls（五个域名 *.<AUTH_DOMAIN>）、vhost（和公开入口共用 HTTP_PORT）、
+#   http（明文端口 15001–15005），用户在 users.caddy
 # 转发规则在 mirror.caddy。
 {
 	# 管理接口只在本机
@@ -17,10 +19,10 @@
 	servers {
 		# 只信任这些来源发来的 X-Forwarded-For，用于在访问日志里记录真实客户端 IP
 		trusted_proxies static {$TRUSTED_PROXIES:private_ranges}
-		client_ip_headers X-Forwarded-For X-Real-IP
-	}
 		# 从右往左取第一个不受信任的地址：客户端自己带的 X-Forwarded-For（例如公司内网代理加的内网地址）在最左边，不能当真
 		trusted_proxies_strict
+		client_ip_headers X-Forwarded-For X-Real-IP
+	}
 }
 
 import mirror.caddy

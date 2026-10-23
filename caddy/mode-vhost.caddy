@@ -1,0 +1,34 @@
+# 回源模式（MODE=vhost）：一个明文端口 HTTP_PORT（默认 8080），按访问的域名区分上游，由前面的 CDN 或反向代理负责 TLS。
+# 回源时要保留客户端访问的域名（Host 头）：docker、gcr、ghcr、k8s、quay.<DOMAIN>。
+# 需要登录的入口（AUTH_MODE=vhost）也在这个端口上，按 *.<AUTH_DOMAIN> 区分；其他域名返回 404。
+
+http://docker.{$DOMAIN}:{$HTTP_PORT:8080} {
+	import access_log
+	import mirror docker.io
+}
+
+http://gcr.{$DOMAIN}:{$HTTP_PORT:8080} {
+	import access_log
+	import mirror gcr.io
+}
+
+http://ghcr.{$DOMAIN}:{$HTTP_PORT:8080} {
+	import access_log
+	import mirror ghcr.io
+}
+
+http://k8s.{$DOMAIN}:{$HTTP_PORT:8080} {
+	import access_log
+	import mirror registry.k8s.io
+}
+
+http://quay.{$DOMAIN}:{$HTTP_PORT:8080} {
+	import access_log
+	import mirror quay.io
+}
+
+# 不认识的域名，例如直接用 IP 访问
+http://:{$HTTP_PORT:8080} {
+	import access_log
+	respond 404
+}

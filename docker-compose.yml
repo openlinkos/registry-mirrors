@@ -18,6 +18,7 @@ services:
     environment:
       MODE: ${MODE:-tls}
       DOMAIN: ${DOMAIN:-}
+      HTTP_PORT: ${HTTP_PORT:-8080}
       BIND: ${BIND:-}
       TRUSTED_PROXIES: ${TRUSTED_PROXIES:-private_ranges}
       ZOT_ADDR: 127.0.0.1:${ZOT_PORT:-5100}

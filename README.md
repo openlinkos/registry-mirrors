@@ -80,9 +80,26 @@ docker compose up -d
 3. 确保 80、443 端口能从公网访问，然后执行 `docker compose up -d`。Caddy 会为每个子域名单独申请证书（HTTP-01 / TLS-ALPN-01），不需要通配符证书，也不需要 DNS 服务商的 API 密钥。
 4. 测试：`docker pull docker.example.com/library/hello-world`。
 
-### 方式二：放在 CDN 或反向代理之后（MODE=http）
+### 方式二：放在 CDN 或反向代理之后，按域名回源（MODE=vhost）
 
-此时 Caddy 只监听明文端口，由前面的 CDN 或反向代理负责 TLS，并把每个加速域名回源到对应端口：
+Caddy 只监听一个明文端口 `HTTP_PORT`（默认 8080），按访问的域名区分上游，由前面的 CDN 或反向代理负责 TLS。在 `.env` 中设置：
+
+```bash
+MODE=vhost
+DOMAIN=example.com     # 五个加速域名 docker、gcr、ghcr、k8s、quay.example.com
+HTTP_PORT=8080
+```
+
+然后把五个加速域名都回源到这一个端口。注意以下几点：
+
+- 回源时要保留客户端访问的域名（Host 头），本服务据此区分上游；不认识的域名返回 404。
+- 需要登录的入口也可以放在同一个端口上（`AUTH_MODE=vhost`，见下文）。
+- 想在访问日志里记录真实客户端 IP，请把 CDN 的回源地址段写进 `TRUSTED_PROXIES`。
+- 部署好后可以经 CDN 自检：`SMOKE_DOMAIN=example.com scripts/smoke.sh`。
+
+### 方式三：放在 CDN 之后，按端口回源（MODE=http）
+
+CDN 回源时不能保留 Host 头时用这种方式。Caddy 每个上游监听一个明文端口，由前面的 CDN 或反向代理负责 TLS，并把每个加速域名回源到对应端口：
 
 | 端口 | 上游 |
 | --- | --- |
@@ -117,8 +134,9 @@ docker compose run --rm caddy caddy hash-password    # 输入口令，得到 bcr
 
 然后在 `.env` 中设置 `AUTH_MODE`：
 
-- `AUTH_MODE=http`：明文端口 15001–15005（依次对应 Docker Hub、gcr.io、ghcr.io、registry.k8s.io、quay.io），放在 CDN 或反向代理之后。
 - `AUTH_MODE=tls`：五个域名 `docker`、`gcr`、`ghcr`、`k8s`、`quay.<AUTH_DOMAIN>`，自动申请证书；`AUTH_DOMAIN` 要和 `DOMAIN` 不同。
+- `AUTH_MODE=vhost`：和公开入口共用明文端口 `HTTP_PORT`，按 `*.<AUTH_DOMAIN>` 区分，放在 CDN 或反向代理之后。
+- `AUTH_MODE=http`：明文端口 15001–15005（依次对应 Docker Hub、gcr.io、ghcr.io、registry.k8s.io、quay.io），放在 CDN 或反向代理之后。
 - 只要需要登录的镜像站时，再设 `MODE=off` 关掉公开入口。
 
 客户端先登录，再照常拉取：
