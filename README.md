@@ -88,7 +88,8 @@ scripts/smoke.sh                                 # 自检：五个上游各拉�
 - 本服务免费提供、尽力维护，**不保证可用性和速度**，可能随时调整、限流或停止。生产环境请自行评估，或自建一套。
 - 镜像内容来自各上游仓库，版权和责任归原作者；使用时请遵守上游的服务条款（如 Docker Hub、GitHub、Quay 的条款）。
 - 不得利用本服务分发违法或侵权内容。对滥用行为，我们会限流或屏蔽。
-- 问题反馈和违规举报：[提交 issue](https://github.com/openlinkos/registry-mirrors/issues)，或发送邮件至 admin@linkos.io。
+- 问题反馈：[提交 issue](https://github.com/openlinkos/registry-mirrors/issues)，或发送邮件至 admin@linkos.io。
+- 违规与侵权举报：发送邮件至 abuse@linkos.io，需要写明的信息见[举报与投诉](https://linkos.org/zh/abuse)。
 - 服务会记录访问日志（IP、请求的镜像、时间），仅用于运维和防止滥用。
 
 ## 许可
