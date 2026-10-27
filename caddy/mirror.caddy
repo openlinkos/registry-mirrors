@@ -51,11 +51,26 @@
 				import to_zot
 			}
 		}
-		# 浏览器打开域名时看到的用法页（仓库的 web/ 目录），只提供这几个文件
-		@web path / /index.html /favicon.svg /favicon.ico /robots.txt /site.json
+		# 浏览器打开域名时看到的用法页（仓库的 web/ 目录），只提供这几个文件和 assets/ 下的样式、脚本、字体、标志。
+		# 页面只加载自己的文件，CSP 不允许内联脚本和样式；标志 SVG 里带着自己的 <style>，单独放宽。
+		@web path / /index.html /favicon.svg /favicon.ico /robots.txt /site.json /assets/*
 		handle @web {
 			root * {$WEB_ROOT:/srv/web}
-			header Cache-Control "no-cache"
+			header {
+				Cache-Control "no-cache"
+				X-Content-Type-Options "nosniff"
+				Referrer-Policy "no-referrer"
+			}
+			@page path / /index.html
+			header @page {
+				Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; require-trusted-types-for 'script'; trusted-types 'none'"
+				X-Frame-Options "DENY"
+			}
+			@svg path *.svg
+			header @svg Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+			# 有的系统（例如 Windows）没有 .woff2 的类型
+			@font path *.woff2
+			header @font Content-Type "font/woff2"
 			file_server
 		}
 		handle {

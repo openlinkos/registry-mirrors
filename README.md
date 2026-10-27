@@ -162,13 +162,23 @@ docker compose up -d --remove-orphans   # 删除旧的 registry-* 容器
 
 ### 用法页
 
-用浏览器打开任一加速域名（如 `https://docker.example.com/`），会看到用法页：五个加速地址、镜像地址转换，以及 Docker、containerd、k3s、Podman 的配置写法。页面在 `web/`，纯静态，由 Caddy 直接提供，不加载任何外部资源。
+用浏览器打开任一加速域名（如 `https://docker.example.com/`），会看到用法页：Docker、containerd、k3s / RKE2、Podman / CRI-O 和 Kubernetes 工具的分步配置（加速域名已经填好，可以直接复制）、镜像地址转换、五个加速地址和常见问题。中英文都在页面里，语言跟随浏览器，也可以在右上角切换；配色有自动、浅色、深色三种。
 
-加速域名默认由当前地址推导：打开 `docker.example.com` 时，五个地址就是 `docker.`、`gcr.`、`ghcr.`、`k8s.`、`quay.example.com`。域名不符合这个规律，或者想在页脚放上状态页、使用须知、隐私说明等链接时，复制一份配置再修改，修改后刷新页面即可，不用重启：
+页面在 `web/`，纯静态，由 Caddy 直接提供，不加载任何外部资源；CSP 只允许页面自己的文件，没有内联脚本和样式。样式、字体和标志来自 OpenLinkOS 设计系统 [`@openlinkos/ui`](https://github.com/openlinkos/design)，放在 `web/assets/`，升级时运行 `scripts/vendor-ui.sh <版本>` 再提交。
+
+加速域名默认由当前地址推导：打开 `docker.example.com` 时，五个地址就是 `docker.`、`gcr.`、`ghcr.`、`k8s.`、`quay.example.com`。域名不符合这个规律，或者想改站点名称和品牌、在页脚放上状态页和使用须知等链接时，复制一份配置再修改，修改后刷新页面即可，不用重启：
 
 ```bash
 cp web/site.json.sample web/site.json
 ```
+
+| 字段 | 作用 |
+| --- | --- |
+| `name` | 站点名称，默认 `LinkOS Mirrors` |
+| `brand` | 设计系统里的品牌，决定配色和标志：默认 `linkos-mirrors`，也可以是 `linkos`、`openlinkos` 等；写 `none` 用中性外观 |
+| `operator` | 运营者，页面上写「由 … 运营」 |
+| `domains` | `docker`、`gcr`、`ghcr`、`k8s`、`quay` 五个加速域名，留空的由当前地址推导 |
+| `links` | 页脚链接：`status`、`terms`、`privacy`、`abuse`、`source`、`home`。写了 `status` 时，页面上多一节「服务状态」指向它 |
 
 ### 日志与监控
 

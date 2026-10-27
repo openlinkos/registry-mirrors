@@ -1,4 +1,6 @@
 {
+  "name": "LinkOS Mirrors",
+  "brand": "linkos-mirrors",
   "operator": "OpenLinkOS",
   "domains": {
     "docker": "",

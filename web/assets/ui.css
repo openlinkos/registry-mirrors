@@ -1,0 +1,5983 @@
+/*! @openlinkos/ui 0.5.0 | MIT | https://github.com/openlinkos/design */
+
+@layer ol.reset, ol.tokens, ol.base, ol.layout, ol.components, ol.utilities;
+
+/*
+ * Geist and Geist Mono (SIL Open Font License 1.1, see fonts/LICENSE-geist.txt), variable weights
+ * 100–900. URLs are relative to this stylesheet: serve dist/fonts/ next to ui.css.
+ *
+ * "Geist ZH" is the same file without the curly quotes, middle dot, em dash and ellipsis, so on
+ * Chinese pages those characters come from the Chinese font in their full-width forms.
+ */
+
+@font-face {
+  font-family: "Geist";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/Geist-Variable.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Geist ZH";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/Geist-Variable.woff2") format("woff2");
+  unicode-range: U+0000-00B6, U+00B8-2013, U+2015-2017, U+2020-2025, U+2027-2FFF;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/GeistMono-Variable.woff2") format("woff2");
+}
+
+/*
+ * At-rules that stay outside the cascade layers, at the top level of ui.css.
+ *
+ * Same-origin navigations between pages that load ui.css become cross-document view transitions
+ * (CSS View Transitions 2) where the browser supports them, unless the user prefers reduced motion;
+ * layout.css says what moves. An app that wants plain navigations adds
+ * @view-transition { navigation: none; } to its own stylesheet.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+/* A chart column's place among its siblings, inherited by its marks, so they can rise one after
+   another (chart.css). */
+@property --ol-index {
+  syntax: "<integer>";
+  inherits: true;
+  initial-value: 0;
+}
+
+@layer ol.reset {
+  /*
+   * Reset: a small, modern normalisation. It sets box sizing, removes default margins where the kit
+   * sets its own rhythm, and makes media and form controls behave predictably. It styles no visual
+   * design; that starts in base.css.
+   */
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    tab-size: 4;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  figure,
+  blockquote,
+  dl,
+  dd {
+    margin: 0;
+  }
+
+  ul[class],
+  ol[class] {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  img,
+  svg,
+  video,
+  canvas {
+    display: block;
+    max-width: 100%;
+  }
+
+  svg {
+    flex: none;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+  }
+
+  button,
+  [type="button"],
+  [type="submit"],
+  [type="reset"] {
+    -webkit-appearance: button;
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  [hidden]:not([hidden="until-found"]) {
+    /* biome-ignore lint/complexity/noImportantStyles: the hidden attribute must win over display classes. */
+    display: none !important;
+  }
+}
+
+@layer ol.tokens {
+  :root {
+    color-scheme: light dark;
+    --ol-palette-neutral-1: light-dark(#fcfcfd, #111113);
+    --ol-palette-neutral-2: light-dark(#f9f9fb, #18191b);
+    --ol-palette-neutral-3: light-dark(#f0f0f3, #212225);
+    --ol-palette-neutral-4: light-dark(#e7e8ec, #29292d);
+    --ol-palette-neutral-5: light-dark(#e0e1e6, #2f3035);
+    --ol-palette-neutral-6: light-dark(#d8d9e0, #38393f);
+    --ol-palette-neutral-7: light-dark(#cdced6, #46474f);
+    --ol-palette-neutral-8: light-dark(#b9bbc6, #5e606a);
+    --ol-palette-neutral-9: #8b8d98;
+    --ol-palette-neutral-10: light-dark(#81838d, #999ba5);
+    --ol-palette-neutral-11: light-dark(#62636c, #b2b3ba);
+    --ol-palette-neutral-12: light-dark(#1e1f24, #edeef0);
+    --ol-palette-neutral-text-subtle: light-dark(#6b6d76, #999ba5);
+    --ol-palette-neutral-border-input: light-dark(#888a94, #696b76);
+    --ol-palette-neutral-border-input-hover: light-dark(#7b7c87, #767883);
+    --ol-palette-neutral-on-solid: light-dark(#1e1f24, #303135);
+    --ol-palette-accent-1: light-dark(#fdfdfe, #0d1420);
+    --ol-palette-accent-2: light-dark(#f6f9ff, #101828);
+    --ol-palette-accent-3: light-dark(#ecf2ff, #11244d);
+    --ol-palette-accent-4: light-dark(#dfeaff, #132e68);
+    --ol-palette-accent-5: light-dark(#cedfff, #1a397a);
+    --ol-palette-accent-6: light-dark(#bad2ff, #22448b);
+    --ol-palette-accent-7: light-dark(#9fc0ff, #2a509f);
+    --ol-palette-accent-8: light-dark(#7da7f8, #325eba);
+    --ol-palette-accent-9: #2563eb;
+    --ol-palette-accent-10: light-dark(#1857e2, #3a74f1);
+    --ol-palette-accent-11: light-dark(#245bd3, #8fb6ff);
+    --ol-palette-accent-12: light-dark(#152e61, #d3e2ff);
+    --ol-palette-accent-text-subtle: light-dark(#1857e2, #4e87ff);
+    --ol-palette-accent-border-input: light-dark(#638bda, #3e6bc9);
+    --ol-palette-accent-border-input-hover: light-dark(#557dca, #4a79d7);
+    --ol-palette-accent-on-solid: #ffffff;
+    --ol-palette-accent-mark: light-dark(#2563eb, #6b9bff);
+    --ol-palette-accent-mark-inverse: #6b9bff;
+    --ol-palette-success-1: light-dark(#fdfdfd, #0e1610);
+    --ol-palette-success-2: light-dark(#f6faf7, #111b13);
+    --ol-palette-success-3: light-dark(#edf5ee, #122e19);
+    --ol-palette-success-4: light-dark(#dfeee2, #143c1f);
+    --ol-palette-success-5: light-dark(#d0e5d3, #1b4928);
+    --ol-palette-success-6: light-dark(#bcdbc1, #245431);
+    --ol-palette-success-7: light-dark(#a3ccab, #2d623b);
+    --ol-palette-success-8: light-dark(#83b78d, #357345);
+    --ol-palette-success-9: #15803d;
+    --ol-palette-success-10: light-dark(#007634, #358c4e);
+    --ol-palette-success-11: light-dark(#20793d, #91c59b);
+    --ol-palette-success-12: light-dark(#163a20, #d4e8d7);
+    --ol-palette-success-text-subtle: light-dark(#007634, #4aa061);
+    --ol-palette-success-border-input: light-dark(#65986f, #407e4f);
+    --ol-palette-success-border-input-hover: light-dark(#588a62, #4d8b5b);
+    --ol-palette-success-on-solid: #ffffff;
+    --ol-palette-warning-1: light-dark(#fefdfc, #1a130a);
+    --ol-palette-warning-2: light-dark(#fcf9f4, #1f160b);
+    --ol-palette-warning-3: light-dark(#f8f1e8, #382100);
+    --ol-palette-warning-4: light-dark(#f4e7d7, #472c00);
+    --ol-palette-warning-5: light-dark(#efdbc3, #563600);
+    --ol-palette-warning-6: light-dark(#e9ccaa, #654000);
+    --ol-palette-warning-7: light-dark(#ddb98c, #754b00);
+    --ol-palette-warning-8: light-dark(#cc9f64, #895800);
+    --ol-palette-warning-9: #f5a524;
+    --ol-palette-warning-10: light-dark(#ea9a00, #ffb650);
+    --ol-palette-warning-11: light-dark(#8b5a00, #dcad71);
+    --ol-palette-warning-12: light-dark(#452a00, #f1dec8);
+    --ol-palette-warning-text-subtle: light-dark(#996300, #ffb650);
+    --ol-palette-warning-border-input: light-dark(#b08449, #976519);
+    --ol-palette-warning-border-input-hover: light-dark(#a1763b, #a47229);
+    --ol-palette-warning-on-solid: #452a00;
+    --ol-palette-danger-1: light-dark(#fefdfd, #1f0f0d);
+    --ol-palette-danger-2: light-dark(#fff7f6, #26120f);
+    --ol-palette-danger-3: light-dark(#ffeeeb, #461310);
+    --ol-palette-danger-4: light-dark(#ffe2dd, #5d1311);
+    --ol-palette-danger-5: light-dark(#ffd3cc, #6f1b18);
+    --ol-palette-danger-6: light-dark(#ffc0b7, #7f241f);
+    --ol-palette-danger-7: light-dark(#f9a79d, #912e28);
+    --ol-palette-danger-8: light-dark(#ed877c, #aa352f);
+    --ol-palette-danger-9: #dc2626;
+    --ol-palette-danger-10: light-dark(#d20516, #e6463e);
+    --ol-palette-danger-11: light-dark(#bc1a1c, #fd9589);
+    --ol-palette-danger-12: light-dark(#581713, #ffd7d1);
+    --ol-palette-danger-text-subtle: light-dark(#d20516, #f35349);
+    --ol-palette-danger-border-input: light-dark(#d16e64, #bc463e);
+    --ol-palette-danger-border-input-hover: light-dark(#c36158, #cb544a);
+    --ol-palette-danger-on-solid: #ffffff;
+    --ol-palette-info-1: light-dark(#fdfdfe, #0d1420);
+    --ol-palette-info-2: light-dark(#f6f9ff, #101828);
+    --ol-palette-info-3: light-dark(#ecf2ff, #11244d);
+    --ol-palette-info-4: light-dark(#dfeaff, #132e68);
+    --ol-palette-info-5: light-dark(#cedfff, #1a397a);
+    --ol-palette-info-6: light-dark(#bad2ff, #22448b);
+    --ol-palette-info-7: light-dark(#9fc0ff, #2a509f);
+    --ol-palette-info-8: light-dark(#7da7f8, #325eba);
+    --ol-palette-info-9: #2563eb;
+    --ol-palette-info-10: light-dark(#1857e2, #3a74f1);
+    --ol-palette-info-11: light-dark(#245bd3, #8fb6ff);
+    --ol-palette-info-12: light-dark(#152e61, #d3e2ff);
+    --ol-palette-info-text-subtle: light-dark(#1857e2, #4e87ff);
+    --ol-palette-info-border-input: light-dark(#638bda, #3e6bc9);
+    --ol-palette-info-border-input-hover: light-dark(#557dca, #4a79d7);
+    --ol-palette-info-on-solid: #ffffff;
+    --ol-color-shell: light-dark(var(--ol-palette-neutral-3), var(--ol-palette-neutral-1));
+    --ol-color-bg: var(--ol-palette-neutral-1);
+    --ol-color-bg-subtle: var(--ol-palette-neutral-2);
+    --ol-color-surface: light-dark(#ffffff, var(--ol-palette-neutral-2));
+    --ol-color-surface-overlay: light-dark(#ffffff, var(--ol-palette-neutral-3));
+    --ol-color-fill-subtle: light-dark(var(--ol-palette-neutral-2), var(--ol-palette-neutral-3));
+    --ol-color-fill: var(--ol-palette-neutral-3);
+    --ol-color-fill-hover: var(--ol-palette-neutral-4);
+    --ol-color-fill-active: var(--ol-palette-neutral-5);
+    --ol-color-fg: var(--ol-palette-neutral-12);
+    --ol-color-fg-muted: var(--ol-palette-neutral-11);
+    --ol-color-fg-subtle: var(--ol-palette-neutral-text-subtle);
+    --ol-color-fg-disabled: var(--ol-palette-neutral-8);
+    --ol-color-icon-subtle: var(--ol-palette-neutral-border-input);
+    --ol-color-border: var(--ol-palette-neutral-6);
+    --ol-color-border-strong: var(--ol-palette-neutral-7);
+    --ol-color-border-input: var(--ol-palette-neutral-border-input);
+    --ol-color-border-input-hover: var(--ol-palette-neutral-border-input-hover);
+    --ol-color-focus-ring: light-dark(var(--ol-palette-accent-9), var(--ol-palette-accent-11));
+    --ol-color-selection: var(--ol-palette-accent-5);
+    --ol-color-overlay: light-dark(rgb(28 32 36 / 0.4), rgb(0 0 0 / 0.6));
+    --ol-color-shadow: light-dark(rgb(28 32 36 / 0.1), rgb(0 0 0 / 0.5));
+    --ol-color-shadow-weak: light-dark(rgb(28 32 36 / 0.05), rgb(0 0 0 / 0.3));
+    --ol-color-mark: var(--ol-palette-accent-mark);
+    --ol-color-mark-inverse: var(--ol-palette-accent-mark-inverse);
+    --ol-color-brand-panel: #0f172a;
+    --ol-color-on-brand-panel: #e2e8f0;
+    --ol-color-on-brand-panel-muted: #94a3b8;
+    --ol-color-highlight: rgb(255 255 255 / 0.16);
+    --ol-color-accent-bg: var(--ol-palette-accent-3);
+    --ol-color-accent-bg-hover: var(--ol-palette-accent-4);
+    --ol-color-accent-bg-active: var(--ol-palette-accent-5);
+    --ol-color-accent-border: var(--ol-palette-accent-7);
+    --ol-color-accent-border-hover: var(--ol-palette-accent-8);
+    --ol-color-accent-solid: var(--ol-palette-accent-9);
+    --ol-color-accent-solid-hover: var(--ol-palette-accent-10);
+    --ol-color-accent-text: var(--ol-palette-accent-11);
+    --ol-color-accent-text-strong: var(--ol-palette-accent-12);
+    --ol-color-accent-on-solid: var(--ol-palette-accent-on-solid);
+    --ol-color-success-bg: var(--ol-palette-success-3);
+    --ol-color-success-bg-hover: var(--ol-palette-success-4);
+    --ol-color-success-bg-active: var(--ol-palette-success-5);
+    --ol-color-success-border: var(--ol-palette-success-7);
+    --ol-color-success-border-hover: var(--ol-palette-success-8);
+    --ol-color-success-solid: var(--ol-palette-success-9);
+    --ol-color-success-solid-hover: var(--ol-palette-success-10);
+    --ol-color-success-text: var(--ol-palette-success-11);
+    --ol-color-success-text-strong: var(--ol-palette-success-12);
+    --ol-color-success-on-solid: var(--ol-palette-success-on-solid);
+    --ol-color-warning-bg: var(--ol-palette-warning-3);
+    --ol-color-warning-bg-hover: var(--ol-palette-warning-4);
+    --ol-color-warning-bg-active: var(--ol-palette-warning-5);
+    --ol-color-warning-border: var(--ol-palette-warning-7);
+    --ol-color-warning-border-hover: var(--ol-palette-warning-8);
+    --ol-color-warning-solid: var(--ol-palette-warning-9);
+    --ol-color-warning-solid-hover: var(--ol-palette-warning-10);
+    --ol-color-warning-text: var(--ol-palette-warning-11);
+    --ol-color-warning-text-strong: var(--ol-palette-warning-12);
+    --ol-color-warning-on-solid: var(--ol-palette-warning-on-solid);
+    --ol-color-danger-bg: var(--ol-palette-danger-3);
+    --ol-color-danger-bg-hover: var(--ol-palette-danger-4);
+    --ol-color-danger-bg-active: var(--ol-palette-danger-5);
+    --ol-color-danger-border: var(--ol-palette-danger-7);
+    --ol-color-danger-border-hover: var(--ol-palette-danger-8);
+    --ol-color-danger-solid: var(--ol-palette-danger-9);
+    --ol-color-danger-solid-hover: var(--ol-palette-danger-10);
+    --ol-color-danger-text: var(--ol-palette-danger-11);
+    --ol-color-danger-text-strong: var(--ol-palette-danger-12);
+    --ol-color-danger-on-solid: var(--ol-palette-danger-on-solid);
+    --ol-color-info-bg: var(--ol-palette-info-3);
+    --ol-color-info-bg-hover: var(--ol-palette-info-4);
+    --ol-color-info-bg-active: var(--ol-palette-info-5);
+    --ol-color-info-border: var(--ol-palette-info-7);
+    --ol-color-info-border-hover: var(--ol-palette-info-8);
+    --ol-color-info-solid: var(--ol-palette-info-9);
+    --ol-color-info-solid-hover: var(--ol-palette-info-10);
+    --ol-color-info-text: var(--ol-palette-info-11);
+    --ol-color-info-text-strong: var(--ol-palette-info-12);
+    --ol-color-info-on-solid: var(--ol-palette-info-on-solid);
+    --ol-color-series-1: light-dark(var(--ol-palette-accent-9), var(--ol-palette-accent-10));
+    --ol-color-series-2: light-dark(#eb6200, #f57323);
+    --ol-color-series-3: light-dark(#0f9cd0, #21b3ed);
+    --ol-color-series-4: light-dark(#e04a99, #eb5ca4);
+    --ol-color-series-5: light-dark(#4ea200, #5bb832);
+    --ol-color-series-6: light-dark(#c06ada, #c978e2);
+    --ol-color-series-7: light-dark(#b88a00, #dca81c);
+    --ol-color-series-8: light-dark(#cc3430, #e94646);
+    --ol-shadow-xs: 0 1px 2px 0 var(--ol-color-shadow-weak);
+    --ol-shadow-sm: 0 1px 3px 0 var(--ol-color-shadow), 0 1px 2px -1px var(--ol-color-shadow);
+    --ol-shadow-md: 0 4px 6px -1px var(--ol-color-shadow), 0 2px 4px -2px var(--ol-color-shadow);
+    --ol-shadow-lg: 0 10px 15px -3px var(--ol-color-shadow), 0 4px 6px -4px var(--ol-color-shadow);
+    --ol-shadow-xl: 0 20px 25px -5px var(--ol-color-shadow), 0 8px 10px -6px var(--ol-color-shadow);
+    --ol-z-sticky: 100;
+    --ol-z-dropdown: 1000;
+    --ol-z-overlay: 1100;
+    --ol-z-toast: 1300;
+    --ol-focus-width: 2px;
+    --ol-focus-offset: 2px;
+    --ol-duration-fast: 100ms;
+    --ol-duration-normal: 160ms;
+    --ol-duration-slow: 240ms;
+    --ol-duration-slower: 400ms;
+    --ol-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ol-ease-enter: cubic-bezier(0.05, 0.7, 0.1, 1);
+    --ol-ease-exit: cubic-bezier(0.3, 0, 1, 1);
+    --ol-radius-none: 0;
+    --ol-radius-xs: 0.1875rem;
+    --ol-radius-sm: 0.25rem;
+    --ol-radius-md: 0.375rem;
+    --ol-radius-lg: 0.625rem;
+    --ol-radius-xl: 0.875rem;
+    --ol-radius-full: 9999px;
+    --ol-radius-control: var(--ol-radius-md);
+    --ol-radius-container: var(--ol-radius-lg);
+    --ol-radius-overlay: var(--ol-radius-xl);
+    --ol-radius-frame: var(--ol-radius-xl);
+    --ol-radius-badge: var(--ol-radius-full);
+    --ol-size-control-xs: 1.5rem;
+    --ol-size-control-sm: 1.75rem;
+    --ol-size-control-md: 2rem;
+    --ol-size-control-lg: 2.5rem;
+    --ol-size-target-min: 1.5rem;
+    --ol-size-icon-sm: 0.875rem;
+    --ol-size-icon-md: 1rem;
+    --ol-size-icon-lg: 1.25rem;
+    --ol-size-avatar-sm: 1.25rem;
+    --ol-size-avatar-md: 1.75rem;
+    --ol-size-avatar-lg: 2.25rem;
+    --ol-size-sidebar: 15rem;
+    --ol-size-content: 75rem;
+    --ol-space-1: 0.25rem;
+    --ol-space-2: 0.5rem;
+    --ol-space-3: 0.75rem;
+    --ol-space-4: 1rem;
+    --ol-space-5: 1.25rem;
+    --ol-space-6: 1.5rem;
+    --ol-space-8: 2rem;
+    --ol-space-10: 2.5rem;
+    --ol-space-12: 3rem;
+    --ol-space-16: 4rem;
+    --ol-space-0-5: 0.125rem;
+    --ol-space-1-5: 0.375rem;
+    --ol-space-2-5: 0.625rem;
+    --ol-space-3-5: 0.875rem;
+    --ol-font-family-sans: Geist, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --ol-font-family-mono: "Geist Mono", ui-monospace, SFMono-Regular, "Cascadia Code", Menlo, Consolas, "Liberation Mono", monospace;
+    --ol-font-family-sans-zh: "Geist ZH", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --ol-font-weight-regular: 400;
+    --ol-font-weight-medium: 500;
+    --ol-font-weight-semibold: 600;
+    --ol-font-weight-bold: 700;
+    --ol-font-size-2xs: 0.6875rem;
+    --ol-font-size-xs: 0.75rem;
+    --ol-font-size-sm: 0.8125rem;
+    --ol-font-size-md: 0.875rem;
+    --ol-font-size-lg: 1rem;
+    --ol-font-size-xl: 1.25rem;
+    --ol-font-size-2xl: 1.5rem;
+    --ol-font-size-3xl: 2.25rem;
+    --ol-font-size-4xl: 3rem;
+    --ol-line-height-2xs: 0.875rem;
+    --ol-line-height-xs: 1rem;
+    --ol-line-height-sm: 1.25rem;
+    --ol-line-height-md: 1.375rem;
+    --ol-line-height-lg: 1.5rem;
+    --ol-line-height-xl: 1.75rem;
+    --ol-line-height-2xl: 2rem;
+    --ol-line-height-3xl: 2.75rem;
+    --ol-line-height-4xl: 3.5rem;
+    --ol-tracking-tight: -0.011em;
+    --ol-tracking-normal: 0;
+    --ol-text-display: var(--ol-font-weight-semibold) var(--ol-font-size-3xl)/1.2222 var(--ol-font-family-sans);
+    --ol-text-heading-xl: var(--ol-font-weight-semibold) var(--ol-font-size-2xl)/1.3333 var(--ol-font-family-sans);
+    --ol-text-heading-lg: var(--ol-font-weight-semibold) var(--ol-font-size-xl)/1.4 var(--ol-font-family-sans);
+    --ol-text-heading-md: var(--ol-font-weight-semibold) var(--ol-font-size-lg)/1.5 var(--ol-font-family-sans);
+    --ol-text-heading-sm: var(--ol-font-weight-semibold) var(--ol-font-size-md)/1.5714 var(--ol-font-family-sans);
+    --ol-text-body: var(--ol-font-weight-regular) var(--ol-font-size-md)/1.5714 var(--ol-font-family-sans);
+    --ol-text-body-sm: var(--ol-font-weight-regular) var(--ol-font-size-sm)/1.5385 var(--ol-font-family-sans);
+    --ol-text-caption: var(--ol-font-weight-regular) var(--ol-font-size-xs)/1.3333 var(--ol-font-family-sans);
+    --ol-text-label: var(--ol-font-weight-medium) var(--ol-font-size-sm)/1.5385 var(--ol-font-family-sans);
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  [data-brand="openlinkos"] {
+    --ol-palette-accent-1: light-dark(#fdfdfe, #0d1420);
+    --ol-palette-accent-2: light-dark(#f6f9ff, #101828);
+    --ol-palette-accent-3: light-dark(#ecf2ff, #11244d);
+    --ol-palette-accent-4: light-dark(#dfeaff, #132e68);
+    --ol-palette-accent-5: light-dark(#cedfff, #1a397a);
+    --ol-palette-accent-6: light-dark(#bad2ff, #22448b);
+    --ol-palette-accent-7: light-dark(#9fc0ff, #2a509f);
+    --ol-palette-accent-8: light-dark(#7da7f8, #325eba);
+    --ol-palette-accent-9: #2563eb;
+    --ol-palette-accent-10: light-dark(#1857e2, #3a74f1);
+    --ol-palette-accent-11: light-dark(#245bd3, #8fb6ff);
+    --ol-palette-accent-12: light-dark(#152e61, #d3e2ff);
+    --ol-palette-accent-text-subtle: light-dark(#1857e2, #4e87ff);
+    --ol-palette-accent-border-input: light-dark(#638bda, #3e6bc9);
+    --ol-palette-accent-border-input-hover: light-dark(#557dca, #4a79d7);
+    --ol-palette-accent-on-solid: #ffffff;
+    --ol-palette-accent-mark: light-dark(#2563eb, #6b9bff);
+    --ol-palette-accent-mark-inverse: #6b9bff;
+    --ol-color-focus-ring: light-dark(var(--ol-palette-accent-9), var(--ol-palette-accent-11));
+    --ol-color-selection: var(--ol-palette-accent-5);
+    --ol-color-mark: var(--ol-palette-accent-mark);
+    --ol-color-mark-inverse: var(--ol-palette-accent-mark-inverse);
+    --ol-color-accent-bg: var(--ol-palette-accent-3);
+    --ol-color-accent-bg-hover: var(--ol-palette-accent-4);
+    --ol-color-accent-bg-active: var(--ol-palette-accent-5);
+    --ol-color-accent-border: var(--ol-palette-accent-7);
+    --ol-color-accent-border-hover: var(--ol-palette-accent-8);
+    --ol-color-accent-solid: var(--ol-palette-accent-9);
+    --ol-color-accent-solid-hover: var(--ol-palette-accent-10);
+    --ol-color-accent-text: var(--ol-palette-accent-11);
+    --ol-color-accent-text-strong: var(--ol-palette-accent-12);
+    --ol-color-accent-on-solid: var(--ol-palette-accent-on-solid);
+    --ol-color-series-1: light-dark(var(--ol-palette-accent-9), var(--ol-palette-accent-10));
+  }
+
+  [data-brand="origin"] {
+    --ol-palette-accent-1: light-dark(#fdfdfe, #11131f);
+    --ol-palette-accent-2: light-dark(#f7f9ff, #141726);
+    --ol-palette-accent-3: light-dark(#eef2fe, #1d2348);
+    --ol-palette-accent-4: light-dark(#e3e8fe, #252c60);
+    --ol-palette-accent-5: light-dark(#d5ddfe, #2e3772);
+    --ol-palette-accent-6: light-dark(#c4cffe, #374182);
+    --ol-palette-accent-7: light-dark(#aebcf7, #424d95);
+    --ol-palette-accent-8: light-dark(#93a3ed, #4e5bae);
+    --ol-palette-accent-9: #4f5bd5;
+    --ol-palette-accent-10: light-dark(#4650cc, #5d6cdc);
+    --ol-palette-accent-11: light-dark(#4b57c4, #a0b1fd);
+    --ol-palette-accent-12: light-dark(#252c5b, #d8e0fe);
+    --ol-palette-accent-text-subtle: light-dark(#4650cc, #7183f5);
+    --ol-palette-accent-border-input: light-dark(#7988d0, #5b69be);
+    --ol-palette-accent-border-input-hover: light-dark(#6c7ac1, #6777cc);
+    --ol-palette-accent-on-solid: #ffffff;
+    --ol-palette-accent-mark: light-dark(#4f5bd5, #8b96ff);
+    --ol-palette-accent-mark-inverse: #8b96ff;
+    --ol-color-focus-ring: light-dark(var(--ol-palette-accent-9), var(--ol-palette-accent-11));
+    --ol-color-selection: var(--ol-palette-accent-5);
+    --ol-color-mark: var(--ol-palette-accent-mark);
+    --ol-color-mark-inverse: var(--ol-palette-accent-mark-inverse);
+    --ol-color-accent-bg: var(--ol-palette-accent-3);
+    --ol-color-accent-bg-hover: var(--ol-palette-accent-4);
+    --ol-color-accent-bg-active: var(--ol-palette-accent-5);
+    --ol-color-accent-border: var(--ol-palette-accent-7);
+    --ol-color-accent-border-hover: var(--ol-palette-accent-8);
+    --ol-color-accent-solid: var(--ol-palette-accent-9);
+    --ol-color-accent-solid-hover: var(--ol-palette-accent-10);
+    --ol-color-accent-text: var(--ol-palette-accent-11);
+    --ol-color-accent-text-strong: var(--ol-palette-accent-12);
+    --ol-color-accent-on-solid: var(--ol-palette-accent-on-solid);
+    --ol-color-series-1: light-dark(var(--ol-palette-accent-9), var(--ol-palette-accent-10));
+  }
+
+  [data-brand="agent"] {
+    --ol-palette-accent-1: light-dark(#fdfdfe, #141121);
+    --ol-palette-accent-2: light-dark(#f9f8ff, #191528);
+    --ol-palette-accent-3: light-dark(#f2f0ff, #291b4e);
+    --ol-palette-accent-4: light-dark(#eae6ff, #372068);
+    --ol-palette-accent-5: light-dark(#dfd9ff, #422a7b);
+    --ol-palette-accent-6: light-dark(#d3c9ff, #4d338c);
+    --ol-palette-accent-7: light-dark(#c2b3ff, #5a3ea0);
+    --ol-palette-accent-8: light-dark(#ac95fa, #6a49bb);
+    --ol-palette-accent-9: light-dark(#7c3aed, #6d28d9);
+    --ol-palette-accent-10: light-dark(#7428e4, #7743df);
+    --ol-palette-accent-11: light-dark(#7139d6, #b9a7ff);
+    --ol-palette-accent-12: light-dark(#352163, #e2dcff);
+    --ol-palette-accent-text-subtle: light-dark(#7428e4, #9871ff);
+    --ol-palette-accent-border-input: light-dark(#947cdf, #7859cc);
+    --ol-palette-accent-border-input-hover: light-dark(#866ecf, #8567db);
+    --ol-palette-accent-on-solid: #ffffff;
+    --ol-palette-accent-mark: light-dark(#7c3aed, #a78bfa);
+    --ol-palette-accent-mark-inverse: #a78bfa;
+    --ol-color-focus-ring: light-dark(var(--ol-palette-accent-9), var(--ol-palette-accent-11));
+    --ol-color-selection: var(--ol-palette-accent-5);
+    --ol-color-mark: var(--ol-palette-accent-mark);
+    --ol-color-mark-inverse: var(--ol-palette-accent-mark-inverse);
+    --ol-color-accent-bg: var(--ol-palette-accent-3);
+    --ol-color-accent-bg-hover: var(--ol-palette-accent-4);
+    --ol-color-accent-bg-active: var(--ol-palette-accent-5);
+    --ol-color-accent-border: var(--ol-palette-accent-7);
+    --ol-color-accent-border-hover: var(--ol-palette-accent-8);
+    --ol-color-accent-solid: var(--ol-palette-accent-9);
+    --ol-color-accent-solid-hover: var(--ol-palette-accent-10);
+    --ol-color-accent-text: var(--ol-palette-accent-11);
+    --ol-color-accent-text-strong: var(--ol-palette-accent-12);
+    --ol-color-accent-on-solid: var(--ol-palette-accent-on-solid);
+    --ol-color-series-1: light-dark(var(--ol-palette-accent-9), var(--ol-palette-accent-10));
+  }
+
+  [data-brand="linkos"] {
+    --ol-palette-accent-1: light-dark(#fdfdfd, #0e1613);
+    --ol-palette-accent-2: light-dark(#f6faf8, #111b16);
+    --ol-palette-accent-3: light-dark(#edf4f0, #122d22);
+    --ol-palette-accent-4: light-dark(#dfede7, #133b2c);
+    --ol-palette-accent-5: light-dark(#d0e4db, #1b4737);
+    --ol-palette-accent-6: light-dark(#bcdacc, #245341);
+    --ol-palette-accent-7: light-dark(#a3cab8, #2d614c);
+    --ol-palette-accent-8: light-dark(#83b59f, #34715a);
+    --ol-palette-accent-9: #047857;
+    --ol-palette-accent-10: light-dark(#006d4f, #2d8465);
+    --ol-palette-accent-11: light-dark(#1f7759, #90c3ad);
+    --ol-palette-accent-12: light-dark(#16392b, #d4e7de);
+    --ol-palette-accent-text-subtle: light-dark(#006d4f, #4a9e7d);
+    --ol-palette-accent-border-input: light-dark(#659681, #3f7c64);
+    --ol-palette-accent-border-input-hover: light-dark(#588874, #4d8a72);
+    --ol-palette-accent-on-solid: #ffffff;
+    --ol-palette-accent-mark: light-dark(#0d9b76, #34d399);
+    --ol-palette-accent-mark-inverse: #34d399;
+    --ol-color-focus-ring: light-dark(var(--ol-palette-accent-9), var(--ol-palette-accent-11));
+    --ol-color-selection: var(--ol-palette-accent-5);
+    --ol-color-mark: var(--ol-palette-accent-mark);
+    --ol-color-mark-inverse: var(--ol-palette-accent-mark-inverse);
+    --ol-color-accent-bg: var(--ol-palette-accent-3);
+    --ol-color-accent-bg-hover: var(--ol-palette-accent-4);
+    --ol-color-accent-bg-active: var(--ol-palette-accent-5);
+    --ol-color-accent-border: var(--ol-palette-accent-7);
+    --ol-color-accent-border-hover: var(--ol-palette-accent-8);
+    --ol-color-accent-solid: var(--ol-palette-accent-9);
+    --ol-color-accent-solid-hover: var(--ol-palette-accent-10);
+    --ol-color-accent-text: var(--ol-palette-accent-11);
+    --ol-color-accent-text-strong: var(--ol-palette-accent-12);
+    --ol-color-accent-on-solid: var(--ol-palette-accent-on-solid);
+    --ol-color-series-1: light-dark(var(--ol-palette-accent-9), var(--ol-palette-accent-10));
+  }
+
+  [data-brand="linkos-mirrors"] {
+    --ol-palette-accent-1: light-dark(#fdfdfd, #0e1613);
+    --ol-palette-accent-2: light-dark(#f6faf8, #111b16);
+    --ol-palette-accent-3: light-dark(#edf4f0, #122d22);
+    --ol-palette-accent-4: light-dark(#dfede7, #133b2c);
+    --ol-palette-accent-5: light-dark(#d0e4db, #1b4737);
+    --ol-palette-accent-6: light-dark(#bcdacc, #245341);
+    --ol-palette-accent-7: light-dark(#a3cab8, #2d614c);
+    --ol-palette-accent-8: light-dark(#83b59f, #34715a);
+    --ol-palette-accent-9: #047857;
+    --ol-palette-accent-10: light-dark(#006d4f, #2d8465);
+    --ol-palette-accent-11: light-dark(#1f7759, #90c3ad);
+    --ol-palette-accent-12: light-dark(#16392b, #d4e7de);
+    --ol-palette-accent-text-subtle: light-dark(#006d4f, #4a9e7d);
+    --ol-palette-accent-border-input: light-dark(#659681, #3f7c64);
+    --ol-palette-accent-border-input-hover: light-dark(#588874, #4d8a72);
+    --ol-palette-accent-on-solid: #ffffff;
+    --ol-palette-accent-mark: light-dark(#0d9b76, #34d399);
+    --ol-palette-accent-mark-inverse: #34d399;
+    --ol-color-focus-ring: light-dark(var(--ol-palette-accent-9), var(--ol-palette-accent-11));
+    --ol-color-selection: var(--ol-palette-accent-5);
+    --ol-color-mark: var(--ol-palette-accent-mark);
+    --ol-color-mark-inverse: var(--ol-palette-accent-mark-inverse);
+    --ol-color-accent-bg: var(--ol-palette-accent-3);
+    --ol-color-accent-bg-hover: var(--ol-palette-accent-4);
+    --ol-color-accent-bg-active: var(--ol-palette-accent-5);
+    --ol-color-accent-border: var(--ol-palette-accent-7);
+    --ol-color-accent-border-hover: var(--ol-palette-accent-8);
+    --ol-color-accent-solid: var(--ol-palette-accent-9);
+    --ol-color-accent-solid-hover: var(--ol-palette-accent-10);
+    --ol-color-accent-text: var(--ol-palette-accent-11);
+    --ol-color-accent-text-strong: var(--ol-palette-accent-12);
+    --ol-color-accent-on-solid: var(--ol-palette-accent-on-solid);
+    --ol-color-series-1: light-dark(var(--ol-palette-accent-9), var(--ol-palette-accent-10));
+  }
+
+  [data-brand="linkos-status"] {
+    --ol-palette-accent-1: light-dark(#fdfdfd, #0e1613);
+    --ol-palette-accent-2: light-dark(#f6faf8, #111b16);
+    --ol-palette-accent-3: light-dark(#edf4f0, #122d22);
+    --ol-palette-accent-4: light-dark(#dfede7, #133b2c);
+    --ol-palette-accent-5: light-dark(#d0e4db, #1b4737);
+    --ol-palette-accent-6: light-dark(#bcdacc, #245341);
+    --ol-palette-accent-7: light-dark(#a3cab8, #2d614c);
+    --ol-palette-accent-8: light-dark(#83b59f, #34715a);
+    --ol-palette-accent-9: #047857;
+    --ol-palette-accent-10: light-dark(#006d4f, #2d8465);
+    --ol-palette-accent-11: light-dark(#1f7759, #90c3ad);
+    --ol-palette-accent-12: light-dark(#16392b, #d4e7de);
+    --ol-palette-accent-text-subtle: light-dark(#006d4f, #4a9e7d);
+    --ol-palette-accent-border-input: light-dark(#659681, #3f7c64);
+    --ol-palette-accent-border-input-hover: light-dark(#588874, #4d8a72);
+    --ol-palette-accent-on-solid: #ffffff;
+    --ol-palette-accent-mark: light-dark(#0d9b76, #34d399);
+    --ol-palette-accent-mark-inverse: #34d399;
+    --ol-color-focus-ring: light-dark(var(--ol-palette-accent-9), var(--ol-palette-accent-11));
+    --ol-color-selection: var(--ol-palette-accent-5);
+    --ol-color-mark: var(--ol-palette-accent-mark);
+    --ol-color-mark-inverse: var(--ol-palette-accent-mark-inverse);
+    --ol-color-accent-bg: var(--ol-palette-accent-3);
+    --ol-color-accent-bg-hover: var(--ol-palette-accent-4);
+    --ol-color-accent-bg-active: var(--ol-palette-accent-5);
+    --ol-color-accent-border: var(--ol-palette-accent-7);
+    --ol-color-accent-border-hover: var(--ol-palette-accent-8);
+    --ol-color-accent-solid: var(--ol-palette-accent-9);
+    --ol-color-accent-solid-hover: var(--ol-palette-accent-10);
+    --ol-color-accent-text: var(--ol-palette-accent-11);
+    --ol-color-accent-text-strong: var(--ol-palette-accent-12);
+    --ol-color-accent-on-solid: var(--ol-palette-accent-on-solid);
+    --ol-color-series-1: light-dark(var(--ol-palette-accent-9), var(--ol-palette-accent-10));
+  }
+
+  [data-density="comfortable"] {
+    --ol-size-control-md: 2.25rem;
+    --ol-size-control-lg: 2.75rem;
+  }
+}
+
+@layer ol.base {
+  /*
+   * Base: page typography, links, focus, selection, and the type presets. Element styles stay few
+   * and quiet so content that is not built from ol- classes still reads well.
+   */
+
+  body {
+    background: var(--ol-color-bg);
+    color: var(--ol-color-fg);
+    font-family: var(--ol-font-family-sans);
+    font-size: var(--ol-font-size-md);
+    font-weight: var(--ol-font-weight-regular);
+    line-height: var(--ol-line-height-md);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    scrollbar-color: var(--ol-color-border-strong) transparent;
+  }
+
+  /* Chinese (clreq): Geist without the punctuation Chinese sets full-width, no negative tracking,
+     trimmed punctuation, and space between Han and Latin where the browser supports it. */
+  :lang(zh) {
+    --ol-font-family-sans: var(--ol-font-family-sans-zh);
+    --ol-tracking-tight: 0em;
+    text-spacing-trim: normal;
+    text-autospace: normal;
+  }
+
+  a {
+    color: var(--ol-color-accent-text);
+    text-decoration: none;
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: from-font;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  /* One focus indicator everywhere: a solid ring of at least 3:1 against the page (WCAG 2.4.13). */
+  :focus-visible {
+    outline: var(--ol-focus-width) solid var(--ol-color-focus-ring);
+    outline-offset: var(--ol-focus-offset);
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  ::selection {
+    background: var(--ol-color-selection);
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: var(--ol-font-family-mono);
+    font-size: 0.9em;
+  }
+
+  :not(pre) > code {
+    padding: 0.1em 0.35em;
+    border-radius: var(--ol-radius-xs);
+    background: var(--ol-color-fill);
+    overflow-wrap: anywhere;
+  }
+
+  hr {
+    height: 1px;
+    margin: var(--ol-space-6) 0;
+    border: 0;
+    background: var(--ol-color-border);
+  }
+
+  strong,
+  b {
+    font-weight: var(--ol-font-weight-semibold);
+  }
+
+  small {
+    font-size: var(--ol-font-size-sm);
+  }
+
+  /* Type presets: size, line height, weight and tracking that belong together. */
+
+  .ol-text-display {
+    font-size: var(--ol-font-size-3xl);
+    font-weight: var(--ol-font-weight-semibold);
+    letter-spacing: var(--ol-tracking-tight);
+    line-height: var(--ol-line-height-3xl);
+    text-wrap: balance;
+  }
+
+  .ol-heading-xl {
+    font-size: var(--ol-font-size-2xl);
+    font-weight: var(--ol-font-weight-semibold);
+    letter-spacing: var(--ol-tracking-tight);
+    line-height: var(--ol-line-height-2xl);
+    text-wrap: balance;
+  }
+
+  .ol-heading-lg {
+    font-size: var(--ol-font-size-xl);
+    font-weight: var(--ol-font-weight-semibold);
+    letter-spacing: var(--ol-tracking-tight);
+    line-height: var(--ol-line-height-xl);
+    text-wrap: balance;
+  }
+
+  .ol-heading-md {
+    font-size: var(--ol-font-size-lg);
+    font-weight: var(--ol-font-weight-semibold);
+    line-height: var(--ol-line-height-lg);
+  }
+
+  .ol-heading-sm {
+    font-size: var(--ol-font-size-md);
+    font-weight: var(--ol-font-weight-semibold);
+    line-height: var(--ol-line-height-md);
+  }
+
+  .ol-text-lg {
+    font-size: var(--ol-font-size-lg);
+    line-height: var(--ol-line-height-lg);
+  }
+
+  .ol-text-md {
+    font-size: var(--ol-font-size-md);
+    line-height: var(--ol-line-height-md);
+  }
+
+  .ol-text-sm {
+    font-size: var(--ol-font-size-sm);
+    line-height: var(--ol-line-height-sm);
+  }
+
+  .ol-text-xs {
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+  }
+
+  .ol-text-label {
+    font-size: var(--ol-font-size-sm);
+    font-weight: var(--ol-font-weight-medium);
+    line-height: var(--ol-line-height-sm);
+  }
+
+  .ol-text-prose {
+    max-width: 72ch;
+    text-wrap: pretty;
+  }
+
+  /* Running Chinese text wants more leading than Latin (clreq: 1.5 to 2). */
+  :lang(zh) .ol-text-prose {
+    max-width: 40em;
+    line-height: 1.75;
+  }
+
+  /* Users who ask for less motion get none. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      /* biome-ignore lint/complexity/noImportantStyles: reduced motion overrides every component. */
+      animation-duration: 0.01ms !important;
+      /* biome-ignore lint/complexity/noImportantStyles: reduced motion overrides every component. */
+      animation-iteration-count: 1 !important;
+      /* biome-ignore lint/complexity/noImportantStyles: reduced motion overrides every component. */
+      transition-duration: 0.01ms !important;
+      /* biome-ignore lint/complexity/noImportantStyles: reduced motion overrides every component. */
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Users who ask for more contrast get firmer lines and secondary text at full strength. */
+  @media (prefers-contrast: more) {
+    :root {
+      --ol-color-border: var(--ol-color-border-input);
+      --ol-color-border-strong: var(--ol-color-border-input-hover);
+      --ol-color-fg-muted: var(--ol-color-fg);
+      --ol-color-fg-subtle: var(--ol-color-fg);
+    }
+  }
+
+  /* Windows high contrast and other forced colours: keep focus and selection visible with system colours. */
+  @media (forced-colors: active) {
+    :focus-visible {
+      outline-color: Highlight;
+    }
+  }
+}
+
+@layer ol.layout {
+  /*
+   * Layout: the app shell, page structure, grids and stacks, and the sign-in layout. Spacing uses
+   * logical properties. Grids respond to the width of their container, not the viewport.
+   *
+   * The shell is a quiet frame: the sidebar sits on the shell colour, and the content is one
+   * floating panel that scrolls on its own, so navigation stays put and the page reads as a single
+   * object. Below 860px the panel becomes the page, and the sidebar folds into a bar whose menu
+   * opens with a checkbox, so navigation needs no JavaScript.
+   *
+   *   <a class="ol-skip-link" href="#main">Skip to content</a>
+   *   <div class="ol-app">
+   *     <aside class="ol-sidebar">
+   *       <input type="checkbox" id="nav" class="ol-nav-toggle">
+   *       <div class="ol-sidebar-head">brand … <label for="nav" class="ol-nav-toggle-button">…</label></div>
+   *       <nav class="ol-nav">.ol-nav-group > .ol-nav-label + .ol-nav-item…</nav>
+   *       <div class="ol-sidebar-foot">theme switch, <button class="ol-sidebar-account">…</div>
+   *     </aside>
+   *     <div class="ol-main">
+   *       <header class="ol-topbar">…</header>
+   *       <main class="ol-content" id="main">.ol-page-header, .ol-section…</main>
+   *       <footer class="ol-footer">…</footer>
+   *     </div>
+   *   </div>
+   */
+
+  .ol-skip-link {
+    position: absolute;
+    inset-block-start: var(--ol-space-2);
+    inset-inline-start: var(--ol-space-2);
+    z-index: var(--ol-z-toast);
+    padding: var(--ol-space-2) var(--ol-space-3);
+    border-radius: var(--ol-radius-control);
+    background: var(--ol-color-accent-solid);
+    color: var(--ol-color-accent-on-solid);
+    font-weight: var(--ol-font-weight-medium);
+    transform: translateY(-200%);
+  }
+
+  .ol-skip-link:focus-visible {
+    transform: none;
+  }
+
+  .ol-app {
+    display: grid;
+    grid-template-columns: var(--ol-size-sidebar) minmax(0, 1fr);
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--ol-color-shell);
+  }
+
+  /* Sidebar */
+
+  .ol-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-6);
+    min-height: 0;
+    padding: var(--ol-space-3) var(--ol-space-3) var(--ol-space-3) var(--ol-space-4);
+    overflow-y: auto;
+  }
+
+  .ol-sidebar-head {
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-2);
+    min-height: var(--ol-size-control-lg);
+    padding-inline: var(--ol-space-1);
+  }
+
+  .ol-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-width: 0;
+    color: var(--ol-color-fg);
+    font-size: var(--ol-font-size-lg);
+    font-weight: var(--ol-font-weight-semibold);
+    letter-spacing: var(--ol-tracking-tight);
+  }
+
+  .ol-brand:hover {
+    text-decoration: none;
+  }
+
+  .ol-brand img,
+  .ol-brand svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  /* The accent shape of an inline SVG mark: a filled shape, or a line (-line) for marks drawn with
+     strokes. */
+  .ol-brand-accent {
+    fill: var(--ol-color-mark);
+  }
+
+  .ol-brand-accent-line {
+    stroke: var(--ol-color-mark);
+  }
+
+  .ol-brand-tag {
+    padding: 0.0625rem 0.4375rem;
+    border: 1px solid var(--ol-color-border-strong);
+    border-radius: var(--ol-radius-full);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-2xs);
+    font-weight: var(--ol-font-weight-medium);
+    line-height: 1.4;
+  }
+
+  .ol-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-5);
+  }
+
+  .ol-nav-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .ol-nav-label {
+    padding: 0 var(--ol-space-2) var(--ol-space-1-5);
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-xs);
+    font-weight: var(--ol-font-weight-medium);
+    line-height: var(--ol-line-height-xs);
+  }
+
+  .ol-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: var(--ol-size-control-md);
+    padding-inline: var(--ol-space-2);
+    border-radius: var(--ol-radius-control);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-sm);
+    font-weight: var(--ol-font-weight-medium);
+    transition:
+      background var(--ol-duration-fast) var(--ol-ease-standard),
+      color var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-nav-item .ol-icon {
+    color: var(--ol-color-fg-subtle);
+  }
+
+  .ol-nav-item:hover {
+    background: var(--ol-color-fill-hover);
+    color: var(--ol-color-fg);
+    text-decoration: none;
+  }
+
+  .ol-nav-item:active {
+    background: var(--ol-color-fill-active);
+  }
+
+  /* The current page is lifted onto the panel's surface, its icon in the brand colour. */
+  .ol-nav-item[aria-current="page"] {
+    background: var(--ol-color-surface);
+    box-shadow:
+      var(--ol-shadow-sm),
+      0 0 0 1px var(--ol-color-border);
+    color: var(--ol-color-fg);
+  }
+
+  .ol-nav-item[aria-current="page"] .ol-icon {
+    color: var(--ol-color-accent-text);
+  }
+
+  .ol-nav-count {
+    margin-inline-start: auto;
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ol-sidebar-foot {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-2);
+    margin-block-start: auto;
+    padding: var(--ol-space-3) var(--ol-space-1) 0;
+    border-block-start: 1px solid var(--ol-color-border);
+  }
+
+  /*
+   * The signed-in account at the foot of the sidebar: a button that opens the account's menu (its
+   * page, the language, signing out) above it.
+   *
+   *   <button class="ol-sidebar-account" type="button" popovertarget="account">
+   *     <span class="ol-avatar ol-avatar-sm">A</span>
+   *     <span class="ol-sidebar-account-text"><span class="ol-sidebar-account-name">admin</span>
+   *       <span class="ol-sidebar-account-meta">Administrator</span></span>
+   *     …chevrons-up-down icon…
+   *   </button>
+   *   <div class="ol-menu ol-menu-above" id="account" popover>…</div>
+   */
+  .ol-sidebar-account {
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-2-5);
+    width: calc(100% + var(--ol-space-2));
+    min-height: var(--ol-size-control-lg);
+    margin-inline: calc(var(--ol-space-1) * -1);
+    padding: var(--ol-space-1) var(--ol-space-2) var(--ol-space-1) var(--ol-space-1);
+    border: 0;
+    border-radius: var(--ol-radius-control);
+    background: none;
+    color: var(--ol-color-fg);
+    text-align: start;
+    cursor: pointer;
+    transition: background var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-sidebar-account:hover,
+  .ol-sidebar-foot:has(> .ol-menu:popover-open) > .ol-sidebar-account {
+    background: var(--ol-color-fill-hover);
+  }
+
+  .ol-sidebar-account > svg:last-child {
+    margin-inline-start: auto;
+    color: var(--ol-color-fg-subtle);
+  }
+
+  .ol-sidebar-account-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .ol-sidebar-account-name,
+  .ol-sidebar-account-meta {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ol-sidebar-account-name {
+    font-size: var(--ol-font-size-sm);
+    font-weight: var(--ol-font-weight-medium);
+    line-height: var(--ol-line-height-sm);
+  }
+
+  .ol-sidebar-account-meta {
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+  }
+
+  .ol-nav-toggle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* The floating content panel */
+
+  .ol-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    margin: var(--ol-space-2) var(--ol-space-2) var(--ol-space-2) 0;
+    overflow-y: auto;
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-frame);
+    background: var(--ol-color-surface);
+    box-shadow: var(--ol-shadow-sm);
+    /* Keep focused elements clear of the sticky top bar (WCAG 2.4.11). */
+    scroll-padding-block-start: 4.5rem;
+  }
+
+  .ol-topbar {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--ol-z-sticky);
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--ol-space-3);
+    min-height: 3.25rem;
+    padding-inline: var(--ol-space-8);
+    border-block-end: 1px solid var(--ol-color-border);
+    background: color-mix(in srgb, var(--ol-color-surface) 85%, transparent);
+    -webkit-backdrop-filter: blur(10px) saturate(1.4);
+    backdrop-filter: blur(10px) saturate(1.4);
+  }
+
+  .ol-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-2);
+    min-width: 0;
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-sm);
+  }
+
+  .ol-breadcrumb li {
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-2);
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .ol-breadcrumb li + li::before {
+    content: "/";
+    color: var(--ol-color-border-strong);
+  }
+
+  .ol-breadcrumb a {
+    color: inherit;
+  }
+
+  .ol-breadcrumb a:hover {
+    color: var(--ol-color-fg);
+  }
+
+  .ol-breadcrumb [aria-current="page"] {
+    overflow: hidden;
+    color: var(--ol-color-fg);
+    font-weight: var(--ol-font-weight-medium);
+    text-overflow: ellipsis;
+  }
+
+  /* The breadcrumb (often inside a <nav> landmark) may shrink so the current page truncates. */
+  .ol-topbar > :first-child {
+    min-width: 0;
+  }
+
+  .ol-topbar .ol-search {
+    width: min(18rem, 50vw);
+  }
+
+  .ol-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-2);
+    margin-inline-start: auto;
+  }
+
+  .ol-content {
+    container: ol-content / inline-size;
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: var(--ol-size-content);
+    margin-inline: auto;
+    padding: var(--ol-space-10) var(--ol-space-8) var(--ol-space-12);
+  }
+
+  .ol-content:focus {
+    outline: none;
+  }
+
+  /*
+   * Motion between pages. ui.css opts same-origin navigations into cross-document view transitions
+   * (where supported, and unless the user prefers reduced motion): the sidebar holds still, and the
+   * content panel cross-fades, so moving between pages feels like one app rather than a reload. The
+   * page's content then rises into place, its first blocks one after another.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .ol-sidebar {
+      view-transition-name: ol-sidebar;
+    }
+
+    .ol-main {
+      view-transition-name: ol-main;
+    }
+
+    .ol-content > :not(.ol-toaster),
+    .ol-auth-card {
+      /* Only before and during the animation: a lasting transform would hold fixed descendants. */
+      animation: ol-rise var(--ol-duration-slower) var(--ol-ease-enter) backwards;
+    }
+
+    .ol-content > :nth-child(2) {
+      animation-delay: 40ms;
+    }
+
+    .ol-content > :nth-child(3) {
+      animation-delay: 80ms;
+    }
+
+    .ol-content > :nth-child(n + 4) {
+      animation-delay: 120ms;
+    }
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: var(--ol-duration-slow);
+    animation-timing-function: var(--ol-ease-standard);
+  }
+
+  @keyframes ol-rise {
+    from {
+      opacity: 0;
+      translate: 0 0.5rem;
+    }
+  }
+
+  .ol-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ol-space-2) var(--ol-space-4);
+    padding: var(--ol-space-4) var(--ol-space-8);
+    border-block-start: 1px solid var(--ol-color-border);
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-xs);
+  }
+
+  .ol-footer a {
+    color: var(--ol-color-fg-muted);
+  }
+
+  /* Page structure */
+
+  .ol-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--ol-space-4);
+    margin-block-end: var(--ol-space-8);
+  }
+
+  .ol-page-heading {
+    flex: 1 1 24rem;
+    min-width: 0;
+  }
+
+  .ol-eyebrow {
+    margin-block-end: var(--ol-space-1);
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-sm);
+    line-height: var(--ol-line-height-sm);
+  }
+
+  /* A title with badges after it, such as a status or a kind. */
+  .ol-title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ol-space-2) var(--ol-space-3);
+  }
+
+  .ol-page-title {
+    font-size: var(--ol-font-size-2xl);
+    font-weight: var(--ol-font-weight-semibold);
+    letter-spacing: var(--ol-tracking-tight);
+    line-height: var(--ol-line-height-2xl);
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  .ol-page-description {
+    max-width: 72ch;
+    margin-block-start: var(--ol-space-1-5);
+    color: var(--ol-color-fg-muted);
+    text-wrap: pretty;
+  }
+
+  /* Facts about the object a page shows: <ul class="ol-page-meta"><li>…icon… codex</li>…</ul> */
+  .ol-page-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ol-space-1) var(--ol-space-5);
+    margin-block-start: var(--ol-space-2);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-sm);
+  }
+
+  .ol-page-meta li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ol-space-1-5);
+  }
+
+  /* Messages between the page header and the content. */
+  .ol-notices {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-2);
+    margin-block-end: var(--ol-space-6);
+  }
+
+  .ol-page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ol-space-2);
+  }
+
+  .ol-section + .ol-section {
+    margin-block-start: var(--ol-space-10);
+  }
+
+  /* Sections side by side in a grid start level with each other. */
+  .ol-grid > .ol-section + .ol-section {
+    margin-block-start: 0;
+  }
+
+  .ol-section-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--ol-space-1) var(--ol-space-3);
+    margin-block-end: var(--ol-space-4);
+  }
+
+  .ol-section-title {
+    font-size: var(--ol-font-size-lg);
+    font-weight: var(--ol-font-weight-semibold);
+    line-height: var(--ol-line-height-lg);
+  }
+
+  .ol-section-description {
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-sm);
+  }
+
+  .ol-section-actions {
+    display: flex;
+    gap: var(--ol-space-2);
+    margin-inline-start: auto;
+  }
+
+  /* Grids collapse by the width of their container. */
+
+  .ol-grid {
+    display: grid;
+    align-items: start;
+    gap: var(--ol-space-6);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @container (min-width: 40rem) {
+    .ol-grid-2,
+    .ol-grid-3 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ol-grid-sidebar {
+      grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
+    }
+  }
+
+  @container (min-width: 60rem) {
+    .ol-grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .ol-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-stack-gap, var(--ol-space-3));
+  }
+
+  /* Buttons, badges and chips keep their own width inside a stack. */
+  .ol-stack > :is(.ol-btn, .ol-badge, .ol-chip):not(.ol-btn-block) {
+    align-self: flex-start;
+  }
+
+  .ol-cluster {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ol-cluster-gap, var(--ol-space-2));
+  }
+
+  .ol-split {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ol-space-3);
+  }
+
+  /*
+   * Sign-in. A brand panel beside the form: the brand's mark drawn large as an origin point, with
+   * rings spreading from it at widening intervals and fading out, then the product's one-line
+   * description. On its own (error pages), .ol-auth centres the card.
+   *
+   *   <main class="ol-auth">
+   *     <aside class="ol-auth-aside">
+   *       <div class="ol-auth-rings" aria-hidden="true"></div>
+   *       <a class="ol-auth-brand" href="…">…mark… Origin</a>
+   *       <p class="ol-auth-statement">Local-first, cross-agent memory for AI coding agents.</p>
+   *       <p class="ol-auth-meta">memory.example.com</p>
+   *     </aside>
+   *     <div class="ol-auth-body">
+   *       <div class="ol-auth-card"><h1 class="ol-auth-title">Sign in</h1> …form…</div>
+   *       <div class="ol-auth-foot">…</div>
+   *     </div>
+   *   </main>
+   */
+
+  .ol-auth {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 100dvh;
+    background: var(--ol-color-surface);
+  }
+
+  .ol-auth:has(> .ol-auth-aside) {
+    grid-template-columns: minmax(26rem, 46%) minmax(0, 1fr);
+  }
+
+  .ol-auth-aside {
+    /* Where the mark sits, and the length of one unit of the drawing (all radii scale with it). */
+    --ol-origin-x: 66%;
+    --ol-origin-y: 38%;
+    --ol-ring: 1px;
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-4);
+    min-height: 0;
+    padding: var(--ol-space-8) var(--ol-space-10);
+    overflow: hidden;
+    background: var(--ol-color-brand-panel);
+    color: var(--ol-color-on-brand-panel);
+  }
+
+  /* The rings are drawn the same way behind a service page's hero (site.css), which sets the same
+     variables. */
+  :is(.ol-auth-rings, .ol-hero-rings),
+  :is(.ol-auth-rings, .ol-hero-rings)::before,
+  :is(.ol-auth-rings, .ol-hero-rings)::after {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+
+  /* A soft light around the origin, under everything. */
+  :is(.ol-auth-rings, .ol-hero-rings) {
+    overflow: clip;
+    background: radial-gradient(
+      circle at var(--ol-origin-x) var(--ol-origin-y),
+      color-mix(in srgb, var(--ol-color-mark-inverse) 22%, transparent),
+      transparent calc(384 * var(--ol-ring))
+    );
+  }
+
+  /* The ripples: rings at widening intervals (×1.42), fading with distance. */
+  :is(.ol-auth-rings, .ol-hero-rings)::before {
+    --ol-ripple: color-mix(in srgb, var(--ol-color-mark-inverse) 42%, transparent);
+    content: "";
+    background: radial-gradient(
+      circle at var(--ol-origin-x) var(--ol-origin-y),
+      transparent 0 calc(99 * var(--ol-ring)),
+      var(--ol-ripple) calc(99 * var(--ol-ring)) calc(99 * var(--ol-ring) + 2px),
+      transparent calc(99 * var(--ol-ring) + 2px) calc(141 * var(--ol-ring)),
+      var(--ol-ripple) calc(141 * var(--ol-ring)) calc(141 * var(--ol-ring) + 1.5px),
+      transparent calc(141 * var(--ol-ring) + 1.5px) calc(201 * var(--ol-ring)),
+      var(--ol-ripple) calc(201 * var(--ol-ring)) calc(201 * var(--ol-ring) + 1.5px),
+      transparent calc(201 * var(--ol-ring) + 1.5px) calc(286 * var(--ol-ring)),
+      var(--ol-ripple) calc(286 * var(--ol-ring)) calc(286 * var(--ol-ring) + 1.5px),
+      transparent calc(286 * var(--ol-ring) + 1.5px) calc(406 * var(--ol-ring)),
+      var(--ol-ripple) calc(406 * var(--ol-ring)) calc(406 * var(--ol-ring) + 1.5px),
+      transparent calc(406 * var(--ol-ring) + 1.5px) calc(577 * var(--ol-ring)),
+      var(--ol-ripple) calc(577 * var(--ol-ring)) calc(577 * var(--ol-ring) + 1.5px),
+      transparent calc(577 * var(--ol-ring) + 1.5px) calc(820 * var(--ol-ring)),
+      var(--ol-ripple) calc(820 * var(--ol-ring)) calc(820 * var(--ol-ring) + 1.5px),
+      transparent calc(820 * var(--ol-ring) + 1.5px)
+    );
+    -webkit-mask-image: radial-gradient(
+      circle at var(--ol-origin-x) var(--ol-origin-y),
+      #000 0 calc(224 * var(--ol-ring)),
+      transparent calc(736 * var(--ol-ring))
+    );
+    mask-image: radial-gradient(
+      circle at var(--ol-origin-x) var(--ol-origin-y),
+      #000 0 calc(224 * var(--ol-ring)),
+      transparent calc(736 * var(--ol-ring))
+    );
+    animation: ol-ripple-in 1.6s var(--ol-ease-enter) both;
+    transform-origin: var(--ol-origin-x) var(--ol-origin-y);
+  }
+
+  /* The mark itself at the origin: a ring and its centre, in the mark's proportions (r 17 and 6,
+     stroke 5.5 on its 48-unit grid). */
+  :is(.ol-auth-rings, .ol-hero-rings)::after {
+    content: "";
+    background:
+      radial-gradient(
+        circle at var(--ol-origin-x) var(--ol-origin-y),
+        var(--ol-color-mark-inverse) 0 calc(20 * var(--ol-ring)),
+        transparent calc(20 * var(--ol-ring) + 0.5px)
+      ),
+      radial-gradient(
+        circle at var(--ol-origin-x) var(--ol-origin-y),
+        transparent 0 calc(47 * var(--ol-ring)),
+        var(--ol-color-on-brand-panel) calc(47 * var(--ol-ring) + 0.5px) calc(65 * var(--ol-ring)),
+        transparent calc(65 * var(--ol-ring) + 0.5px)
+      );
+  }
+
+  /* The brand's own mark at the origin, in place of the drawn one: an <img class="ol-rings-mark">
+     (the mark for dark backgrounds) inside the rings. */
+  .ol-rings-mark {
+    position: absolute;
+    /* A point in the drawing, measured from the left like the drawing itself. */
+    top: var(--ol-origin-y);
+    left: var(--ol-origin-x);
+    width: calc(176 * var(--ol-ring));
+    height: calc(176 * var(--ol-ring));
+    max-width: none;
+    translate: -50% -50%;
+  }
+
+  :is(.ol-auth-rings, .ol-hero-rings):has(> .ol-rings-mark)::after {
+    content: none;
+  }
+
+  @keyframes ol-ripple-in {
+    from {
+      opacity: 0;
+      transform: scale(0.94);
+    }
+  }
+
+  .ol-auth-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    align-self: flex-start;
+    color: inherit;
+    font-size: var(--ol-font-size-lg);
+    font-weight: var(--ol-font-weight-semibold);
+    letter-spacing: var(--ol-tracking-tight);
+  }
+
+  .ol-auth-brand:hover {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .ol-auth-brand img,
+  .ol-auth-brand svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .ol-auth-brand .ol-brand-accent,
+  .ol-rings-mark .ol-brand-accent {
+    fill: var(--ol-color-mark-inverse);
+  }
+
+  .ol-auth-brand .ol-brand-accent-line,
+  .ol-rings-mark .ol-brand-accent-line {
+    stroke: var(--ol-color-mark-inverse);
+  }
+
+  .ol-auth-statement {
+    max-width: 17em;
+    margin-block-start: auto;
+    font-size: var(--ol-font-size-2xl);
+    font-weight: var(--ol-font-weight-medium);
+    letter-spacing: var(--ol-tracking-tight);
+    line-height: var(--ol-line-height-2xl);
+    text-wrap: balance;
+  }
+
+  .ol-auth-meta {
+    color: var(--ol-color-on-brand-panel-muted);
+    font-size: var(--ol-font-size-sm);
+  }
+
+  .ol-auth-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ol-space-6);
+    padding: var(--ol-space-8) var(--ol-space-6);
+  }
+
+  .ol-auth-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-5);
+    width: min(22rem, 100%);
+  }
+
+  /* A card on its own, without the brand panel, gets a frame. */
+  .ol-auth:not(:has(> .ol-auth-aside)) {
+    background: var(--ol-color-shell);
+  }
+
+  .ol-auth:not(:has(> .ol-auth-aside)) .ol-auth-card {
+    padding: var(--ol-space-8);
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-frame);
+    background: var(--ol-color-surface);
+    box-shadow: var(--ol-shadow-md);
+  }
+
+  .ol-auth-title {
+    font-size: var(--ol-font-size-2xl);
+    font-weight: var(--ol-font-weight-semibold);
+    letter-spacing: var(--ol-tracking-tight);
+    line-height: var(--ol-line-height-2xl);
+  }
+
+  .ol-auth-title + p {
+    margin-block-start: calc(var(--ol-space-4) * -1);
+    color: var(--ol-color-fg-muted);
+  }
+
+  .ol-auth-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ol-space-1) var(--ol-space-4);
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-xs);
+  }
+
+  .ol-auth-foot a {
+    color: var(--ol-color-fg-muted);
+  }
+
+  /* Page meta icons are quieter than their text. (Placed after the sign-in rules: same element, higher specificity.) */
+  .ol-page-meta li > svg {
+    color: var(--ol-color-fg-subtle);
+  }
+
+  /* Narrow screens: the panel becomes the page, the sidebar a bar with a menu, the brand panel a band. */
+
+  @media (max-width: 860px) {
+    .ol-app {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto minmax(0, 1fr);
+      height: auto;
+      min-height: 100dvh;
+      overflow: visible;
+    }
+
+    .ol-sidebar {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: var(--ol-z-sticky);
+      view-transition-name: none;
+      gap: var(--ol-space-3);
+      padding: var(--ol-space-2) var(--ol-space-3);
+      overflow: visible;
+      border-block-end: 1px solid var(--ol-color-border);
+      background: var(--ol-color-shell);
+    }
+
+    .ol-nav,
+    .ol-sidebar-foot {
+      display: none;
+    }
+
+    .ol-nav-toggle:checked ~ .ol-nav,
+    .ol-nav-toggle:checked ~ .ol-sidebar-foot {
+      display: flex;
+    }
+
+    .ol-nav-toggle:focus-visible ~ .ol-sidebar-head .ol-nav-toggle-button {
+      outline: var(--ol-focus-width) solid var(--ol-color-focus-ring);
+      outline-offset: var(--ol-focus-offset);
+    }
+
+    .ol-main {
+      margin: 0;
+      overflow: visible;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      view-transition-name: none;
+    }
+
+    .ol-topbar {
+      position: static;
+      padding-inline: var(--ol-space-4);
+    }
+
+    .ol-breadcrumb li:not(:last-child) {
+      display: none;
+    }
+
+    .ol-breadcrumb li:last-child::before {
+      content: none;
+    }
+
+    .ol-content {
+      padding: var(--ol-space-6) var(--ol-space-4) var(--ol-space-10);
+    }
+
+    .ol-footer {
+      padding: var(--ol-space-4);
+    }
+
+    .ol-auth:has(> .ol-auth-aside) {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+    }
+
+    .ol-auth-aside {
+      --ol-origin-x: 84%;
+      --ol-origin-y: 50%;
+      --ol-ring: 0.62px;
+      min-height: 9.5rem;
+      padding: var(--ol-space-5);
+    }
+
+    .ol-auth-statement {
+      max-width: 12em;
+      font-size: var(--ol-font-size-lg);
+      line-height: var(--ol-line-height-lg);
+    }
+
+    .ol-auth-meta {
+      display: none;
+    }
+
+    .ol-auth-body {
+      justify-content: flex-start;
+      padding-block-start: var(--ol-space-8);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ol-nav-item[aria-current="page"] {
+      outline: 2px solid Highlight;
+    }
+
+    .ol-main {
+      border-color: CanvasText;
+    }
+
+    .ol-auth-rings,
+    .ol-hero-rings {
+      display: none;
+    }
+  }
+
+  /*
+   * Service sites: one public page about one service, such as a mirror's usage page. A header with
+   * the brand, links to the page's sections and its tools (language, theme); a hero, the page's one
+   * bold moment, where the brand's mark sends rings across a dark panel; sections; and a footer. The
+   * header, sections and footer span the page and keep their content to one column, so a section can
+   * take a band of colour; the hero is a framed panel in that column.
+   *
+   *   <header class="ol-site-header">
+   *     <a class="ol-brand" href="/">…mark… LinkOS Mirrors</a>
+   *     <nav class="ol-site-nav" aria-label="On this page"><a href="#start">Get started</a>…</nav>
+   *     <div class="ol-site-tools">…language menu, theme switch…</div>
+   *   </header>
+   *   <main id="main">
+   *     <section class="ol-hero" aria-labelledby="hero-title">
+   *       <div class="ol-hero-rings" aria-hidden="true"></div>
+   *       <div class="ol-hero-body">
+   *         <a class="ol-status ol-status-success" href="#status"><span class="ol-dot ol-dot-live"></span>All mirrors are up</a>
+   *         <h1 class="ol-hero-title" id="hero-title">…</h1>
+   *         <p class="ol-hero-lead">…</p>
+   *         <div class="ol-hero-actions">…buttons…</div>
+   *       </div>
+   *     </section>
+   *     <section class="ol-site-section" id="start" aria-labelledby="start-title">
+   *       <div class="ol-site-section-header"><h2 class="ol-site-section-title" id="start-title">…</h2>
+   *         <p class="ol-site-section-description">…</p></div>
+   *       …
+   *     </section>
+   *   </main>
+   *   <footer class="ol-site-footer">…</footer>
+   *
+   * --ol-site-width (68rem) sets the column and --ol-site-gutter the space beside it on small screens.
+   */
+
+  .ol-site-header,
+  .ol-site-section,
+  .ol-site-footer {
+    /* The column, centred by padding so the element itself can span the page. */
+    padding-inline: max(
+      var(--ol-site-gutter, var(--ol-space-6)),
+      calc((100% - var(--ol-site-width, 68rem)) / 2)
+    );
+  }
+
+  /* Anchors land clear of the sticky header (WCAG 2.4.11), and scroll there smoothly. */
+  html:has(.ol-site-header) {
+    scroll-padding-block-start: 4.5rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html:has(.ol-site-header) {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* Header */
+
+  .ol-site-header {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--ol-z-sticky);
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-2) var(--ol-space-8);
+    min-height: 3.5rem;
+    border-block-end: 1px solid var(--ol-color-border);
+    background: color-mix(in srgb, var(--ol-color-bg) 85%, transparent);
+    -webkit-backdrop-filter: blur(10px) saturate(1.4);
+    backdrop-filter: blur(10px) saturate(1.4);
+  }
+
+  /* At the top of the page the header sits on the page; it takes its frame as the page scrolls. */
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .ol-site-header {
+        animation: ol-header-frame linear both;
+        animation-timeline: scroll();
+        animation-range: 0 4rem;
+      }
+    }
+  }
+
+  @keyframes ol-header-frame {
+    from {
+      border-block-end-color: transparent;
+      background-color: transparent;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  .ol-site-header > .ol-brand {
+    flex: none;
+  }
+
+  .ol-site-nav {
+    display: flex;
+    gap: var(--ol-space-1);
+    min-width: 0;
+  }
+
+  .ol-site-nav a {
+    padding: var(--ol-space-1-5) var(--ol-space-2-5);
+    border-radius: var(--ol-radius-control);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-sm);
+    font-weight: var(--ol-font-weight-medium);
+    line-height: var(--ol-line-height-sm);
+    white-space: nowrap;
+    transition:
+      background var(--ol-duration-fast) var(--ol-ease-standard),
+      color var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-site-nav a:hover {
+    background: var(--ol-color-fill-hover);
+    color: var(--ol-color-fg);
+    text-decoration: none;
+  }
+
+  /* The section in view, when a script marks it. */
+  .ol-site-nav a[aria-current="true"] {
+    background: var(--ol-color-fill);
+    color: var(--ol-color-fg);
+  }
+
+  .ol-site-tools {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--ol-space-2);
+    margin-inline-start: auto;
+  }
+
+  /* Hero */
+
+  .ol-hero {
+    /* Where the mark sits, and the length of one unit of the drawing, as on the sign-in page. */
+    --ol-origin-x: 78%;
+    --ol-origin-y: 50%;
+    --ol-ring: 1px;
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    min-height: 28rem;
+    margin: var(--ol-space-6)
+      max(var(--ol-site-gutter, var(--ol-space-6)), calc((100% - var(--ol-site-width, 68rem)) / 2)) 0;
+    padding: var(--ol-space-16) clamp(var(--ol-space-6), 6vw, var(--ol-space-16));
+    overflow: hidden;
+    border-radius: var(--ol-radius-frame);
+    background: var(--ol-color-brand-panel);
+    /* A faint rim, so the panel keeps its edge on a dark page. */
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ol-color-on-brand-panel) 8%, transparent);
+    color: var(--ol-color-on-brand-panel);
+  }
+
+  /* Every few seconds a ring leaves the mark and fades as it spreads: the page is alive. */
+  .ol-hero::before {
+    content: "";
+    position: absolute;
+    /* The origin is a point in the drawing, measured from the left like the drawing itself. */
+    top: var(--ol-origin-y);
+    left: var(--ol-origin-x);
+    z-index: -1;
+    width: calc(1100 * var(--ol-ring));
+    aspect-ratio: 1;
+    border: 1.5px solid color-mix(in srgb, var(--ol-color-mark-inverse) 60%, transparent);
+    border-radius: 50%;
+    opacity: 0;
+    translate: -50% -50%;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ol-hero::before {
+      animation: ol-pulse 5.6s var(--ol-ease-standard) 1.6s infinite;
+    }
+
+    .ol-hero-body {
+      animation: ol-rise var(--ol-duration-slower) var(--ol-ease-enter) backwards;
+    }
+  }
+
+  @keyframes ol-pulse {
+    0% {
+      opacity: 0;
+      transform: scale(0.05);
+    }
+
+    10% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(1);
+    }
+  }
+
+  .ol-hero-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ol-space-5);
+    max-width: 34rem;
+  }
+
+  .ol-hero-title {
+    font-size: clamp(var(--ol-font-size-3xl), 4.6vw, var(--ol-font-size-4xl));
+    font-weight: var(--ol-font-weight-semibold);
+    letter-spacing: calc(var(--ol-tracking-tight) * 2);
+    line-height: 1.12;
+    text-wrap: balance;
+  }
+
+  .ol-hero-lead {
+    max-width: 32em;
+    color: var(--ol-color-on-brand-panel-muted);
+    font-size: var(--ol-font-size-xl);
+    line-height: var(--ol-line-height-xl);
+    text-wrap: pretty;
+  }
+
+  .ol-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ol-space-3);
+    margin-block-start: var(--ol-space-2);
+  }
+
+  .ol-hero-meta {
+    color: var(--ol-color-on-brand-panel-muted);
+    font-size: var(--ol-font-size-sm);
+  }
+
+  /* On the dark panel, links and focus take the panel's own colours; buttons and status pills too
+     (components/context.css). */
+  .ol-hero a:not(.ol-btn, .ol-status) {
+    color: var(--ol-color-on-brand-panel);
+    text-decoration: underline;
+  }
+
+  .ol-hero :focus-visible {
+    outline-color: var(--ol-color-on-brand-panel);
+  }
+
+  /* Sections */
+
+  .ol-site-section {
+    /* Grids inside respond to the column's width, as they do in an app's content. */
+    container-type: inline-size;
+    padding-block: var(--ol-space-16) 0;
+  }
+
+  /* A band of colour behind a section, to set it apart. */
+  .ol-site-section-band {
+    margin-block-start: var(--ol-space-16);
+    padding-block: var(--ol-space-16);
+    border-block: 1px solid var(--ol-color-border);
+    background: var(--ol-color-bg-subtle);
+  }
+
+  .ol-site-section-band + .ol-site-section {
+    padding-block-start: var(--ol-space-16);
+  }
+
+  .ol-site-section-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-2);
+    max-width: 44rem;
+    margin-block-end: var(--ol-space-8);
+  }
+
+  .ol-site-section-title {
+    font-size: var(--ol-font-size-2xl);
+    font-weight: var(--ol-font-weight-semibold);
+    letter-spacing: var(--ol-tracking-tight);
+    line-height: var(--ol-line-height-2xl);
+    text-wrap: balance;
+  }
+
+  .ol-site-section-description {
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-lg);
+    line-height: var(--ol-line-height-lg);
+    text-wrap: pretty;
+  }
+
+  /* Footer */
+
+  .ol-site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--ol-space-4) var(--ol-space-8);
+    margin-block-start: var(--ol-space-16);
+    padding-block: var(--ol-space-8) var(--ol-space-10);
+    border-block-start: 1px solid var(--ol-color-border);
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-sm);
+    line-height: var(--ol-line-height-sm);
+  }
+
+  .ol-site-footer > * {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-2);
+  }
+
+  .ol-site-footer .ol-brand {
+    font-size: var(--ol-font-size-md);
+  }
+
+  .ol-site-footer a:not(.ol-brand) {
+    color: var(--ol-color-fg-muted);
+  }
+
+  .ol-site-footer-links {
+    flex-flow: row wrap;
+    gap: var(--ol-space-2) var(--ol-space-5);
+  }
+
+  .ol-site-footer-note {
+    max-width: 56ch;
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+  }
+
+  /* Narrow screens: the section links scroll on a row of their own, and the drawing moves to the
+     corner, behind the words. */
+
+  @media (max-width: 860px) {
+    html:has(.ol-site-header) {
+      scroll-padding-block-start: 6rem;
+    }
+
+    /* Two rows: the brand and the first tool (the language), then the section links, scrolling
+       sideways, with the other tools (the theme) at their end. */
+    .ol-site-header {
+      --ol-site-gutter: var(--ol-space-4);
+      flex-wrap: wrap;
+      gap: var(--ol-space-2) var(--ol-space-3);
+      padding-block: var(--ol-space-2);
+    }
+
+    /* The line break between the rows. */
+    .ol-site-header::after {
+      content: "";
+      order: 1;
+      flex-basis: 100%;
+      margin-block-start: calc(var(--ol-space-2) * -1);
+    }
+
+    .ol-site-tools {
+      display: contents;
+    }
+
+    .ol-site-tools > :first-child {
+      margin-inline-start: auto;
+    }
+
+    .ol-site-tools > :not(:first-child) {
+      order: 3;
+    }
+
+    .ol-site-nav {
+      order: 2;
+      flex: 1 1 0;
+      margin-inline-start: calc(var(--ol-space-4) * -1);
+      padding-inline: var(--ol-space-4);
+      overflow-x: auto;
+      scrollbar-width: none;
+      /* Links that run on fade out at the end: a hint that the row scrolls. */
+      -webkit-mask-image: linear-gradient(to left, transparent, #000 var(--ol-space-4));
+      mask-image: linear-gradient(to left, transparent, #000 var(--ol-space-4));
+    }
+
+    .ol-site-nav:dir(rtl) {
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--ol-space-4));
+      mask-image: linear-gradient(to right, transparent, #000 var(--ol-space-4));
+    }
+
+    .ol-site-section,
+    .ol-site-footer,
+    .ol-hero {
+      --ol-site-gutter: var(--ol-space-4);
+    }
+
+    .ol-hero {
+      --ol-origin-x: 88%;
+      --ol-origin-y: 14%;
+      --ol-ring: 0.62px;
+      align-items: flex-end;
+      min-height: 0;
+      margin-block-start: var(--ol-space-4);
+      padding: 9rem var(--ol-space-5) var(--ol-space-6);
+    }
+
+    .ol-hero-lead {
+      font-size: var(--ol-font-size-lg);
+      line-height: var(--ol-line-height-lg);
+    }
+
+    .ol-site-section {
+      padding-block-start: var(--ol-space-12);
+    }
+
+    .ol-site-section-band {
+      margin-block-start: var(--ol-space-12);
+      padding-block: var(--ol-space-12);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ol-hero {
+      border: 1px solid CanvasText;
+    }
+
+    .ol-hero::before {
+      display: none;
+    }
+
+    .ol-site-nav a[aria-current="true"] {
+      outline: 2px solid Highlight;
+    }
+  }
+}
+
+@layer ol.components {
+  /* Icons: <svg class="ol-icon" aria-hidden="true"><use href="icons.svg#search"/></svg> */
+
+  .ol-icon {
+    display: inline-block;
+    flex: none;
+    width: var(--ol-size-icon-md);
+    height: var(--ol-size-icon-md);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vertical-align: -0.17em;
+  }
+
+  .ol-icon-sm {
+    width: var(--ol-size-icon-sm);
+    height: var(--ol-size-icon-sm);
+  }
+
+  .ol-icon-lg {
+    width: var(--ol-size-icon-lg);
+    height: var(--ol-size-icon-lg);
+  }
+
+  /* A spinning ring for pending work. Pair it with visible or screen-reader text. */
+  .ol-spinner {
+    display: inline-block;
+    flex: none;
+    width: var(--ol-size-icon-md);
+    height: var(--ol-size-icon-md);
+    border: 2px solid currentColor;
+    border-inline-end-color: transparent;
+    border-radius: 50%;
+    animation: ol-spin 0.75s linear infinite;
+    vertical-align: -0.17em;
+  }
+
+  @keyframes ol-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /*
+   * Buttons: .ol-btn plus a variant (-primary, -secondary, -soft, -ghost, -danger, -danger-soft,
+   * -link) and optionally a size (-xs, -sm, -lg), -icon for icon-only buttons (give them an
+   * aria-label), and -block. Works on <button> and <a>. aria-busy="true" shows a spinner and keeps
+   * the width; disabled and aria-disabled="true" dim the button.
+   */
+
+  .ol-btn {
+    --ol-btn-height: var(--ol-size-control-md);
+    --ol-btn-padding: var(--ol-space-3);
+    --ol-btn-bg: transparent;
+    --ol-btn-bg-hover: var(--ol-color-fill-hover);
+    --ol-btn-bg-active: var(--ol-color-fill-active);
+    --ol-btn-fg: var(--ol-color-fg);
+    --ol-btn-border: transparent;
+    --ol-btn-shadow: none;
+
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ol-space-1-5);
+    min-width: var(--ol-size-target-min);
+    height: var(--ol-btn-height);
+    padding-inline: var(--ol-btn-padding);
+    border: 1px solid var(--ol-btn-border);
+    border-radius: var(--ol-radius-control);
+    background: var(--ol-btn-bg);
+    box-shadow: var(--ol-btn-shadow);
+    color: var(--ol-btn-fg);
+    font-size: var(--ol-font-size-sm);
+    font-weight: var(--ol-font-weight-medium);
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    transition:
+      background var(--ol-duration-fast) var(--ol-ease-standard),
+      border-color var(--ol-duration-fast) var(--ol-ease-standard),
+      color var(--ol-duration-fast) var(--ol-ease-standard),
+      box-shadow var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-btn:hover {
+    background: var(--ol-btn-bg-hover);
+    color: var(--ol-btn-fg);
+    text-decoration: none;
+  }
+
+  .ol-btn:active {
+    background: var(--ol-btn-bg-active);
+    transform: translateY(0.5px);
+  }
+
+  .ol-btn:disabled,
+  .ol-btn[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .ol-btn[aria-busy="true"] {
+    color: transparent;
+    pointer-events: none;
+  }
+
+  .ol-btn[aria-busy="true"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: var(--ol-size-icon-md);
+    height: var(--ol-size-icon-md);
+    margin: auto;
+    border: 2px solid var(--ol-btn-fg);
+    border-inline-end-color: transparent;
+    border-radius: 50%;
+    animation: ol-spin 0.75s linear infinite;
+  }
+
+  /* Solid buttons have a light top edge and a slightly darker rim, so they read as pressable. */
+  .ol-btn-primary {
+    --ol-btn-bg: var(--ol-color-accent-solid);
+    --ol-btn-bg-hover: var(--ol-color-accent-solid-hover);
+    --ol-btn-bg-active: var(--ol-color-accent-solid);
+    --ol-btn-fg: var(--ol-color-accent-on-solid);
+    --ol-btn-border: color-mix(in oklab, var(--ol-color-accent-solid) 82%, #000);
+    --ol-btn-shadow: inset 0 1px 0 var(--ol-color-highlight), var(--ol-shadow-xs);
+  }
+
+  .ol-btn-secondary {
+    --ol-btn-bg: var(--ol-color-surface);
+    --ol-btn-border: var(--ol-color-border-strong);
+    --ol-btn-shadow: var(--ol-shadow-xs);
+  }
+
+  .ol-btn-soft {
+    --ol-btn-bg: var(--ol-color-accent-bg);
+    --ol-btn-bg-hover: var(--ol-color-accent-bg-hover);
+    --ol-btn-bg-active: var(--ol-color-accent-bg-active);
+    --ol-btn-fg: var(--ol-color-accent-text);
+  }
+
+  .ol-btn-ghost {
+    --ol-btn-fg: var(--ol-color-fg-muted);
+  }
+
+  .ol-btn-ghost:hover {
+    --ol-btn-fg: var(--ol-color-fg);
+  }
+
+  .ol-btn-danger {
+    --ol-btn-bg: var(--ol-color-danger-solid);
+    --ol-btn-bg-hover: var(--ol-color-danger-solid-hover);
+    --ol-btn-bg-active: var(--ol-color-danger-solid-hover);
+    --ol-btn-fg: var(--ol-color-danger-on-solid);
+    --ol-btn-border: color-mix(in oklab, var(--ol-color-danger-solid) 82%, #000);
+    --ol-btn-shadow: inset 0 1px 0 var(--ol-color-highlight), var(--ol-shadow-xs);
+  }
+
+  .ol-btn-danger-soft {
+    --ol-btn-bg: transparent;
+    --ol-btn-bg-hover: var(--ol-color-danger-bg);
+    --ol-btn-bg-active: var(--ol-color-danger-bg-hover);
+    --ol-btn-fg: var(--ol-color-danger-text);
+  }
+
+  .ol-btn-link {
+    --ol-btn-bg-hover: transparent;
+    --ol-btn-bg-active: transparent;
+    --ol-btn-fg: var(--ol-color-accent-text);
+    --ol-btn-height: auto;
+    --ol-btn-padding: 0;
+    min-width: 0;
+  }
+
+  .ol-btn-link:hover {
+    text-decoration: underline;
+  }
+
+  .ol-btn-xs {
+    --ol-btn-height: var(--ol-size-control-xs);
+    --ol-btn-padding: var(--ol-space-2);
+    gap: var(--ol-space-1);
+    font-size: var(--ol-font-size-xs);
+  }
+
+  .ol-btn-sm {
+    --ol-btn-height: var(--ol-size-control-sm);
+    --ol-btn-padding: var(--ol-space-2-5);
+    gap: var(--ol-space-1);
+    font-size: var(--ol-font-size-xs);
+  }
+
+  .ol-btn-lg {
+    --ol-btn-height: var(--ol-size-control-lg);
+    --ol-btn-padding: var(--ol-space-4);
+    font-size: var(--ol-font-size-md);
+  }
+
+  .ol-btn-icon {
+    width: var(--ol-btn-height);
+    padding: 0;
+  }
+
+  .ol-btn-block {
+    width: 100%;
+  }
+
+  /* A row of buttons that read as one control. */
+  .ol-btn-group {
+    display: inline-flex;
+  }
+
+  .ol-btn-group > .ol-btn:not(:first-child) {
+    margin-inline-start: -1px;
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+  }
+
+  .ol-btn-group > .ol-btn:not(:last-child) {
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+  }
+
+  .ol-btn-group > .ol-btn:focus-visible {
+    z-index: 1;
+  }
+
+  /*
+   * Forms. A field is a label, a control, and optional hint and error text:
+   *
+   *   <div class="ol-field">
+   *     <label class="ol-label" for="name">Name <span class="ol-required">*</span></label>
+   *     <input class="ol-input" id="name" aria-describedby="name-hint" required>
+   *     <p class="ol-hint" id="name-hint">…</p>
+   *   </div>
+   *
+   * Mark invalid controls with aria-invalid="true" and point aria-describedby at .ol-field-error.
+   * Control borders reach 3:1 against the page so the field is visible without its label (WCAG 1.4.11).
+   */
+
+  .ol-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-5);
+    max-width: 36rem;
+  }
+
+  .ol-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-1-5);
+    min-width: 0;
+  }
+
+  .ol-label {
+    color: var(--ol-color-fg);
+    font-size: var(--ol-font-size-sm);
+    font-weight: var(--ol-font-weight-medium);
+    line-height: var(--ol-line-height-sm);
+  }
+
+  .ol-required {
+    color: var(--ol-color-danger-text);
+  }
+
+  .ol-hint {
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+  }
+
+  .ol-field-error {
+    display: flex;
+    gap: var(--ol-space-1);
+    color: var(--ol-color-danger-text);
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+  }
+
+  .ol-input,
+  .ol-select,
+  .ol-textarea {
+    --ol-control-height: var(--ol-size-control-md);
+    width: 100%;
+    min-height: var(--ol-control-height);
+    padding-inline: var(--ol-space-2-5);
+    border: 1px solid var(--ol-color-border-input);
+    border-radius: var(--ol-radius-control);
+    background: var(--ol-color-surface);
+    box-shadow: var(--ol-shadow-xs);
+    color: var(--ol-color-fg);
+    font-size: var(--ol-font-size-md);
+    line-height: var(--ol-line-height-md);
+    transition:
+      border-color var(--ol-duration-fast) var(--ol-ease-standard),
+      box-shadow var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-input::placeholder,
+  .ol-textarea::placeholder {
+    color: var(--ol-color-fg-subtle);
+    opacity: 1;
+  }
+
+  .ol-input:hover,
+  .ol-select:hover,
+  .ol-textarea:hover {
+    border-color: var(--ol-color-border-input-hover);
+  }
+
+  /* Focus: a 2px ring on the edge (WCAG 2.4.13) with a soft halo around it. */
+  .ol-input:focus-visible,
+  .ol-select:focus-visible,
+  .ol-textarea:focus-visible {
+    border-color: var(--ol-color-focus-ring);
+    outline: var(--ol-focus-width) solid var(--ol-color-focus-ring);
+    outline-offset: -1px;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ol-color-focus-ring) 18%, transparent);
+  }
+
+  .ol-input[aria-invalid="true"],
+  .ol-select[aria-invalid="true"],
+  .ol-textarea[aria-invalid="true"] {
+    border-color: var(--ol-color-danger-solid);
+  }
+
+  .ol-input[aria-invalid="true"]:focus-visible,
+  .ol-select[aria-invalid="true"]:focus-visible,
+  .ol-textarea[aria-invalid="true"]:focus-visible {
+    outline-color: var(--ol-color-danger-solid);
+  }
+
+  .ol-input:disabled,
+  .ol-select:disabled,
+  .ol-textarea:disabled {
+    background: var(--ol-color-fill);
+    color: var(--ol-color-fg-disabled);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .ol-input:read-only:not(:disabled),
+  .ol-textarea:read-only:not(:disabled) {
+    background: var(--ol-color-bg-subtle);
+  }
+
+  .ol-input-sm,
+  .ol-select.ol-input-sm {
+    --ol-control-height: var(--ol-size-control-sm);
+    font-size: var(--ol-font-size-sm);
+  }
+
+  .ol-input-lg,
+  .ol-select.ol-input-lg {
+    --ol-control-height: var(--ol-size-control-lg);
+  }
+
+  .ol-input-mono {
+    font-family: var(--ol-font-family-mono);
+    font-size: var(--ol-font-size-sm);
+  }
+
+  .ol-textarea {
+    min-height: 5.5rem;
+    padding-block: var(--ol-space-2);
+    resize: vertical;
+    field-sizing: content;
+  }
+
+  .ol-select {
+    padding-inline-end: var(--ol-space-8);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b8d98' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right var(--ol-space-2) center;
+    background-repeat: no-repeat;
+    background-size: 1rem;
+    cursor: pointer;
+  }
+
+  /* A control with text or a button attached: <div class="ol-input-group"><span class="ol-addon">https://</span><input class="ol-input">…</div> */
+  .ol-input-group {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+  }
+
+  .ol-input-group > .ol-input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ol-input-group > :not(:first-child) {
+    margin-inline-start: -1px;
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+  }
+
+  .ol-input-group > :not(:last-child) {
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+  }
+
+  .ol-input-group > :focus-visible {
+    z-index: 1;
+  }
+
+  .ol-addon {
+    display: inline-flex;
+    align-items: center;
+    padding-inline: var(--ol-space-2-5);
+    border: 1px solid var(--ol-color-border-input);
+    border-radius: var(--ol-radius-control);
+    background: var(--ol-color-bg-subtle);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-sm);
+    white-space: nowrap;
+  }
+
+  /* A search box with a leading icon: <div class="ol-search"><svg class="ol-icon">…</svg><input class="ol-input" type="search"></div> */
+  .ol-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .ol-search > .ol-icon {
+    position: absolute;
+    inset-inline-start: var(--ol-space-2-5);
+    color: var(--ol-color-fg-subtle);
+    pointer-events: none;
+  }
+
+  .ol-search > .ol-input {
+    padding-inline-start: var(--ol-space-8);
+  }
+
+  /* Checkboxes, radios and switches: native inputs with a custom face, plus a label around them. */
+
+  .ol-check {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: var(--ol-space-2);
+    min-height: var(--ol-size-target-min);
+    padding-block: 0.125rem;
+    color: var(--ol-color-fg);
+    font-size: var(--ol-font-size-sm);
+    line-height: var(--ol-line-height-sm);
+    cursor: pointer;
+  }
+
+  .ol-check:has(:disabled) {
+    color: var(--ol-color-fg-disabled);
+    cursor: not-allowed;
+  }
+
+  .ol-checkbox,
+  .ol-radio,
+  .ol-switch {
+    flex: none;
+    margin: 0.125rem 0 0;
+    border: 1px solid var(--ol-color-border-input);
+    background-color: var(--ol-color-surface);
+    background-position: center;
+    background-repeat: no-repeat;
+    appearance: none;
+    cursor: inherit;
+    transition:
+      background-color var(--ol-duration-fast) var(--ol-ease-standard),
+      border-color var(--ol-duration-fast) var(--ol-ease-standard),
+      background-position var(--ol-duration-normal) var(--ol-ease-standard);
+  }
+
+  .ol-checkbox {
+    width: 1rem;
+    height: 1rem;
+    border-radius: var(--ol-radius-xs);
+    background-size: 0.75rem;
+  }
+
+  .ol-checkbox:checked {
+    border-color: var(--ol-color-accent-solid);
+    background-color: var(--ol-color-accent-solid);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+  }
+
+  .ol-checkbox:indeterminate {
+    border-color: var(--ol-color-accent-solid);
+    background-color: var(--ol-color-accent-solid);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3C/svg%3E");
+  }
+
+  .ol-radio {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+  }
+
+  .ol-radio:checked {
+    border: 5px solid var(--ol-color-accent-solid);
+    background-color: var(--ol-color-accent-on-solid);
+  }
+
+  /* A switch is a checkbox with role="switch": <input type="checkbox" role="switch" class="ol-switch"> */
+  .ol-switch {
+    width: 2rem;
+    height: 1.125rem;
+    border-color: transparent;
+    border-radius: var(--ol-radius-full);
+    background-color: var(--ol-color-border-input);
+    background-image: radial-gradient(circle, #fff 0 0.4375rem, transparent 0.5rem);
+    background-position: left 0.0625rem center;
+    background-size: 1rem 1rem;
+  }
+
+  .ol-switch:checked {
+    background-color: var(--ol-color-accent-solid);
+    background-position: right 0.0625rem center;
+  }
+
+  .ol-checkbox:hover:not(:checked, :indeterminate, :disabled),
+  .ol-radio:hover:not(:checked, :disabled) {
+    border-color: var(--ol-color-border-input-hover);
+  }
+
+  .ol-checkbox:disabled,
+  .ol-radio:disabled,
+  .ol-switch:disabled {
+    opacity: 0.5;
+  }
+
+  .ol-checkbox[aria-invalid="true"],
+  .ol-radio[aria-invalid="true"] {
+    border-color: var(--ol-color-danger-solid);
+  }
+
+  .ol-fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-2);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .ol-fieldset > legend {
+    margin-block-end: var(--ol-space-1);
+    padding: 0;
+    font-size: var(--ol-font-size-sm);
+    font-weight: var(--ol-font-weight-medium);
+  }
+
+  /* A row of filters or controls above a table. Fields keep their natural width; .ol-grow fills. */
+  .ol-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--ol-space-3);
+    margin-block-end: var(--ol-space-4);
+  }
+
+  .ol-toolbar .ol-field {
+    flex: 0 1 auto;
+  }
+
+  .ol-toolbar .ol-grow {
+    flex: 1 1 16rem;
+  }
+
+  /* A checkbox in a toolbar sits level with the controls beside it. */
+  .ol-toolbar .ol-check {
+    align-items: center;
+    min-height: var(--ol-size-control-md);
+  }
+
+  /* Results below a toolbar. */
+  .ol-toolbar + .ol-section {
+    margin-block-start: var(--ol-space-8);
+  }
+
+  .ol-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ol-space-2);
+    padding-block-start: var(--ol-space-1);
+  }
+
+  /*
+   * Form sections: a long form in parts, each with its name and what it is for beside its fields
+   * (above them in a narrow column). Sections are divided by a line.
+   *
+   *   <section class="ol-form-section" aria-labelledby="links-title">
+   *     <div class="ol-form-section-header"><h2 class="ol-form-section-title" id="links-title">Links</h2>
+   *       <p class="ol-form-section-description">Shown in the footer of the usage page.</p></div>
+   *     <div class="ol-form-section-body">…fields, or a panel…</div>
+   *   </section>
+   */
+  .ol-form-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--ol-space-4) var(--ol-space-10);
+  }
+
+  .ol-form-section + .ol-form-section {
+    margin-block-start: var(--ol-space-8);
+    padding-block-start: var(--ol-space-8);
+    border-block-start: 1px solid var(--ol-color-border);
+  }
+
+  @container (min-width: 48rem) {
+    .ol-form-section {
+      grid-template-columns: minmax(12rem, 17rem) minmax(0, 1fr);
+    }
+  }
+
+  .ol-form-section-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-1);
+  }
+
+  .ol-form-section-title {
+    font-size: var(--ol-font-size-md);
+    font-weight: var(--ol-font-weight-semibold);
+    line-height: var(--ol-line-height-md);
+  }
+
+  .ol-form-section-description {
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-sm);
+    line-height: var(--ol-line-height-sm);
+    text-wrap: pretty;
+  }
+
+  .ol-form-section-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-5);
+    min-width: 0;
+    max-width: 40rem;
+  }
+
+  @media (forced-colors: active) {
+    .ol-checkbox,
+    .ol-radio,
+    .ol-switch {
+      appearance: auto;
+    }
+
+    .ol-select {
+      appearance: auto;
+      background-image: none;
+    }
+  }
+
+  /*
+   * Data display: tables, stats, description lists, compact lists, and feeds.
+   */
+
+  /* Tables: wrap in .ol-table-wrap for the frame and horizontal scrolling. Mark sortable column
+     headings with aria-sort and selected rows with aria-selected="true". */
+
+  .ol-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-container);
+    background: var(--ol-color-surface);
+  }
+
+  .ol-table {
+    --ol-cell-padding-block: var(--ol-space-2-5);
+    --ol-cell-padding-inline: var(--ol-space-3-5);
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: var(--ol-font-size-sm);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--ol-line-height-sm);
+  }
+
+  .ol-table-compact {
+    --ol-cell-padding-block: var(--ol-space-1-5);
+  }
+
+  .ol-table-relaxed {
+    --ol-cell-padding-block: var(--ol-space-3-5);
+  }
+
+  .ol-table th,
+  .ol-table td {
+    padding: var(--ol-cell-padding-block) var(--ol-cell-padding-inline);
+    border-block-end: 1px solid var(--ol-color-border);
+    text-align: start;
+  }
+
+  .ol-table th {
+    padding-block: var(--ol-space-2);
+    background: var(--ol-color-bg-subtle);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-xs);
+    font-weight: var(--ol-font-weight-medium);
+    line-height: var(--ol-line-height-xs);
+    white-space: nowrap;
+  }
+
+  .ol-table td {
+    vertical-align: middle;
+  }
+
+  /* Only the last body's last row drops its line, so several bodies (groups) stay separated. */
+  .ol-table tbody:last-of-type > tr:last-child > * {
+    border-block-end: 0;
+  }
+
+  .ol-table tbody tr {
+    transition: background var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-table tbody tr:hover {
+    background: var(--ol-color-fill-subtle);
+  }
+
+  .ol-table tbody tr[aria-selected="true"] {
+    background: var(--ol-color-accent-bg);
+  }
+
+  /* A row that heads a group of rows, such as a day, usually first in its <tbody>:
+     <tr class="ol-table-group"><th colspan="4" scope="rowgroup">Today</th></tr> */
+  .ol-table :where(.ol-table-group) > th {
+    padding-block: var(--ol-space-1-5);
+    color: var(--ol-color-fg);
+    font-weight: var(--ol-font-weight-semibold);
+  }
+
+  .ol-table tbody tr.ol-table-group:hover {
+    background: none;
+  }
+
+  .ol-table-sticky thead th {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 1;
+  }
+
+  .ol-table th[aria-sort] a,
+  .ol-table th[aria-sort] button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ol-space-1);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .ol-table th[aria-sort] :is(a, button)::after {
+    content: "↕";
+    color: var(--ol-color-fg-subtle);
+  }
+
+  .ol-table th[aria-sort="ascending"] :is(a, button)::after {
+    content: "↑";
+    color: var(--ol-color-fg);
+  }
+
+  .ol-table th[aria-sort="descending"] :is(a, button)::after {
+    content: "↓";
+    color: var(--ol-color-fg);
+  }
+
+  .ol-table .ol-num {
+    text-align: end;
+    white-space: nowrap;
+  }
+
+  .ol-table .ol-actions {
+    width: 1%;
+    text-align: end;
+    white-space: nowrap;
+  }
+
+  .ol-cell-title {
+    color: var(--ol-color-fg);
+    font-weight: var(--ol-font-weight-medium);
+  }
+
+  .ol-cell-sub {
+    display: block;
+    margin-block-start: 0.125rem;
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+  }
+
+  /* A row that leads somewhere: the one link marked .ol-row-link (usually the name) makes the whole
+     row its target. Other links and buttons in the row stay on top and work as before. */
+  .ol-table tr:has(.ol-row-link) {
+    position: relative;
+  }
+
+  .ol-row-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  .ol-table
+    tr:has(.ol-row-link)
+    :is(a, button, input, select, textarea, summary, label):not(.ol-row-link) {
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 860px) {
+    /* Tables scroll sideways rather than squeezing every cell into a column of words. */
+    .ol-table th,
+    .ol-table td {
+      white-space: nowrap;
+    }
+  }
+
+  /* Stats: one framed strip of figures divided by hairlines, not a grid of separate cards. Items
+     grow to fill every row, so a short last row never shows an empty cell. */
+
+  .ol-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-container);
+    background: var(--ol-color-border);
+  }
+
+  .ol-stat {
+    display: flex;
+    flex: 1 1 9.5rem;
+    flex-direction: column;
+    gap: var(--ol-space-1);
+    min-width: 0;
+    padding: var(--ol-space-4) var(--ol-space-5);
+    background: var(--ol-color-surface);
+    color: inherit;
+  }
+
+  a.ol-stat {
+    transition: background var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  a.ol-stat:hover {
+    background: var(--ol-color-fill-subtle);
+    text-decoration: none;
+  }
+
+  .ol-stat-label {
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-2);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-xs);
+    font-weight: var(--ol-font-weight-medium);
+    line-height: var(--ol-line-height-xs);
+  }
+
+  /* A small tinted tile for the stat's icon: the accent by default, or a tone. */
+  .ol-stat-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 1.375rem;
+    height: 1.375rem;
+    border-radius: var(--ol-radius-sm);
+    background: var(--ol-color-accent-bg);
+    color: var(--ol-color-accent-text);
+  }
+
+  .ol-stat-icon.ol-tone-success {
+    background: var(--ol-color-success-bg);
+    color: var(--ol-color-success-text);
+  }
+
+  .ol-stat-icon.ol-tone-warning {
+    background: var(--ol-color-warning-bg);
+    color: var(--ol-color-warning-text);
+  }
+
+  .ol-stat-icon.ol-tone-danger {
+    background: var(--ol-color-danger-bg);
+    color: var(--ol-color-danger-text);
+  }
+
+  .ol-stat-value {
+    margin-block-start: var(--ol-space-1);
+    color: var(--ol-color-fg);
+    font-size: var(--ol-font-size-2xl);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--ol-font-weight-semibold);
+    letter-spacing: var(--ol-tracking-tight);
+    line-height: var(--ol-line-height-2xl);
+  }
+
+  .ol-stat-meta {
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+  }
+
+  .ol-trend-up {
+    color: var(--ol-color-success-text);
+  }
+
+  .ol-trend-down {
+    color: var(--ol-color-danger-text);
+  }
+
+  /* Description lists: key-value pairs. */
+
+  .ol-dl {
+    display: grid;
+    grid-template-columns: minmax(7rem, max-content) minmax(0, 1fr);
+    gap: var(--ol-space-2) var(--ol-space-6);
+    font-size: var(--ol-font-size-sm);
+    line-height: var(--ol-line-height-sm);
+  }
+
+  .ol-dl dt {
+    color: var(--ol-color-fg-muted);
+  }
+
+  /* A sub-row of a description list, such as one source under a total. */
+  .ol-dl .ol-dl-sub {
+    padding-inline-start: var(--ol-space-3);
+    color: var(--ol-color-fg-subtle);
+  }
+
+  .ol-dl dd {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* Each term above its value, for a narrow column such as a detail page's side panel. */
+  .ol-dl-stack {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .ol-dl-stack dt {
+    margin-block-end: var(--ol-space-0-5);
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+  }
+
+  .ol-dl-stack dd + dt {
+    margin-block-start: var(--ol-space-3);
+  }
+
+  /*
+   * Settings: one setting per row, its name and what it does on one side and its control on the
+   * other, often in a panel whose footer holds the save button.
+   *
+   *   <div class="ol-settings">
+   *     <div class="ol-setting">
+   *       <div class="ol-setting-text"><label class="ol-setting-title" for="status">Show the status</label>
+   *         <p class="ol-setting-description" id="status-hint">…</p></div>
+   *       <div class="ol-setting-control"><input type="checkbox" role="switch" class="ol-switch" id="status" aria-describedby="status-hint"></div>
+   *     </div>
+   *   </div>
+   */
+  .ol-settings {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-container);
+    background: var(--ol-color-surface);
+  }
+
+  .ol-panel > .ol-settings {
+    border: 0;
+  }
+
+  .ol-setting {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ol-space-3) var(--ol-space-8);
+    padding: var(--ol-space-4);
+  }
+
+  .ol-setting + .ol-setting {
+    border-block-start: 1px solid var(--ol-color-border);
+  }
+
+  .ol-setting-text {
+    display: flex;
+    flex: 1 1 18rem;
+    flex-direction: column;
+    gap: var(--ol-space-0-5);
+    min-width: 0;
+  }
+
+  .ol-setting-title {
+    color: var(--ol-color-fg);
+    font-size: var(--ol-font-size-sm);
+    font-weight: var(--ol-font-weight-medium);
+    line-height: var(--ol-line-height-sm);
+  }
+
+  .ol-setting-description {
+    max-width: 60ch;
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+    text-wrap: pretty;
+  }
+
+  .ol-setting-control {
+    display: flex;
+    flex: 0 1 18rem;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ol-space-2);
+    min-width: 0;
+  }
+
+  .ol-setting-control > :is(.ol-input, .ol-select, .ol-input-group) {
+    width: 100%;
+  }
+
+  /* A switch or a button needs no width of its own. */
+  .ol-setting-control:not(:has(.ol-input, .ol-select, .ol-textarea)) {
+    flex-basis: auto;
+  }
+
+  /* Compact lists: items in one frame, each a title over a line of facts.
+     <ul class="ol-list"><li><a class="ol-list-title" href="…">…</a><span class="ol-list-meta">…</span></li></ul>
+     .ol-list-row puts a title and a value (.ol-list-value) on one line, or anything else, such as a
+     badge before the title, or a meter under it. */
+  .ol-list {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-container);
+    background: var(--ol-color-surface);
+  }
+
+  .ol-list > li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-1);
+    min-width: 0;
+    padding: var(--ol-space-2-5) var(--ol-space-3-5);
+  }
+
+  .ol-list > li + li {
+    border-block-start: 1px solid var(--ol-color-border);
+  }
+
+  .ol-list-title {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--ol-color-fg);
+    font-size: var(--ol-font-size-sm);
+    font-weight: var(--ol-font-weight-medium);
+    line-height: var(--ol-line-height-sm);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ol-list-row {
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-2);
+    min-width: 0;
+  }
+
+  .ol-list-row > .ol-list-title {
+    flex: 1;
+  }
+
+  .ol-list-value {
+    flex: none;
+    margin-inline-start: auto;
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ol-list-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ol-space-1) var(--ol-space-3);
+    min-width: 0;
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+  }
+
+  /* Feeds: a conversation or event stream. Set data-role on items: user, assistant, tool, system. */
+
+  .ol-feed {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ol-feed-item {
+    display: grid;
+    grid-template-columns: 1.75rem minmax(0, 1fr);
+    gap: var(--ol-space-3);
+    padding-block: var(--ol-space-3);
+  }
+
+  .ol-feed-item + .ol-feed-item {
+    border-block-start: 1px solid var(--ol-color-border);
+  }
+
+  .ol-feed-avatar {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: var(--ol-radius-full);
+    background: var(--ol-color-fill);
+    color: var(--ol-color-fg-muted);
+  }
+
+  .ol-feed-item[data-role="user"] .ol-feed-avatar {
+    background: var(--ol-color-accent-bg);
+    color: var(--ol-color-accent-text);
+  }
+
+  .ol-feed-item[data-role="assistant"] .ol-feed-avatar {
+    background: var(--ol-color-success-bg);
+    color: var(--ol-color-success-text);
+  }
+
+  .ol-feed-item[data-role="tool"] .ol-feed-avatar {
+    border: 1px dashed var(--ol-color-border-strong);
+    background: transparent;
+  }
+
+  .ol-feed-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ol-space-1) var(--ol-space-2);
+    margin-block-end: var(--ol-space-1);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+  }
+
+  .ol-feed-meta strong {
+    color: var(--ol-color-fg);
+  }
+
+  .ol-feed-body {
+    font-size: var(--ol-font-size-sm);
+    line-height: 1.65;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .ol-feed-item[data-role="tool"] .ol-feed-body {
+    color: var(--ol-color-fg-muted);
+    font-family: var(--ol-font-family-mono);
+    font-size: var(--ol-font-size-xs);
+  }
+
+  .ol-feed-item[data-highlight="true"] {
+    padding-inline: var(--ol-space-3);
+    border-radius: var(--ol-radius-container);
+    background: var(--ol-color-accent-bg);
+  }
+
+  .ol-feed-item[data-highlight="true"] + .ol-feed-item,
+  .ol-feed-item + .ol-feed-item[data-highlight="true"] {
+    border-block-start-color: transparent;
+  }
+
+  /*
+   * Charts: the series palette, swatches and legends, and the parts of a chart that the app draws as
+   * SVG on the server (bars, lines, dots, gridlines, axes, labels). The SVG carries classes only, no
+   * colours or inline styles. Every chart comes with a legend when it shows two or more series, and
+   * with a table of its numbers.
+   */
+
+  /* Series: .ol-series-<n> sets --ol-series for a mark, a swatch, a meter, or a group of them (the
+     property inherits). A slot stays with the thing it stands for, in a fixed order; never cycle. */
+  .ol-series-1 {
+    --ol-series: var(--ol-color-series-1);
+  }
+
+  .ol-series-2 {
+    --ol-series: var(--ol-color-series-2);
+  }
+
+  .ol-series-3 {
+    --ol-series: var(--ol-color-series-3);
+  }
+
+  .ol-series-4 {
+    --ol-series: var(--ol-color-series-4);
+  }
+
+  .ol-series-5 {
+    --ol-series: var(--ol-color-series-5);
+  }
+
+  .ol-series-6 {
+    --ol-series: var(--ol-color-series-6);
+  }
+
+  .ol-series-7 {
+    --ol-series: var(--ol-color-series-7);
+  }
+
+  .ol-series-8 {
+    --ol-series: var(--ol-color-series-8);
+  }
+
+  /* A series that means good or bad, such as errors, takes a status tone instead of a slot. */
+  .ol-series-success {
+    --ol-series: var(--ol-color-success-solid);
+  }
+
+  .ol-series-warning {
+    --ol-series: var(--ol-color-warning-solid);
+  }
+
+  .ol-series-danger {
+    --ol-series: var(--ol-color-danger-solid);
+  }
+
+  /* A swatch beside the text that names a series: a square for bars and areas, -line for lines. */
+  .ol-swatch {
+    display: inline-block;
+    flex: none;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: var(--ol-radius-xs);
+    background: var(--ol-series, var(--ol-color-series-1));
+  }
+
+  .ol-swatch-line {
+    width: 0.875rem;
+    height: 0.125rem;
+    border-radius: var(--ol-radius-full);
+  }
+
+  /* Legends: <ul class="ol-legend"><li><span class="ol-swatch ol-series-2" aria-hidden="true"></span>
+     codex <span class="ol-legend-value">298</span></li></ul>. .ol-legend-item lays out one entry on
+     its own, such as a swatch and a name in a table cell. Text keeps text colours, never the series
+     colour. */
+  .ol-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ol-space-1) var(--ol-space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+  }
+
+  .ol-legend > li,
+  .ol-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ol-space-1-5);
+    min-width: 0;
+  }
+
+  .ol-legend > li {
+    color: var(--ol-color-fg-muted);
+  }
+
+  .ol-legend-value {
+    color: var(--ol-color-fg-subtle);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * A chart: <figure class="ol-chart"> holding an <svg class="ol-chart-svg" role="img"> with a title
+   * and a description, a <figcaption class="ol-chart-caption"> with the legend and a one-line summary,
+   * and a <details class="ol-details ol-chart-table"> with every number in a table.
+   *
+   * Inside the SVG: .ol-chart-grid (gridlines), .ol-chart-axis (the baseline), .ol-chart-tick and
+   * .ol-chart-label (axis text), .ol-chart-bar, .ol-chart-line and .ol-chart-dot (marks, coloured by
+   * a .ol-series-<n> on them or on a group), and .ol-chart-col (a column's group: a transparent
+   * .ol-chart-hit band, its marks, and a <title> the browser shows on hover).
+   */
+  .ol-chart {
+    min-width: 0;
+    margin: 0;
+    padding: var(--ol-space-4) var(--ol-space-4) var(--ol-space-3);
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-container);
+    background: var(--ol-color-surface);
+  }
+
+  .ol-chart-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .ol-chart-grid,
+  .ol-chart-axis {
+    fill: none;
+    stroke: var(--ol-color-border);
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .ol-chart-axis {
+    stroke: var(--ol-color-border-strong);
+  }
+
+  .ol-chart-tick,
+  .ol-chart-label {
+    fill: var(--ol-color-fg-subtle);
+    font-family: var(--ol-font-family-sans);
+    font-size: var(--ol-font-size-2xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ol-chart-bar {
+    fill: var(--ol-series, var(--ol-color-series-1));
+  }
+
+  .ol-chart-line {
+    fill: none;
+    stroke: var(--ol-series, var(--ol-color-series-1));
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* The area under a line: a tint of its series, drawn before the line. */
+  .ol-chart-area {
+    fill: color-mix(in srgb, var(--ol-series, var(--ol-color-series-1)) 14%, transparent);
+    stroke: none;
+  }
+
+  /* Dots carry a ring in the surface colour, so they stay legible where they cross a line. */
+  .ol-chart-dot {
+    fill: var(--ol-series, var(--ol-color-series-1));
+    stroke: var(--ol-color-surface);
+    stroke-width: 2;
+  }
+
+  /* A column's hit band: larger than its marks, shaded on hover and on keyboard focus. */
+  .ol-chart-hit {
+    fill: transparent;
+    transition: fill var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-chart-col:hover > .ol-chart-hit,
+  .ol-chart-col:focus-visible > .ol-chart-hit {
+    fill: var(--ol-color-fill);
+  }
+
+  .ol-chart-col:focus-visible {
+    outline: none;
+  }
+
+  .ol-chart-col:focus-visible > .ol-chart-hit {
+    stroke: var(--ol-color-focus-ring);
+    stroke-width: var(--ol-focus-width);
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* Drawing in: bars rise from the baseline, column after column where the browser can count them;
+     lines draw from the start; dots follow. */
+  @media (prefers-reduced-motion: no-preference) {
+    .ol-chart-bar {
+      transform-box: fill-box;
+      transform-origin: bottom;
+      animation: ol-grow-y var(--ol-duration-slower) var(--ol-ease-enter) backwards;
+    }
+
+    .ol-chart-line,
+    .ol-chart-area {
+      animation: ol-draw calc(var(--ol-duration-slower) * 2) var(--ol-ease-standard) backwards;
+    }
+
+    .ol-chart-dot {
+      animation: ol-fade-in var(--ol-duration-slow) var(--ol-ease-enter)
+        calc(var(--ol-duration-slower) * 1.5) backwards;
+    }
+
+    @supports (animation-delay: calc(sibling-index() * 1ms)) {
+      .ol-chart-col {
+        --ol-index: sibling-index();
+      }
+
+      .ol-chart-col > .ol-chart-bar {
+        animation-delay: calc(var(--ol-index) * 14ms);
+      }
+    }
+  }
+
+  @keyframes ol-draw {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+
+    to {
+      clip-path: inset(0);
+    }
+  }
+
+  @keyframes ol-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .ol-chart-caption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ol-space-2) var(--ol-space-4);
+    margin-block-start: var(--ol-space-2);
+  }
+
+  /* The numbers behind a chart, folded under it. */
+  .ol-chart-table {
+    margin-block-start: var(--ol-space-2);
+  }
+
+  /*
+   * Uptime strips: how something did over time, one cell per period (an hour, a day), oldest first.
+   * The strip is one image to assistive technology, so its label says what it shows in words; each
+   * cell's title gives its period and figure to pointer users.
+   *
+   *   <div class="ol-uptime" role="img" aria-label="Last 24 hours: 99.7% available, degraded at 14:00">
+   *     <span class="ol-uptime-ok" title="13:00 100%"></span><span class="ol-uptime-degraded" title="14:00 96%"></span>…
+   *   </div>
+   *
+   * Cells: -ok, -degraded, -down; a cell without a class is a period without data.
+   */
+  .ol-uptime {
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    min-width: 0;
+    height: var(--ol-uptime-height, 1.5rem);
+  }
+
+  .ol-uptime > * {
+    flex: 1 1 0;
+    min-width: 2px;
+    max-width: var(--ol-uptime-cell, 0.5rem);
+    border-radius: 2px;
+    background: var(--ol-color-border);
+    transform-origin: bottom;
+    transition: opacity var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-uptime > .ol-uptime-ok {
+    background: var(--ol-color-success-solid);
+  }
+
+  .ol-uptime > .ol-uptime-degraded {
+    background: var(--ol-color-warning-solid);
+  }
+
+  .ol-uptime > .ol-uptime-down {
+    background: var(--ol-color-danger-solid);
+  }
+
+  /* Pointing at a cell brings it forward. */
+  .ol-uptime:hover > :not(:hover) {
+    opacity: 0.45;
+  }
+
+  /* Taller, with cells that grow to fill a wide column. */
+  .ol-uptime-lg {
+    --ol-uptime-height: 2.25rem;
+    --ol-uptime-cell: 1rem;
+    gap: 3px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ol-uptime > * {
+      animation: ol-grow-y var(--ol-duration-slower) var(--ol-ease-enter) backwards;
+    }
+
+    @supports (animation-delay: calc(sibling-index() * 1ms)) {
+      .ol-uptime > * {
+        animation-delay: calc((sibling-index() - 1) * 12ms);
+      }
+    }
+  }
+
+  @keyframes ol-grow-y {
+    from {
+      opacity: 0;
+      transform: scaleY(0.15);
+    }
+  }
+
+  @media (forced-colors: active) {
+    /* Colours collapse to one; the legend's words and the table carry the series. */
+    .ol-chart-bar,
+    .ol-chart-dot {
+      fill: CanvasText;
+    }
+
+    .ol-chart-line {
+      stroke: CanvasText;
+    }
+
+    .ol-chart-area {
+      fill: none;
+    }
+
+    .ol-chart-dot {
+      stroke: Canvas;
+    }
+
+    .ol-chart-grid,
+    .ol-chart-axis {
+      stroke: GrayText;
+    }
+
+    .ol-chart-tick,
+    .ol-chart-label {
+      fill: CanvasText;
+    }
+
+    .ol-chart-col:focus-visible > .ol-chart-hit {
+      stroke: Highlight;
+    }
+
+    .ol-swatch {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+
+    .ol-uptime > * {
+      forced-color-adjust: none;
+      background: GrayText;
+    }
+
+    .ol-uptime > :is(.ol-uptime-ok, .ol-uptime-degraded) {
+      background: CanvasText;
+    }
+
+    .ol-uptime > .ol-uptime-down {
+      background: Highlight;
+    }
+  }
+
+  /*
+   * Display: badges, chips, avatars, code, keys, and secrets.
+   */
+
+  /* Badges: short status or category labels. .ol-badge plus a tone (-accent, -success, -warning,
+     -danger, -info; neutral without one) and optionally -solid or -outline; -square for tags; -mono
+     for identifiers. Add .ol-dot for a status dot. Badges are not buttons: never make one the only
+     way to act. */
+
+  .ol-badge {
+    --ol-badge-bg: var(--ol-color-fill);
+    --ol-badge-fg: var(--ol-color-fg-muted);
+    --ol-badge-border: transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3125rem;
+    height: 1.25rem;
+    padding-inline: var(--ol-space-2);
+    border: 1px solid var(--ol-badge-border);
+    border-radius: var(--ol-radius-badge);
+    background: var(--ol-badge-bg);
+    color: var(--ol-badge-fg);
+    font-size: var(--ol-font-size-xs);
+    font-weight: var(--ol-font-weight-medium);
+    line-height: 1;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  .ol-badge-accent {
+    --ol-badge-bg: var(--ol-color-accent-bg);
+    --ol-badge-fg: var(--ol-color-accent-text);
+  }
+
+  .ol-badge-success {
+    --ol-badge-bg: var(--ol-color-success-bg);
+    --ol-badge-fg: var(--ol-color-success-text);
+  }
+
+  .ol-badge-warning {
+    --ol-badge-bg: var(--ol-color-warning-bg);
+    --ol-badge-fg: var(--ol-color-warning-text);
+  }
+
+  .ol-badge-danger {
+    --ol-badge-bg: var(--ol-color-danger-bg);
+    --ol-badge-fg: var(--ol-color-danger-text);
+  }
+
+  .ol-badge-info {
+    --ol-badge-bg: var(--ol-color-info-bg);
+    --ol-badge-fg: var(--ol-color-info-text);
+  }
+
+  .ol-badge-solid {
+    --ol-badge-bg: var(--ol-color-fg);
+    --ol-badge-fg: var(--ol-color-bg);
+  }
+
+  .ol-badge-solid.ol-badge-accent {
+    --ol-badge-bg: var(--ol-color-accent-solid);
+    --ol-badge-fg: var(--ol-color-accent-on-solid);
+  }
+
+  .ol-badge-solid.ol-badge-danger {
+    --ol-badge-bg: var(--ol-color-danger-solid);
+    --ol-badge-fg: var(--ol-color-danger-on-solid);
+  }
+
+  .ol-badge-outline {
+    --ol-badge-bg: transparent;
+    --ol-badge-border: var(--ol-color-border-strong);
+  }
+
+  .ol-badge-square {
+    border-radius: var(--ol-radius-xs);
+  }
+
+  /* An identifier, such as an agent's name or a version, in monospace. */
+  .ol-badge-mono {
+    font-family: var(--ol-font-family-mono);
+    font-weight: var(--ol-font-weight-regular);
+  }
+
+  .ol-dot {
+    flex: none;
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* A dot for a state that is being watched live: a ring leaves it every few seconds. */
+  .ol-dot-live {
+    position: relative;
+  }
+
+  .ol-dot-live::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ol-dot-live::after {
+      animation: ol-ping 2.4s var(--ol-ease-standard) infinite;
+    }
+  }
+
+  @keyframes ol-ping {
+    0% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+
+    70%,
+    100% {
+      opacity: 0;
+      transform: scale(3);
+    }
+  }
+
+  /*
+   * Status pills: the overall state of a service in a few words, such as at the top of a status
+   * section or a hero. A dot in the tone's colour, then the words; a link to the detail is fine.
+   * <a class="ol-status ol-status-success" href="#status"><span class="ol-dot ol-dot-live"></span>All mirrors are up</a>
+   */
+  .ol-status {
+    --ol-status-dot: var(--ol-color-fg-subtle);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ol-space-2);
+    min-height: var(--ol-size-control-sm);
+    padding-inline: var(--ol-space-2-5) var(--ol-space-3);
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-full);
+    background: var(--ol-color-surface);
+    color: var(--ol-color-fg);
+    font-size: var(--ol-font-size-sm);
+    font-weight: var(--ol-font-weight-medium);
+    line-height: var(--ol-line-height-sm);
+    white-space: nowrap;
+    transition: border-color var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-status > .ol-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    color: var(--ol-status-dot);
+  }
+
+  a.ol-status:hover {
+    border-color: var(--ol-color-border-strong);
+    text-decoration: none;
+  }
+
+  .ol-status-success {
+    --ol-status-dot: var(--ol-color-success-solid);
+  }
+
+  .ol-status-warning {
+    --ol-status-dot: var(--ol-color-warning-solid);
+  }
+
+  .ol-status-danger {
+    --ol-status-dot: var(--ol-color-danger-solid);
+  }
+
+  .ol-status-info {
+    --ol-status-dot: var(--ol-color-info-solid);
+  }
+
+  /*
+   * Chips: small, muted notes in a flow of content, such as a command an agent ran or context it
+   * added. <span class="ol-chip">…icon… <span class="ol-chip-label">…</span></span>. As
+   * <details class="ol-chip"> it opens to show the whole text (.ol-chip-detail, then an optional
+   * .ol-chip-foot); as <a class="ol-chip"> it is a pill link, with aria-current="true" on the current
+   * one of a set. -mono sets the label in monospace, -accent marks the chip that stands for the main
+   * item, -lg is larger.
+   */
+  .ol-chip {
+    --ol-chip-height: 1.625rem;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ol-space-1-5);
+    max-width: 100%;
+    min-height: var(--ol-chip-height);
+    padding-inline: var(--ol-space-2);
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-full);
+    background: var(--ol-color-bg-subtle);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+    vertical-align: middle;
+  }
+
+  .ol-chip :where(.ol-icon) {
+    color: var(--ol-color-fg-subtle);
+  }
+
+  /* The label keeps to one line and ends with an ellipsis; open a disclosure chip for the rest. */
+  .ol-chip-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ol-chip-mono .ol-chip-label {
+    font-family: var(--ol-font-family-mono);
+  }
+
+  /* A quiet link at the end of a chip sits inside its rounded end. */
+  .ol-chip > .ol-quiet-link:last-child,
+  .ol-chip > summary > .ol-quiet-link:last-child {
+    margin-inline-end: calc(-1 * var(--ol-space-1-5));
+    border-radius: var(--ol-radius-full);
+  }
+
+  a.ol-chip {
+    white-space: nowrap;
+    transition:
+      border-color var(--ol-duration-fast) var(--ol-ease-standard),
+      color var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  a.ol-chip:hover {
+    border-color: var(--ol-color-border-strong);
+    color: var(--ol-color-fg);
+    text-decoration: none;
+  }
+
+  a.ol-chip[aria-current="true"],
+  a.ol-chip[aria-current="page"] {
+    border-color: var(--ol-color-accent-border);
+    background: var(--ol-color-accent-bg);
+    color: var(--ol-color-accent-text);
+  }
+
+  .ol-chip-accent {
+    border-color: var(--ol-color-accent-border);
+    background: var(--ol-color-accent-bg);
+    color: var(--ol-color-fg);
+  }
+
+  .ol-chip-accent :where(.ol-icon) {
+    color: var(--ol-color-accent-text);
+  }
+
+  .ol-chip-lg {
+    --ol-chip-height: var(--ol-size-control-md);
+    padding-inline: var(--ol-space-3);
+    font-size: var(--ol-font-size-sm);
+    line-height: var(--ol-line-height-sm);
+  }
+
+  details.ol-chip {
+    display: inline-block;
+    padding: 0;
+  }
+
+  details.ol-chip > summary {
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-1-5);
+    min-height: calc(var(--ol-chip-height) - 2px);
+    padding-inline: var(--ol-space-2);
+    border-radius: inherit;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  details.ol-chip > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  details.ol-chip > summary::after {
+    content: "";
+    flex: none;
+    width: 0.3125rem;
+    height: 0.3125rem;
+    margin-inline: 0.125rem;
+    border-inline-end: 1.5px solid currentColor;
+    border-block-end: 1.5px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  details.ol-chip > summary:hover {
+    color: var(--ol-color-fg);
+  }
+
+  /* Open, a disclosure chip takes the full width, on a line of its own in a row of chips. */
+  details.ol-chip[open] {
+    display: block;
+    width: 100%;
+    border-radius: var(--ol-radius-control);
+  }
+
+  details.ol-chip[open] > summary::after {
+    transform: rotate(45deg);
+  }
+
+  .ol-chip-detail {
+    max-height: 20rem;
+    margin: 0;
+    padding: var(--ol-space-2) var(--ol-space-3);
+    overflow: auto;
+    border-block-start: 1px solid var(--ol-color-border);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-xs);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .ol-chip-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ol-space-2);
+    padding: 0 var(--ol-space-2) var(--ol-space-2);
+  }
+
+  /* A count next to a label, such as unread items. */
+  .ol-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.125rem;
+    height: 1.125rem;
+    padding-inline: 0.3125rem;
+    border-radius: var(--ol-radius-full);
+    background: var(--ol-color-fill);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-2xs);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--ol-font-weight-medium);
+    line-height: 1;
+  }
+
+  /* Avatars: initials or an icon in a circle. Sizes -sm and -lg. */
+  .ol-avatar {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: var(--ol-size-avatar-md);
+    height: var(--ol-size-avatar-md);
+    overflow: hidden;
+    border-radius: var(--ol-radius-full);
+    background: var(--ol-color-accent-bg);
+    color: var(--ol-color-accent-text);
+    font-size: var(--ol-font-size-xs);
+    font-weight: var(--ol-font-weight-semibold);
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .ol-avatar-sm {
+    width: var(--ol-size-avatar-sm);
+    height: var(--ol-size-avatar-sm);
+    font-size: var(--ol-font-size-2xs);
+  }
+
+  .ol-avatar-lg {
+    width: var(--ol-size-avatar-lg);
+    height: var(--ol-size-avatar-lg);
+    font-size: var(--ol-font-size-sm);
+  }
+
+  .ol-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* An avatar in a series colour tells people apart in a list: give each person a slot from their
+     name, such as a hash of it, and keep it. The initials stay in the text colour. */
+  .ol-avatar:is(
+    .ol-series-1,
+    .ol-series-2,
+    .ol-series-3,
+    .ol-series-4,
+    .ol-series-5,
+    .ol-series-6,
+    .ol-series-7,
+    .ol-series-8
+  ) {
+    background: color-mix(in srgb, var(--ol-series) 22%, var(--ol-color-surface));
+    color: var(--ol-color-fg);
+  }
+
+  /*
+   * Entities: someone or something named, with an avatar or icon, its name and a second line, such
+   * as an account in a table, a menu's header or a page's title row.
+   * <span class="ol-entity"><span class="ol-avatar">CI</span><span class="ol-entity-text">
+   *   <a class="ol-entity-title" href="…">ci-runner</a><span class="ol-entity-sub">Build machines</span></span></span>
+   */
+  .ol-entity {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ol-space-2-5);
+    min-width: 0;
+    max-width: 100%;
+    vertical-align: middle;
+  }
+
+  .ol-entity-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .ol-entity-title,
+  .ol-entity-sub {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ol-entity-title {
+    color: var(--ol-color-fg);
+    font-weight: var(--ol-font-weight-medium);
+  }
+
+  .ol-entity-sub {
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+  }
+
+  /*
+   * Steps: what to do, in order, each with a number on a line that joins them.
+   * <ol class="ol-steps"><li><h3 class="ol-step-title">Point Docker at the mirror</h3><p>…</p>…</li></ol>
+   */
+  .ol-steps {
+    counter-reset: ol-step;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ol-steps > li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.75rem minmax(0, 1fr);
+    gap: var(--ol-space-2) var(--ol-space-4);
+    padding-block-end: var(--ol-space-8);
+    counter-increment: ol-step;
+  }
+
+  .ol-steps > li:last-child {
+    padding-block-end: 0;
+  }
+
+  .ol-steps > li > * {
+    grid-column: 2;
+    min-width: 0;
+  }
+
+  .ol-steps > li::before {
+    content: counter(ol-step);
+    display: grid;
+    grid-row: 1 / span 2;
+    grid-column: 1;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1px solid var(--ol-color-accent-border);
+    border-radius: var(--ol-radius-full);
+    background: var(--ol-color-accent-bg);
+    color: var(--ol-color-accent-text);
+    font-size: var(--ol-font-size-sm);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--ol-font-weight-semibold);
+  }
+
+  /* The line from one number to the next. */
+  .ol-steps > li:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    inset-block: 2.25rem var(--ol-space-1);
+    inset-inline-start: calc(0.875rem - 0.5px);
+    width: 1px;
+    background: var(--ol-color-border);
+  }
+
+  .ol-step-title {
+    color: var(--ol-color-fg);
+    font-size: var(--ol-font-size-md);
+    font-weight: var(--ol-font-weight-semibold);
+    line-height: 1.75rem;
+  }
+
+  /* Code blocks, with an optional label and a copy button (.ol-copy). */
+  .ol-code {
+    position: relative;
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-control);
+    background: var(--ol-color-bg-subtle);
+  }
+
+  .ol-code pre {
+    margin: 0;
+    padding: var(--ol-space-2-5) var(--ol-space-3);
+    overflow-x: auto;
+    font-size: var(--ol-font-size-xs);
+    line-height: 1.65;
+  }
+
+  .ol-code-label {
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-2);
+    min-height: var(--ol-size-control-md);
+    padding-inline: var(--ol-space-3) var(--ol-space-10);
+    border-block-end: 1px solid var(--ol-color-border);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-xs);
+    font-weight: var(--ol-font-weight-medium);
+  }
+
+  .ol-code > .ol-copy {
+    position: absolute;
+    inset-block-start: var(--ol-space-1);
+    inset-inline-end: var(--ol-space-1);
+  }
+
+  /* A code block for long single lines, such as raw JSON: wraps instead of scrolling. */
+  .ol-code-wrap pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  /* Words quoted from a source. */
+  .ol-quote {
+    margin: 0;
+    padding-inline-start: var(--ol-space-3);
+    border-inline-start: 2px solid var(--ol-color-accent-border);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-sm);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .ol-mono {
+    font-family: var(--ol-font-family-mono);
+    font-size: 0.9em;
+  }
+
+  .ol-kbd {
+    display: inline-block;
+    min-width: 1.25rem;
+    padding-inline: 0.3125rem;
+    border: 1px solid var(--ol-color-border-strong);
+    border-block-end-width: 2px;
+    border-radius: var(--ol-radius-xs);
+    background: var(--ol-color-surface);
+    font-family: var(--ol-font-family-mono);
+    font-size: var(--ol-font-size-2xs);
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  /* A secret shown once, such as a new token: select-all on click, wrapping anywhere. */
+  .ol-secret {
+    display: block;
+    padding: var(--ol-space-2-5) var(--ol-space-3);
+    border: 1px dashed var(--ol-color-border-strong);
+    border-radius: var(--ol-radius-control);
+    background: var(--ol-color-bg-subtle);
+    font-family: var(--ol-font-family-mono);
+    font-size: var(--ol-font-size-sm);
+    overflow-wrap: anywhere;
+    user-select: all;
+  }
+
+  @media (forced-colors: active) {
+    .ol-badge,
+    .ol-count,
+    .ol-avatar,
+    .ol-status,
+    .ol-steps > li::before {
+      border: 1px solid CanvasText;
+    }
+
+    .ol-dot {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+
+    a.ol-chip[aria-current="true"],
+    a.ol-chip[aria-current="page"] {
+      border-color: Highlight;
+      outline: 1px solid Highlight;
+    }
+  }
+
+  /*
+   * Feedback: alerts, banners, toasts, progress, skeletons, and empty states.
+   */
+
+  /* Alerts: a message inside the page. Large tinted areas use a lighter tint than badges, mixed
+     towards the surface, so they stay calm in dark mode. .ol-alert plus a tone (-info, -success, -warning, -danger).
+     Use role="alert" only for errors that need immediate attention, role="status" for confirmations. */
+
+  .ol-alert {
+    --ol-alert-bg: var(--ol-color-bg-subtle);
+    --ol-alert-border: var(--ol-color-border);
+    --ol-alert-icon: var(--ol-color-fg-muted);
+    display: flex;
+    gap: var(--ol-space-2-5);
+    padding: var(--ol-space-2-5) var(--ol-space-3-5);
+    border: 1px solid var(--ol-alert-border);
+    border-radius: var(--ol-radius-container);
+    background: var(--ol-alert-bg);
+    font-size: var(--ol-font-size-sm);
+    line-height: var(--ol-line-height-sm);
+  }
+
+  .ol-alert > .ol-icon {
+    margin-block-start: 0.125rem;
+    color: var(--ol-alert-icon);
+  }
+
+  .ol-alert-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ol-alert-title {
+    margin-block-end: 0.125rem;
+    font-weight: var(--ol-font-weight-semibold);
+  }
+
+  .ol-alert-body > p + p {
+    margin-block-start: var(--ol-space-2);
+  }
+
+  .ol-alert-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ol-space-2);
+    margin-block-start: var(--ol-space-2);
+  }
+
+  .ol-alert-info {
+    --ol-alert-bg: color-mix(in oklab, var(--ol-color-info-bg) 55%, var(--ol-color-surface));
+    --ol-alert-border: color-mix(in oklab, var(--ol-color-info-border) 55%, var(--ol-color-border));
+    --ol-alert-icon: var(--ol-color-info-text);
+  }
+
+  .ol-alert-success {
+    --ol-alert-bg: color-mix(in oklab, var(--ol-color-success-bg) 55%, var(--ol-color-surface));
+    --ol-alert-border: color-mix(
+      in oklab,
+      var(--ol-color-success-border) 55%,
+      var(--ol-color-border)
+    );
+    --ol-alert-icon: var(--ol-color-success-text);
+  }
+
+  .ol-alert-warning {
+    --ol-alert-bg: color-mix(in oklab, var(--ol-color-warning-bg) 55%, var(--ol-color-surface));
+    --ol-alert-border: color-mix(
+      in oklab,
+      var(--ol-color-warning-border) 55%,
+      var(--ol-color-border)
+    );
+    --ol-alert-icon: var(--ol-color-warning-text);
+  }
+
+  .ol-alert-danger {
+    --ol-alert-bg: color-mix(in oklab, var(--ol-color-danger-bg) 55%, var(--ol-color-surface));
+    --ol-alert-border: color-mix(in oklab, var(--ol-color-danger-border) 55%, var(--ol-color-border));
+    --ol-alert-icon: var(--ol-color-danger-text);
+  }
+
+  /* Banners: one line across the top of the page for a system-wide state. */
+  .ol-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ol-space-2);
+    padding: var(--ol-space-2) var(--ol-space-4);
+    background: var(--ol-color-accent-solid);
+    color: var(--ol-color-accent-on-solid);
+    font-size: var(--ol-font-size-sm);
+    text-align: center;
+  }
+
+  .ol-banner a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  .ol-banner-warning {
+    background: var(--ol-color-warning-solid);
+    color: var(--ol-color-warning-on-solid);
+  }
+
+  .ol-banner-danger {
+    background: var(--ol-color-danger-solid);
+    color: var(--ol-color-danger-on-solid);
+  }
+
+  /* Toasts: a transient confirmation, usually rendered by the server after a redirect.
+     <div class="ol-toaster" role="status"><div class="ol-toast ol-toast-success ol-toast-auto">…icon… Saved.</div></div>
+     A tone (-success, -info, -warning, -danger) colours the icon. -auto leaves by itself after six
+     seconds, with no script; pointing at it or focusing inside it holds it. Keep anything the reader
+     must act on out of a toast that leaves: use an alert. */
+  .ol-toaster {
+    position: fixed;
+    inset-block-end: var(--ol-space-4);
+    inset-inline-end: var(--ol-space-4);
+    z-index: var(--ol-z-toast);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-2);
+    width: min(22rem, calc(100vw - 2rem));
+  }
+
+  .ol-toast {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ol-space-2-5);
+    padding: var(--ol-space-3) var(--ol-space-3-5);
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-container);
+    background: var(--ol-color-surface-overlay);
+    box-shadow: var(--ol-shadow-lg);
+    font-size: var(--ol-font-size-sm);
+    animation: ol-toast-in var(--ol-duration-slow) var(--ol-ease-enter);
+  }
+
+  .ol-toast > .ol-icon {
+    margin-block-start: 0.125rem;
+    color: var(--ol-color-fg-muted);
+  }
+
+  .ol-toast-success > .ol-icon {
+    color: var(--ol-color-success-text);
+  }
+
+  .ol-toast-info > .ol-icon {
+    color: var(--ol-color-info-text);
+  }
+
+  .ol-toast-warning > .ol-icon {
+    color: var(--ol-color-warning-text);
+  }
+
+  .ol-toast-danger > .ol-icon {
+    color: var(--ol-color-danger-text);
+  }
+
+  .ol-toast-auto {
+    animation:
+      ol-toast-in var(--ol-duration-slow) var(--ol-ease-enter),
+      ol-toast-out var(--ol-duration-slow) var(--ol-ease-exit) 6s forwards;
+  }
+
+  .ol-toast-auto:is(:hover, :focus-within) {
+    animation-play-state: paused;
+  }
+
+  @keyframes ol-toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem) scale(0.98);
+    }
+  }
+
+  /* Hidden before the very end, so a duration cut to almost nothing (reduced motion) still ends
+     hidden. */
+  @keyframes ol-toast-out {
+    80%,
+    to {
+      display: none;
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(0.5rem) scale(0.98);
+    }
+  }
+
+  /* A value that has just changed, such as a live figure: add .ol-flash when it changes, and remove
+     it on animationend so it can flash again. */
+  .ol-flash {
+    border-radius: var(--ol-radius-xs);
+    animation: ol-flash calc(var(--ol-duration-slower) * 3) var(--ol-ease-standard);
+  }
+
+  @keyframes ol-flash {
+    from {
+      background-color: var(--ol-color-accent-bg-active);
+      box-shadow: 0 0 0 0.25rem var(--ol-color-accent-bg-active);
+    }
+
+    to {
+      background-color: transparent;
+      box-shadow: 0 0 0 0.25rem transparent;
+    }
+  }
+
+  /* Progress and meters: style the native elements so assistive technology reads their values. */
+
+  .ol-progress,
+  .ol-meter {
+    display: block;
+    width: 100%;
+    height: 0.375rem;
+    overflow: hidden;
+    border: 0;
+    border-radius: var(--ol-radius-full);
+    background: var(--ol-color-fill);
+    appearance: none;
+  }
+
+  .ol-progress::-webkit-progress-bar {
+    background: var(--ol-color-fill);
+  }
+
+  .ol-progress::-webkit-progress-value {
+    border-radius: var(--ol-radius-full);
+    background: var(--ol-color-accent-solid);
+  }
+
+  .ol-progress::-moz-progress-bar {
+    border-radius: var(--ol-radius-full);
+    background: var(--ol-color-accent-solid);
+  }
+
+  .ol-meter::-webkit-meter-bar {
+    height: 0.375rem;
+    border: 0;
+    border-radius: var(--ol-radius-full);
+    background: var(--ol-color-fill);
+  }
+
+  .ol-meter::-webkit-meter-optimum-value {
+    background: var(--ol-color-success-solid);
+  }
+
+  .ol-meter::-webkit-meter-suboptimum-value {
+    background: var(--ol-color-warning-solid);
+  }
+
+  .ol-meter::-webkit-meter-even-less-good-value {
+    background: var(--ol-color-danger-solid);
+  }
+
+  .ol-meter:-moz-meter-optimum::-moz-meter-bar {
+    background: var(--ol-color-success-solid);
+  }
+
+  .ol-meter:-moz-meter-sub-optimum::-moz-meter-bar {
+    background: var(--ol-color-warning-solid);
+  }
+
+  .ol-meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
+    background: var(--ol-color-danger-solid);
+  }
+
+  /* A meter in a series colour, such as one value's share of the largest in a list:
+     <meter class="ol-meter ol-meter-series ol-series-1" max="14026" value="526">526 events</meter>.
+     It ignores low, high and optimum; slot 1 by default. */
+  .ol-meter.ol-meter-series::-webkit-meter-optimum-value,
+  .ol-meter.ol-meter-series::-webkit-meter-suboptimum-value,
+  .ol-meter.ol-meter-series::-webkit-meter-even-less-good-value {
+    border-radius: var(--ol-radius-full);
+    background: var(--ol-series, var(--ol-color-series-1));
+  }
+
+  .ol-meter.ol-meter-series::-moz-meter-bar {
+    border-radius: var(--ol-radius-full);
+    background: var(--ol-series, var(--ol-color-series-1));
+  }
+
+  /* Meters and progress bars fill in from the start when the page draws them. */
+  @media (prefers-reduced-motion: no-preference) {
+    .ol-progress,
+    .ol-meter {
+      animation: ol-fill-in var(--ol-duration-slower) var(--ol-ease-enter) backwards;
+    }
+
+    .ol-progress:dir(rtl),
+    .ol-meter:dir(rtl) {
+      animation-name: ol-fill-in-rtl;
+    }
+  }
+
+  @keyframes ol-fill-in {
+    from {
+      clip-path: inset(0 100% 0 0 round var(--ol-radius-full));
+    }
+
+    to {
+      clip-path: inset(0 0 0 0 round var(--ol-radius-full));
+    }
+  }
+
+  @keyframes ol-fill-in-rtl {
+    from {
+      clip-path: inset(0 0 0 100% round var(--ol-radius-full));
+    }
+
+    to {
+      clip-path: inset(0 0 0 0 round var(--ol-radius-full));
+    }
+  }
+
+  /* Skeletons: placeholders while content loads. Mark the region aria-busy="true". */
+  .ol-skeleton {
+    display: block;
+    height: 0.875rem;
+    border-radius: var(--ol-radius-xs);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in srgb, var(--ol-color-surface) 60%, transparent),
+        transparent
+      )
+      var(--ol-color-fill);
+    background-size: 200% 100%;
+    animation: ol-shimmer 1.4s linear infinite;
+  }
+
+  @keyframes ol-shimmer {
+    from {
+      background-position: 100% 0;
+    }
+
+    to {
+      background-position: -100% 0;
+    }
+  }
+
+  /* Empty states: what is missing, why, and the one action that fills it. The icon sits at the
+     centre of faint rings, a quiet echo of the sign-in page. */
+  .ol-empty {
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ol-space-2);
+    padding: var(--ol-space-12) var(--ol-space-6) var(--ol-space-10);
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-container);
+    background: var(--ol-color-bg-subtle);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-sm);
+    line-height: var(--ol-line-height-sm);
+    text-align: center;
+  }
+
+  .ol-empty-icon {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-block-end: var(--ol-space-3);
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-container);
+    background: var(--ol-color-surface);
+    box-shadow: var(--ol-shadow-sm);
+    color: var(--ol-color-fg-muted);
+  }
+
+  .ol-empty-icon::before {
+    content: "";
+    position: absolute;
+    inset: -2.75rem;
+    z-index: -1;
+    border-radius: 50%;
+    background: repeating-radial-gradient(
+      circle,
+      transparent 0 1.25rem,
+      var(--ol-color-border) 1.25rem calc(1.25rem + 1px),
+      transparent calc(1.25rem + 1px) 1.75rem
+    );
+    -webkit-mask-image: radial-gradient(circle, #000 30%, transparent 70%);
+    mask-image: radial-gradient(circle, #000 30%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .ol-empty-title {
+    color: var(--ol-color-fg);
+    font-size: var(--ol-font-size-md);
+    font-weight: var(--ol-font-weight-semibold);
+  }
+
+  .ol-empty-text {
+    max-width: 44ch;
+    text-wrap: pretty;
+  }
+
+  .ol-empty .ol-btn {
+    margin-block-start: var(--ol-space-2);
+  }
+
+  @media (forced-colors: active) {
+    .ol-progress,
+    .ol-meter {
+      border: 1px solid CanvasText;
+    }
+
+    .ol-skeleton {
+      background: GrayText;
+      animation: none;
+    }
+  }
+
+  /*
+   * Containers: panels, cards, dividers, disclosures, and folds.
+   *
+   * Frame only what belongs together. A page of identical framed boxes reads as noise; use sections,
+   * headings and whitespace first, a panel for a group of related detail, a card for one item in a
+   * collection.
+   */
+
+  .ol-panel {
+    min-width: 0;
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-container);
+    background: var(--ol-color-surface);
+  }
+
+  .ol-panel-header {
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-2);
+    min-height: 2.75rem;
+    padding: var(--ol-space-2) var(--ol-space-4);
+    border-block-end: 1px solid var(--ol-color-border);
+  }
+
+  .ol-panel-title {
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-2);
+    font-size: var(--ol-font-size-sm);
+    font-weight: var(--ol-font-weight-semibold);
+    line-height: var(--ol-line-height-sm);
+  }
+
+  .ol-panel-title .ol-icon {
+    color: var(--ol-color-fg-subtle);
+  }
+
+  /* A table or a compact list inside a panel loses its own frame. */
+  .ol-panel > :is(.ol-table-wrap, .ol-list) {
+    border: 0;
+    border-radius: 0;
+  }
+
+  /* Whatever sits at the panel's edges (a tinted header, a table's heading row, a footer) follows
+     its rounded corners inside its 1px border. */
+  .ol-panel > :first-child {
+    border-start-start-radius: calc(var(--ol-radius-container) - 1px);
+    border-start-end-radius: calc(var(--ol-radius-container) - 1px);
+  }
+
+  .ol-panel > :last-child {
+    border-end-start-radius: calc(var(--ol-radius-container) - 1px);
+    border-end-end-radius: calc(var(--ol-radius-container) - 1px);
+  }
+
+  .ol-panel-header > :last-child:not(:first-child) {
+    margin-inline-start: auto;
+  }
+
+  .ol-panel-body {
+    padding: var(--ol-space-4);
+  }
+
+  .ol-panel-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ol-space-2) var(--ol-space-3);
+    padding: var(--ol-space-3) var(--ol-space-4);
+    border-block-start: 1px solid var(--ol-color-border);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-xs);
+  }
+
+  /* A footer that saves the panel: a note at the start, the buttons at the end. */
+  .ol-panel-footer:has(> .ol-btn) {
+    background: var(--ol-color-bg-subtle);
+  }
+
+  .ol-panel-footer > .ol-btn:first-child,
+  .ol-panel-footer > :not(.ol-btn) + .ol-btn {
+    margin-inline-start: auto;
+  }
+
+  .ol-panel-danger {
+    border-color: var(--ol-color-danger-border);
+  }
+
+  .ol-panel-danger > .ol-panel-header {
+    border-block-end-color: var(--ol-color-danger-border);
+    background: var(--ol-color-danger-bg);
+  }
+
+  /* Cards: one item of a collection, optionally a link (.ol-card on <a>). A card that is the target
+     of the URL's #fragment is outlined, and scrolls clear of the top bar. */
+  .ol-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ol-space-2);
+    min-width: 0;
+    padding: var(--ol-space-4);
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-container);
+    background: var(--ol-color-surface);
+    color: inherit;
+    scroll-margin-block-start: var(--ol-space-6);
+    transition:
+      border-color var(--ol-duration-fast) var(--ol-ease-standard),
+      box-shadow var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  /* The card a link points at (#id in the URL) is outlined. */
+  .ol-card:target {
+    border-color: var(--ol-color-accent-border);
+    box-shadow: 0 0 0 3px var(--ol-color-accent-bg);
+  }
+
+  a.ol-card {
+    transition:
+      border-color var(--ol-duration-fast) var(--ol-ease-standard),
+      box-shadow var(--ol-duration-normal) var(--ol-ease-standard),
+      translate var(--ol-duration-normal) var(--ol-ease-standard);
+  }
+
+  /* A linked card lifts towards the pointer. */
+  a.ol-card:hover {
+    border-color: var(--ol-color-border-strong);
+    box-shadow: var(--ol-shadow-md);
+    text-decoration: none;
+    translate: 0 -1px;
+  }
+
+  a.ol-card:active {
+    box-shadow: var(--ol-shadow-sm);
+    translate: none;
+  }
+
+  /* A row at the top or the foot of a card: a title with a badge, or facts at both ends. */
+  .ol-card-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ol-space-1) var(--ol-space-3);
+    min-width: 0;
+  }
+
+  .ol-card-row + .ol-card-row:last-child {
+    margin-block-start: auto;
+    padding-block-start: var(--ol-space-1);
+  }
+
+  .ol-card-title {
+    color: var(--ol-color-fg);
+    font-weight: var(--ol-font-weight-semibold);
+  }
+
+  .ol-card-meta {
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-xs);
+  }
+
+  /* Dividers, optionally with a label: <div class="ol-divider">or</div> */
+  .ol-divider {
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-3);
+    margin-block: var(--ol-space-4);
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-xs);
+  }
+
+  .ol-divider::before,
+  .ol-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--ol-color-border);
+  }
+
+  .ol-divider:empty {
+    gap: 0;
+  }
+
+  /*
+   * Folds: a run of steps behind one summary line that says what is inside, such as counts by kind
+   * and how they went.
+   *
+   *   <details class="ol-fold">
+   *     <summary><span class="ol-fold-title">…icon… 14 tool calls</span>
+   *       <span class="ol-fold-meta">…</span><span class="ol-fold-end">2 messages</span></summary>
+   *     <div class="ol-fold-body">…</div>
+   *   </details>
+   */
+  .ol-fold {
+    min-width: 0;
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-control);
+    background: var(--ol-color-bg-subtle);
+  }
+
+  .ol-fold > summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ol-space-1) var(--ol-space-3);
+    min-height: var(--ol-size-control-lg);
+    padding: var(--ol-space-1-5) var(--ol-space-3);
+    border-radius: inherit;
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-xs);
+    line-height: var(--ol-line-height-xs);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .ol-fold > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .ol-fold > summary::before {
+    content: "";
+    flex: none;
+    width: 0.375rem;
+    height: 0.375rem;
+    border-inline-end: 1.5px solid currentColor;
+    border-block-end: 1.5px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-fold > summary:hover {
+    color: var(--ol-color-fg);
+  }
+
+  .ol-fold:where([open]) > summary {
+    border-block-end: 1px solid var(--ol-color-border);
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+  }
+
+  .ol-fold:where([open]) > summary::before {
+    transform: rotate(45deg);
+  }
+
+  .ol-fold-title {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ol-space-1-5);
+    color: var(--ol-color-fg);
+    font-weight: var(--ol-font-weight-semibold);
+  }
+
+  /* Facts on the summary line, each an icon and a number or a few words. */
+  .ol-fold-meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ol-space-1) var(--ol-space-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ol-fold-meta > * {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ol-space-0-5);
+  }
+
+  .ol-fold-end {
+    margin-inline-start: auto;
+    color: var(--ol-color-fg-subtle);
+  }
+
+  .ol-fold-body {
+    padding: var(--ol-space-2);
+  }
+
+  /* Disclosures: <details class="ol-details"><summary>…</summary>…</details>.
+     Accordions: give several <details class="ol-accordion"> the same name to open one at a time. */
+
+  .ol-details > summary,
+  .ol-accordion > summary {
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-1-5);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .ol-details > summary::-webkit-details-marker,
+  .ol-accordion > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .ol-details > summary::before,
+  .ol-accordion > summary::after {
+    content: "";
+    flex: none;
+    width: 0.375rem;
+    height: 0.375rem;
+    border-inline-end: 1.5px solid currentColor;
+    border-block-end: 1.5px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-accordion > summary::after {
+    margin-inline-end: var(--ol-space-1);
+  }
+
+  .ol-details > summary {
+    display: inline-flex;
+    color: var(--ol-color-accent-text);
+    font-size: var(--ol-font-size-xs);
+    font-weight: var(--ol-font-weight-medium);
+  }
+
+  .ol-details[open] > summary::before,
+  .ol-accordion[open] > summary::after {
+    transform: rotate(45deg);
+  }
+
+  .ol-details > :not(summary) {
+    margin-block-start: var(--ol-space-2);
+  }
+
+  .ol-accordion {
+    border-block-end: 1px solid var(--ol-color-border);
+  }
+
+  .ol-accordion > summary {
+    justify-content: space-between;
+    min-height: var(--ol-size-control-lg);
+    font-weight: var(--ol-font-weight-medium);
+  }
+
+  .ol-accordion > :not(summary) {
+    padding-block-end: var(--ol-space-4);
+    color: var(--ol-color-fg-muted);
+  }
+
+  /* Disclosures, accordions and folds open and close smoothly where the browser can animate to
+     their content's height. The clip leaves room for focus rings. */
+  @supports selector(::details-content) {
+    :is(.ol-details, .ol-accordion, .ol-fold) {
+      interpolate-size: allow-keywords;
+    }
+
+    :is(.ol-details, .ol-accordion, .ol-fold)::details-content {
+      block-size: 0;
+      overflow: clip;
+      overflow-clip-margin: calc(var(--ol-focus-width) + var(--ol-focus-offset));
+      transition:
+        block-size var(--ol-duration-slow) var(--ol-ease-standard),
+        content-visibility var(--ol-duration-slow) allow-discrete;
+    }
+
+    :is(.ol-details, .ol-accordion, .ol-fold)[open]::details-content {
+      block-size: auto;
+    }
+  }
+
+  /*
+   * Navigation inside a page: tabs, segmented controls, pagination, and quiet links.
+   */
+
+  /* Tabs: links along a line, each a separate page or URL state. Mark the current one with
+     aria-current="page". (For in-page panels switched by script, use the ARIA tabs pattern.) */
+  .ol-tabs {
+    display: flex;
+    gap: var(--ol-space-1);
+    margin-block-end: var(--ol-space-4);
+    overflow-x: auto;
+    border-block-end: 1px solid var(--ol-color-border);
+    scrollbar-width: none;
+  }
+
+  .ol-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ol-space-1-5);
+    min-height: var(--ol-size-control-lg);
+    margin-block-end: -1px;
+    padding-inline: var(--ol-space-2-5);
+    border-block-end: 2px solid transparent;
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-sm);
+    font-weight: var(--ol-font-weight-medium);
+    white-space: nowrap;
+    transition:
+      color var(--ol-duration-fast) var(--ol-ease-standard),
+      border-color var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-tab:hover {
+    border-block-end-color: var(--ol-color-border-strong);
+    color: var(--ol-color-fg);
+    text-decoration: none;
+  }
+
+  .ol-tab[aria-current="page"],
+  .ol-tab[aria-selected="true"] {
+    border-block-end-color: var(--ol-color-accent-solid);
+    color: var(--ol-color-fg);
+  }
+
+  /* The ARIA tabs pattern, for panels switched by script: buttons with role="tab" in a
+     role="tablist", each controlling a role="tabpanel". */
+  button.ol-tab {
+    padding-block: 0;
+    border-inline: 0;
+    border-block-start: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .ol-tab:focus-visible {
+    outline-offset: calc(var(--ol-focus-width) * -1);
+    border-radius: var(--ol-radius-control) var(--ol-radius-control) 0 0;
+  }
+
+  .ol-tab-panel:focus-visible {
+    outline-offset: var(--ol-space-1);
+    border-radius: var(--ol-radius-xs);
+  }
+
+  /* Segmented controls: mutually exclusive options. Buttons mark the chosen one with
+     aria-pressed="true", links with aria-current="true". Put each label in a <span>: where the
+     options do not fit, an option with an icon shows only its icon (screen readers still read the
+     label), and one without ends its label with an ellipsis. -icons shows only the icons always;
+     give each option an aria-label then. */
+  .ol-segmented {
+    display: inline-flex;
+    box-shadow: inset 0 0 0 1px var(--ol-color-border);
+    gap: 2px;
+    min-inline-size: 0;
+    margin: 0;
+    padding: 2px;
+    border: 0;
+    border-radius: calc(var(--ol-radius-control) + 2px);
+    background: var(--ol-color-fill);
+  }
+
+  .ol-segmented > a,
+  .ol-segmented > button {
+    display: inline-flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ol-space-1);
+    min-width: 0;
+    min-height: var(--ol-size-target-min);
+    padding-inline: var(--ol-space-2-5);
+    border: 0;
+    border-radius: var(--ol-radius-control);
+    background: transparent;
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-xs);
+    font-weight: var(--ol-font-weight-medium);
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background var(--ol-duration-fast) var(--ol-ease-standard),
+      color var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-segmented > a:hover,
+  .ol-segmented > button:hover {
+    color: var(--ol-color-fg);
+    text-decoration: none;
+  }
+
+  .ol-segmented > [aria-pressed="true"],
+  .ol-segmented > [aria-current="true"] {
+    background: var(--ol-color-surface);
+    box-shadow: var(--ol-shadow-sm);
+    color: var(--ol-color-fg);
+  }
+
+  .ol-segmented > :is(a, button) > span:not(.ol-sr-only) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* With an icon, a label that does not fit beside it wraps onto a second line, which the option
+     clips: the icon stays, alone and centred. */
+  .ol-segmented > :is(a, button):has(> .ol-icon) {
+    flex-wrap: wrap;
+    align-content: flex-start;
+    height: var(--ol-size-target-min);
+    overflow: hidden;
+  }
+
+  .ol-segmented > :is(a, button):has(> .ol-icon) > span {
+    line-height: var(--ol-size-target-min);
+  }
+
+  .ol-segmented > :is(a, button) > svg {
+    margin-block: calc((var(--ol-size-target-min) - var(--ol-size-icon-sm)) / 2);
+  }
+
+  .ol-segmented-block {
+    display: flex;
+  }
+
+  .ol-segmented-icons > a,
+  .ol-segmented-icons > button {
+    flex: none;
+    width: var(--ol-size-control-sm);
+    padding-inline: 0;
+  }
+
+  /* Pagination: a summary and previous/next links. */
+  .ol-pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ol-space-3);
+    margin-block-start: var(--ol-space-3);
+    color: var(--ol-color-fg-muted);
+    font-size: var(--ol-font-size-xs);
+  }
+
+  .ol-pager-links {
+    display: flex;
+    gap: var(--ol-space-2);
+  }
+
+  /* Quiet links: a small link, often only an icon, that stays out of the way until wanted, such as
+     the source of a line. <a class="ol-quiet-link" href="…" aria-label="Open the event">…icon…</a>
+     keeps a 24px target (WCAG 2.5.8), and its icon reaches 3:1 at rest (WCAG 1.4.11). */
+  .ol-quiet-link {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ol-space-1);
+    min-width: var(--ol-size-target-min);
+    min-height: var(--ol-size-target-min);
+    padding-inline: var(--ol-space-1);
+    border-radius: var(--ol-radius-sm);
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-xs);
+    line-height: 1;
+    white-space: nowrap;
+    transition:
+      background var(--ol-duration-fast) var(--ol-ease-standard),
+      color var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-quiet-link .ol-icon {
+    color: var(--ol-color-icon-subtle);
+    transition: color var(--ol-duration-fast) var(--ol-ease-standard);
+  }
+
+  .ol-quiet-link:hover,
+  .ol-quiet-link:focus-visible {
+    background: var(--ol-color-fill-hover);
+    color: var(--ol-color-fg);
+    text-decoration: none;
+  }
+
+  .ol-quiet-link:hover .ol-icon,
+  .ol-quiet-link:focus-visible .ol-icon {
+    color: currentColor;
+  }
+
+  /* The sidebar's menu button (a .ol-btn) appears only on narrow screens. It lives in the component
+     layer so it overrides the button's display. */
+  .ol-sidebar-head .ol-nav-toggle-button {
+    display: none;
+  }
+
+  @media (max-width: 860px) {
+    .ol-sidebar-head .ol-nav-toggle-button {
+      display: inline-flex;
+      margin-inline-start: auto;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ol-segmented > [aria-pressed="true"],
+    .ol-segmented > [aria-current="true"] {
+      outline: 2px solid Highlight;
+    }
+
+    .ol-tab[aria-current="page"],
+    .ol-tab[aria-selected="true"] {
+      border-block-end-color: Highlight;
+    }
+  }
+
+  /*
+   * Overlays: popovers, menus, and dialogs, built on the platform's top layer so they need no
+   * z-index and, for popovers, no JavaScript.
+   *
+   *   <button class="ol-btn" popovertarget="more">More</button>
+   *   <div class="ol-menu" id="more" popover>
+   *     <a class="ol-menu-item" href="…">…</a>
+   *     <hr class="ol-menu-separator">
+   *     <form method="post"><button class="ol-menu-item ol-menu-item-danger">…</button></form>
+   *   </div>
+   *
+   * The invoker is the popover's implicit anchor, so where CSS anchor positioning is supported the
+   * menu opens below its button with no inline style (strict CSP forbids style attributes); elsewhere
+   * it opens centred in the viewport. -end aligns a menu to its button's end, -above opens it above
+   * the button (a menu at the foot of the sidebar), and either way it flips when there is no room.
+   * Dialogs use <dialog class="ol-dialog">, opened by command="show-modal" commandfor="id" or by
+   * script.
+   *
+   * A choice among options, such as the language, marks the chosen item with aria-current="true" (a
+   * link or a button in a plain menu) or aria-checked="true" (role="menuitemradio", in a role="menu"
+   * that script drives with the arrow keys); either way it gets a check mark at its end.
+   */
+
+  .ol-popover,
+  .ol-menu {
+    margin: auto;
+    padding: var(--ol-space-1);
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-container);
+    background: var(--ol-color-surface-overlay);
+    box-shadow: var(--ol-shadow-lg);
+    color: var(--ol-color-fg);
+    /* Where the menu comes from: it slides out of its button. */
+    --ol-popover-from: translateY(-0.25rem) scale(0.98);
+    opacity: 0;
+    transform: var(--ol-popover-from);
+    transform-origin: top;
+    transition:
+      opacity var(--ol-duration-normal) var(--ol-ease-enter),
+      transform var(--ol-duration-normal) var(--ol-ease-enter),
+      overlay var(--ol-duration-normal) allow-discrete,
+      display var(--ol-duration-normal) allow-discrete;
+  }
+
+  .ol-popover:popover-open,
+  .ol-menu:popover-open {
+    opacity: 1;
+    transform: none;
+  }
+
+  @starting-style {
+    .ol-popover:popover-open,
+    .ol-menu:popover-open {
+      opacity: 0;
+      transform: var(--ol-popover-from);
+    }
+  }
+
+  /* Closing is quicker than opening. */
+  .ol-popover:not(:popover-open),
+  .ol-menu:not(:popover-open) {
+    transition-duration: var(--ol-duration-fast);
+    transition-timing-function: var(--ol-ease-exit);
+  }
+
+  .ol-menu-above {
+    --ol-popover-from: translateY(0.25rem) scale(0.98);
+    transform-origin: bottom;
+  }
+
+  .ol-popover {
+    width: min(20rem, calc(100vw - 2rem));
+    padding: var(--ol-space-4);
+  }
+
+  .ol-menu {
+    min-width: 11rem;
+    max-width: min(20rem, calc(100vw - 2rem));
+  }
+
+  @supports (position-area: block-end) {
+    .ol-popover,
+    .ol-menu {
+      position-area: block-end span-inline-end;
+      position-try-fallbacks: flip-block, flip-inline;
+      margin: var(--ol-space-1) 0 0;
+    }
+
+    .ol-menu-end {
+      position-area: block-end span-inline-start;
+    }
+
+    .ol-menu-above {
+      position-area: block-start span-inline-end;
+      margin: 0 0 var(--ol-space-1);
+    }
+  }
+
+  /* A menu is at least as wide as its button. */
+  @supports (width: anchor-size(width)) {
+    .ol-menu {
+      min-width: max(11rem, anchor-size(width));
+    }
+  }
+
+  .ol-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--ol-space-2);
+    width: 100%;
+    min-height: var(--ol-size-control-md);
+    padding-inline: var(--ol-space-2);
+    border: 0;
+    border-radius: var(--ol-radius-control);
+    background: none;
+    color: var(--ol-color-fg);
+    font-size: var(--ol-font-size-sm);
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .ol-menu-item .ol-icon {
+    color: var(--ol-color-fg-subtle);
+  }
+
+  .ol-menu-item:hover,
+  .ol-menu-item:focus-visible {
+    background: var(--ol-color-fill-hover);
+    outline: none;
+    text-decoration: none;
+  }
+
+  .ol-menu-item[aria-current="true"],
+  .ol-menu-item[aria-checked="true"] {
+    font-weight: var(--ol-font-weight-medium);
+  }
+
+  /* The check mark of the chosen option, drawn with two borders. It is not mirrored in
+     right-to-left text, so it uses physical sides. */
+  .ol-menu-item[aria-current="true"]::after,
+  .ol-menu-item[aria-checked="true"]::after {
+    content: "";
+    flex: none;
+    width: 0.3125rem;
+    height: 0.625rem;
+    margin-inline: auto 0.375rem;
+    border-right: 2px solid var(--ol-color-accent-text);
+    border-bottom: 2px solid var(--ol-color-accent-text);
+    transform: translateY(-0.0625rem) rotate(45deg);
+  }
+
+  /* Text at the end of an item: a shortcut, or the current value of a setting. */
+  .ol-menu-item-end {
+    margin-inline-start: auto;
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-xs);
+  }
+
+  /* Who or what a menu is about, at its top: <div class="ol-menu-header"><span class="ol-entity">…</span></div> */
+  .ol-menu-header {
+    margin: calc(var(--ol-space-1) * -1) calc(var(--ol-space-1) * -1) var(--ol-space-1);
+    padding: var(--ol-space-3);
+    border-block-end: 1px solid var(--ol-color-border);
+  }
+
+  .ol-menu-item-danger,
+  .ol-menu-item-danger .ol-icon {
+    color: var(--ol-color-danger-text);
+  }
+
+  .ol-menu-item-danger:hover {
+    background: var(--ol-color-danger-bg);
+  }
+
+  .ol-menu-label {
+    padding: var(--ol-space-1-5) var(--ol-space-2) var(--ol-space-1);
+    color: var(--ol-color-fg-subtle);
+    font-size: var(--ol-font-size-xs);
+    font-weight: var(--ol-font-weight-medium);
+  }
+
+  .ol-menu-separator {
+    margin: var(--ol-space-1) calc(var(--ol-space-1) * -1);
+  }
+
+  .ol-menu form {
+    display: contents;
+  }
+
+  /* Dialogs */
+
+  .ol-dialog {
+    width: min(32rem, calc(100vw - 2rem));
+    max-height: calc(100dvh - 4rem);
+    padding: 0;
+    overflow: auto;
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-overlay);
+    background: var(--ol-color-surface-overlay);
+    box-shadow: var(--ol-shadow-xl);
+    color: var(--ol-color-fg);
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+    transition:
+      opacity var(--ol-duration-normal) var(--ol-ease-enter),
+      transform var(--ol-duration-normal) var(--ol-ease-enter),
+      overlay var(--ol-duration-normal) allow-discrete,
+      display var(--ol-duration-normal) allow-discrete;
+  }
+
+  .ol-dialog[open] {
+    opacity: 1;
+    transform: none;
+  }
+
+  @starting-style {
+    .ol-dialog[open] {
+      opacity: 0;
+      transform: translateY(0.5rem) scale(0.98);
+    }
+  }
+
+  .ol-dialog::backdrop {
+    background: var(--ol-color-overlay);
+    opacity: 0;
+    transition:
+      opacity var(--ol-duration-normal) var(--ol-ease-standard),
+      overlay var(--ol-duration-normal) allow-discrete,
+      display var(--ol-duration-normal) allow-discrete;
+  }
+
+  .ol-dialog[open]::backdrop {
+    opacity: 1;
+  }
+
+  @starting-style {
+    .ol-dialog[open]::backdrop {
+      opacity: 0;
+    }
+  }
+
+  .ol-dialog-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ol-space-3);
+    padding: var(--ol-space-5) var(--ol-space-5) 0;
+  }
+
+  .ol-dialog-title {
+    flex: 1;
+    font-size: var(--ol-font-size-lg);
+    font-weight: var(--ol-font-weight-semibold);
+    line-height: var(--ol-line-height-lg);
+  }
+
+  .ol-dialog-body {
+    padding: var(--ol-space-3) var(--ol-space-5) var(--ol-space-5);
+    color: var(--ol-color-fg-muted);
+  }
+
+  .ol-dialog-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--ol-space-2);
+    padding: var(--ol-space-3) var(--ol-space-5);
+    border-block-start: 1px solid var(--ol-color-border);
+    background: var(--ol-color-bg-subtle);
+  }
+
+  @media (forced-colors: active) {
+    .ol-popover,
+    .ol-menu,
+    .ol-dialog {
+      border: 1px solid CanvasText;
+    }
+
+    .ol-menu-item:hover,
+    .ol-menu-item:focus-visible {
+      outline: 2px solid Highlight;
+    }
+
+    .ol-menu-item[aria-current="true"]::after,
+    .ol-menu-item[aria-checked="true"]::after {
+      border-color: CanvasText;
+    }
+  }
+
+  /*
+   * Prose: running content written elsewhere, such as Markdown that a person or an agent wrote,
+   * rendered as plain HTML: headings, paragraphs, lists, quotes, code, tables, rules and links. The
+   * elements need no classes. Put each table in a .ol-prose-table, which scrolls sideways; a code
+   * block may be a .ol-code (with a label) or a bare <pre>.
+   *
+   *   <div class="ol-prose ol-prose-sm"><h4>…</h4><p>…</p><ul><li>…</li></ul>
+   *     <div class="ol-prose-table"><table>…<td class="ol-align-end">…</td>…</table></div></div>
+   */
+
+  .ol-prose {
+    min-width: 0;
+    font-size: var(--ol-font-size-md);
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+  }
+
+  /* At the size of interface text, for prose inside a list, a feed or a card. */
+  .ol-prose-sm {
+    font-size: var(--ol-font-size-sm);
+  }
+
+  :lang(zh) .ol-prose {
+    line-height: 1.75;
+  }
+
+  /* Blocks are spaced by the rules below, not by their own margins. */
+  .ol-prose :where(ul, ol, pre) {
+    margin: 0;
+  }
+
+  .ol-prose > * + *,
+  .ol-prose :is(li, blockquote) > * + * {
+    margin-block-start: var(--ol-space-3);
+  }
+
+  .ol-prose :is(h1, h2, h3, h4, h5, h6) {
+    color: var(--ol-color-fg);
+    font-weight: var(--ol-font-weight-semibold);
+    line-height: 1.4;
+    text-wrap: balance;
+  }
+
+  /* Headings step down from the page's own: an app that renders a document inside a page can map its
+     levels to h4 and below, which keep to the prose's size. */
+  .ol-prose h1 {
+    font-size: var(--ol-font-size-xl);
+  }
+
+  .ol-prose h2 {
+    font-size: var(--ol-font-size-lg);
+  }
+
+  .ol-prose :is(h3, h4) {
+    font-size: var(--ol-font-size-md);
+  }
+
+  .ol-prose :is(h5, h6) {
+    font-size: var(--ol-font-size-sm);
+  }
+
+  .ol-prose > * + :is(h1, h2, h3) {
+    margin-block-start: var(--ol-space-5);
+  }
+
+  .ol-prose > * + :is(h4, h5, h6) {
+    margin-block-start: var(--ol-space-4);
+  }
+
+  .ol-prose :is(ul, ol) {
+    padding-inline-start: 1.5em;
+  }
+
+  .ol-prose li + li,
+  .ol-prose li > :is(ul, ol) {
+    margin-block-start: var(--ol-space-1);
+  }
+
+  .ol-prose li::marker {
+    color: var(--ol-color-fg-subtle);
+  }
+
+  .ol-prose blockquote {
+    margin-inline: 0;
+    padding-inline-start: var(--ol-space-3);
+    border-inline-start: 2px solid var(--ol-color-border-strong);
+    color: var(--ol-color-fg-muted);
+  }
+
+  .ol-prose hr {
+    margin-block: var(--ol-space-4);
+  }
+
+  /* Links in running text are underlined, so they never rely on colour alone (WCAG 1.4.1). */
+  .ol-prose a {
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, currentColor 40%, transparent);
+  }
+
+  .ol-prose a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* A bare code block, or text kept as written. */
+  .ol-prose pre:not(.ol-code > pre) {
+    padding: var(--ol-space-2-5) var(--ol-space-3);
+    overflow-x: auto;
+    border: 1px solid var(--ol-color-border);
+    border-radius: var(--ol-radius-control);
+    background: var(--ol-color-bg-subtle);
+    font-size: var(--ol-font-size-xs);
+    line-height: 1.65;
+    overflow-wrap: normal;
+  }
+
+  /* Tables: cells keep to one line, so a wide table scrolls; .ol-cell-wrap lets a long cell wrap. */
+  .ol-prose-table {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .ol-prose table {
+    border-collapse: collapse;
+    font-size: var(--ol-font-size-xs);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.55;
+  }
+
+  .ol-prose :is(th, td) {
+    padding: var(--ol-space-1-5) var(--ol-space-3);
+    border: 1px solid var(--ol-color-border);
+    overflow-wrap: normal;
+    text-align: start;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+
+  .ol-prose th {
+    background: var(--ol-color-bg-subtle);
+    color: var(--ol-color-fg);
+    font-weight: var(--ol-font-weight-semibold);
+  }
+
+  .ol-prose .ol-cell-wrap {
+    min-width: 14rem;
+    white-space: normal;
+  }
+
+  /*
+   * Components inside the layouts that change them. These rules sit in the component layer, after
+   * the components themselves, because a rule in the layout layer cannot override a component.
+   */
+
+  /* The sign-in page's footer: a link-style button reads as one of its links. */
+  .ol-auth-foot .ol-btn-link {
+    font-size: inherit;
+  }
+
+  /* The hero's dark panel: buttons other than the primary one, and status pills, take the panel's
+     own colours. The primary button keeps the brand's solid colour. */
+  .ol-hero .ol-btn-secondary,
+  .ol-hero .ol-btn-ghost {
+    --ol-btn-bg: color-mix(in srgb, var(--ol-color-on-brand-panel) 8%, transparent);
+    --ol-btn-bg-hover: color-mix(in srgb, var(--ol-color-on-brand-panel) 14%, transparent);
+    --ol-btn-bg-active: color-mix(in srgb, var(--ol-color-on-brand-panel) 20%, transparent);
+    --ol-btn-fg: var(--ol-color-on-brand-panel);
+    --ol-btn-border: color-mix(in srgb, var(--ol-color-on-brand-panel) 22%, transparent);
+    --ol-btn-shadow: none;
+  }
+
+  .ol-hero .ol-btn-ghost {
+    --ol-btn-bg: transparent;
+    --ol-btn-border: transparent;
+  }
+
+  .ol-hero .ol-status {
+    border-color: color-mix(in srgb, var(--ol-color-on-brand-panel) 20%, transparent);
+    background: color-mix(in srgb, var(--ol-color-on-brand-panel) 8%, transparent);
+    color: var(--ol-color-on-brand-panel);
+  }
+
+  .ol-hero a.ol-status:hover {
+    border-color: color-mix(in srgb, var(--ol-color-on-brand-panel) 36%, transparent);
+  }
+
+  /* A status dot keeps its tone on the dark panel, lightened to stay visible. */
+  .ol-hero .ol-status > .ol-dot {
+    color: color-mix(in oklab, var(--ol-status-dot) 65%, var(--ol-color-on-brand-panel));
+  }
+}
+
+@layer ol.utilities {
+  /*
+   * Utilities: a deliberately short list. Reach for a component or a layout primitive first; these
+   * cover the small adjustments that would otherwise become one-off CSS.
+   */
+
+  .ol-muted {
+    color: var(--ol-color-fg-muted);
+  }
+
+  .ol-subtle {
+    color: var(--ol-color-fg-subtle);
+  }
+
+  /* Tones for text and icons, such as counts that say how something went. Pair a tone with an icon
+     or words; never let colour alone carry the meaning. */
+  .ol-tone-accent {
+    color: var(--ol-color-accent-text);
+  }
+
+  .ol-tone-success {
+    color: var(--ol-color-success-text);
+  }
+
+  .ol-tone-warning {
+    color: var(--ol-color-warning-text);
+  }
+
+  .ol-tone-danger {
+    color: var(--ol-color-danger-text);
+  }
+
+  .ol-tone-info {
+    color: var(--ol-color-info-text);
+  }
+
+  /* Text alignment, such as for table cells. */
+  .ol-align-start {
+    text-align: start;
+  }
+
+  .ol-align-center {
+    text-align: center;
+  }
+
+  .ol-align-end {
+    text-align: end;
+  }
+
+  .ol-nowrap {
+    white-space: nowrap;
+  }
+
+  .ol-break {
+    overflow-wrap: anywhere;
+  }
+
+  /* Stored text shown whole: line breaks kept, long words wrapped. */
+  .ol-text-pre {
+    line-height: 1.65;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .ol-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ol-truncate {
+    display: block;
+    max-width: var(--ol-truncate, 36ch);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ol-line-clamp {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--ol-lines, 2);
+    line-clamp: var(--ol-lines, 2);
+  }
+
+  .ol-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+}
