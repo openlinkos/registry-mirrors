@@ -1,0 +1,35 @@
+# 需要登录的入口，回源模式（AUTH_MODE=http）：明文 HTTP，由前面的 CDN 或反向代理负责 TLS。
+# 默认端口 15001 Docker Hub、15002 gcr.io、15003 ghcr.io、15004 registry.k8s.io、15005 quay.io，
+# 和公开入口共用同一个 zot 缓存，只是多了一道口令。用户在 users.caddy。
+
+import login.caddy
+
+http://:{$AUTH_PORT_DOCKER:15001} {
+	import access_log
+	import login
+	import mirror docker.io
+}
+
+http://:{$AUTH_PORT_GCR:15002} {
+	import access_log
+	import login
+	import mirror gcr.io
+}
+
+http://:{$AUTH_PORT_GHCR:15003} {
+	import access_log
+	import login
+	import mirror ghcr.io
+}
+
+http://:{$AUTH_PORT_K8S:15004} {
+	import access_log
+	import login
+	import mirror registry.k8s.io
+}
+
+http://:{$AUTH_PORT_QUAY:15005} {
+	import access_log
+	import login
+	import mirror quay.io
+}

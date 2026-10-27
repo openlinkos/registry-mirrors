@@ -1,0 +1,35 @@
+# 需要登录的入口，回源模式（AUTH_MODE=vhost）：和 MODE=vhost 共用明文端口 HTTP_PORT，按访问的域名区分：
+# docker、gcr、ghcr、k8s、quay.<AUTH_DOMAIN>（AUTH_DOMAIN 不能和 DOMAIN 相同）。
+# 和公开入口共用同一个 zot 缓存，只是多了一道口令。用户在 users.caddy。
+
+import login.caddy
+
+http://docker.{$AUTH_DOMAIN}:{$HTTP_PORT:8080} {
+	import access_log
+	import login
+	import mirror docker.io
+}
+
+http://gcr.{$AUTH_DOMAIN}:{$HTTP_PORT:8080} {
+	import access_log
+	import login
+	import mirror gcr.io
+}
+
+http://ghcr.{$AUTH_DOMAIN}:{$HTTP_PORT:8080} {
+	import access_log
+	import login
+	import mirror ghcr.io
+}
+
+http://k8s.{$AUTH_DOMAIN}:{$HTTP_PORT:8080} {
+	import access_log
+	import login
+	import mirror registry.k8s.io
+}
+
+http://quay.{$AUTH_DOMAIN}:{$HTTP_PORT:8080} {
+	import access_log
+	import login
+	import mirror quay.io
+}

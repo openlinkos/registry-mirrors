@@ -1,0 +1,35 @@
+# 需要登录的入口，直连模式（AUTH_MODE=tls）：五个域名 docker/gcr/ghcr/k8s/quay.<AUTH_DOMAIN>，自动 HTTPS。
+# 和公开入口共用同一个 zot 缓存，只是多了一道口令。用户在 users.caddy。
+# 只要需要登录的镜像站时，设 MODE=off 关掉公开入口。
+
+import login.caddy
+
+docker.{$AUTH_DOMAIN} {
+	import access_log
+	import login
+	import mirror docker.io
+}
+
+gcr.{$AUTH_DOMAIN} {
+	import access_log
+	import login
+	import mirror gcr.io
+}
+
+ghcr.{$AUTH_DOMAIN} {
+	import access_log
+	import login
+	import mirror ghcr.io
+}
+
+k8s.{$AUTH_DOMAIN} {
+	import access_log
+	import login
+	import mirror registry.k8s.io
+}
+
+quay.{$AUTH_DOMAIN} {
+	import access_log
+	import login
+	import mirror quay.io
+}

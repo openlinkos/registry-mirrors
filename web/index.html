@@ -1,0 +1,451 @@
+<!doctype html>
+<!-- The usage page a browser sees at any mirror host, served by Caddy as static files. It loads nothing from
+     elsewhere and carries English and Chinese; assets/head.js picks the language (?lang=, the relay-lang cookie,
+     the browser) and the theme before the page is drawn, and assets/site.js fills in the mirror addresses: from
+     site.json's domains, or worked out from this page's own address (docker.example.com → gcr.example.com and
+     so on). data-variant is cache (registry-mirrors, Caddy and zot) or direct (registry-mirrors-caddy) and only
+     changes some answers. The styles and fonts come from @openlinkos/ui (scripts/vendor-ui.sh); the icons below
+     are Lucide's, from the same package. ?image=<image> fills in the converter. -->
+<html lang="en" data-variant="cache">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>LinkOS Mirrors</title>
+<meta name="description" content="Docker Hub, gcr.io, ghcr.io, registry.k8s.io and quay.io, through mirror addresses on this site.">
+<link rel="icon" href="/assets/brands/linkos-mirrors/favicon.svg" type="image/svg+xml" data-mark="favicon.svg">
+<link rel="stylesheet" href="/assets/ui.css">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/head.js"></script>
+<script type="module" src="/assets/site.js"></script>
+</head>
+<body data-brand="linkos-mirrors">
+<svg xmlns="http://www.w3.org/2000/svg" hidden aria-hidden="true"><symbol id="i-arrow-right-left" viewBox="0 0 24 24"><path d="m16 3 4 4-4 4" /><path d="M20 7H4" /><path d="m8 21-4-4 4-4" /><path d="M4 17h16" /></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></symbol><symbol id="i-external-link" viewBox="0 0 24 24"><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></symbol><symbol id="i-file-text" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /><path d="M14 2v5a1 1 0 0 0 1 1h5" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></symbol><symbol id="i-languages" viewBox="0 0 24 24"><path d="m5 8 6 6" /><path d="m4 14 6-6 2-3" /><path d="M2 5h12" /><path d="M7 2h1" /><path d="m22 22-5-10-5 10" /><path d="M14 18h6" /></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></symbol><symbol id="i-sun-moon" viewBox="0 0 24 24"><path d="M12 2v2" /><path d="M14.837 16.385a6 6 0 1 1-7.223-7.222c.624-.147.97.66.715 1.248a4 4 0 0 0 5.26 5.259c.589-.255 1.396.09 1.248.715" /><path d="M16 12a4 4 0 0 0-4-4" /><path d="m19 5-1.256 1.256" /><path d="M20 12h2" /></symbol><symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2" /></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></symbol><symbol id="i-triangle-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" /><path d="M12 9v4" /><path d="M12 17h.01" /></symbol></svg>
+<template id="tpl-copy"><button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="" aria-label="Copy" title="Copy" data-zh-aria-label="复制" data-zh-title="复制"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button></template>
+<a class="ol-skip-link" href="#main"><span data-l="en">Skip to content</span><span data-l="zh" lang="zh-CN">跳到正文</span></a>
+<header class="ol-site-header">
+  <a class="ol-brand" href="#main"><img src="/assets/brands/linkos-mirrors/logo.svg" alt="" width="24" height="24" class="site-logo-light" data-mark="logo.svg"><img src="/assets/brands/linkos-mirrors/logo-dark.svg" alt="" width="24" height="24" class="site-logo-dark" data-mark="logo-dark.svg"><span data-name>LinkOS Mirrors</span></a>
+  <nav class="ol-site-nav" aria-label="On this page" data-zh-aria-label="本页">
+    <a href="#start"><span data-l="en">Get started</span><span data-l="zh" lang="zh-CN">开始使用</span></a>
+    <a href="#convert"><span data-l="en">Convert</span><span data-l="zh" lang="zh-CN">地址转换</span></a>
+    <a href="#mirrors"><span data-l="en">Mirrors</span><span data-l="zh" lang="zh-CN">加速地址</span></a>
+    <a href="#status" data-if="status" hidden><span data-l="en">Status</span><span data-l="zh" lang="zh-CN">服务状态</span></a>
+    <a href="#faq"><span data-l="en">Questions</span><span data-l="zh" lang="zh-CN">常见问题</span></a>
+  </nav>
+  <div class="ol-site-tools">
+    <button class="ol-btn ol-btn-ghost ol-btn-sm only-js" type="button" popovertarget="lang-menu"><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-languages"/></svg><span class="ol-sr-only"><span data-l="en">Language: </span><span data-l="zh" lang="zh-CN">语言：</span></span><span data-l="en">English</span><span data-l="zh" lang="zh-CN">简体中文</span><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-chevron-down"/></svg></button>
+    <div class="ol-menu ol-menu-end" id="lang-menu" popover>
+      <a class="ol-menu-item" href="?lang=en" lang="en" hreflang="en" data-lang="en" aria-current="true">English</a>
+      <a class="ol-menu-item" href="?lang=zh" lang="zh-CN" hreflang="zh-CN" data-lang="zh">简体中文</a>
+    </div>
+    <fieldset class="ol-segmented ol-segmented-icons only-js">
+      <legend class="ol-sr-only"><span data-l="en">Theme</span><span data-l="zh" lang="zh-CN">配色</span></legend>
+      <button type="button" data-set-theme="auto" aria-pressed="true" aria-label="Auto" data-zh-aria-label="自动" title="Auto" data-zh-title="自动"><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-sun-moon"/></svg></button>
+      <button type="button" data-set-theme="light" aria-pressed="false" aria-label="Light" data-zh-aria-label="浅色" title="Light" data-zh-title="浅色"><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-sun"/></svg></button>
+      <button type="button" data-set-theme="dark" aria-pressed="false" aria-label="Dark" data-zh-aria-label="深色" title="Dark" data-zh-title="深色"><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-moon"/></svg></button>
+    </fieldset>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <section class="ol-hero" aria-labelledby="hero-title">
+    <div class="ol-hero-rings" aria-hidden="true"><img class="ol-rings-mark" src="/assets/brands/linkos-mirrors/logo-dark.svg" alt="" data-mark="logo-dark.svg"></div>
+    <div class="ol-hero-body">
+      <h1 class="ol-hero-title" id="hero-title"><span data-l="en">Pull container images through a mirror</span><span data-l="zh" lang="zh-CN">容器镜像加速</span></h1>
+      <p class="ol-hero-lead"><span data-l="en">Docker Hub, gcr.io, ghcr.io, registry.k8s.io and quay.io, through mirror addresses on this site. Pull only: no push, search or catalog. <span data-v="cache">Images pulled once are cached here, so later pulls are fast.</span><span data-v="direct">Nothing is stored here: every pull passes straight through.</span></span><span data-l="zh" lang="zh-CN">Docker Hub、gcr.io、ghcr.io、registry.k8s.io 和 quay.io 的镜像，经由本站的加速地址拉取。只支持拉取，不支持推送、搜索和列出仓库。<span data-v="cache">拉取过的镜像缓存在本站，再拉更快。</span><span data-v="direct">本站不保存镜像，每次拉取都直接转发。</span></span></p>
+      <div class="ol-hero-actions">
+        <a class="ol-btn ol-btn-primary ol-btn-lg" href="#start"><span data-l="en">Get started</span><span data-l="zh" lang="zh-CN">开始使用</span></a>
+        <a class="ol-btn ol-btn-secondary ol-btn-lg" href="#convert"><svg class="ol-icon" aria-hidden="true"><use href="#i-arrow-right-left"/></svg><span data-l="en">Convert an image</span><span data-l="zh" lang="zh-CN">转换镜像地址</span></a>
+      </div>
+      <p class="ol-hero-meta" data-if="operator" hidden><span data-l="en">Run by <span data-operator></span>.</span><span data-l="zh" lang="zh-CN">由 <span data-operator></span> 运营。</span></p>
+    </div>
+  </section>
+
+  <section class="ol-site-section" id="start" aria-labelledby="start-title">
+    <div class="ol-site-section-header">
+      <h2 class="ol-site-section-title" id="start-title"><span data-l="en">Get started</span><span data-l="zh" lang="zh-CN">开始使用</span></h2>
+      <p class="ol-site-section-description"><span data-l="en">Point your container runtime at the mirror once; pulls then go through this site without changing a single image name.</span><span data-l="zh" lang="zh-CN">给容器运行时配置一次镜像加速，之后拉取会自动经过本站，镜像名一个字都不用改。</span></p>
+    </div>
+    <div class="ol-alert ol-alert-info site-placeholder" role="status" data-if="placeholder" hidden><svg class="ol-icon" aria-hidden="true"><use href="#i-info"/></svg><div class="ol-alert-body"><p class="ol-alert-title"><span data-l="en">The mirror addresses are placeholders</span><span data-l="zh" lang="zh-CN">加速地址是占位符</span></p><p><span data-l="en">This page could not work out the mirror addresses from its own address (opened by IP or localhost, say), so <code>docker.&lt;your-domain&gt;</code> stands in for them. Set <code>domains</code> in <code>web/site.json</code> when deploying.</span><span data-l="zh" lang="zh-CN">没能从当前地址推导出加速域名（例如用 IP 或 localhost 访问），下面用 <code>docker.&lt;你的域名&gt;</code> 占位。部署时可以在 <code>web/site.json</code> 的 <code>domains</code> 里配置。</span></p></div></div>
+    <div class="ol-tabs only-js" role="tablist" aria-label="Runtime" data-zh-aria-label="运行时">
+      <button class="ol-tab" type="button" role="tab" id="tab-docker" aria-controls="panel-docker" aria-selected="true"><span data-l="en">Docker</span><span data-l="zh" lang="zh-CN">Docker</span></button>
+      <button class="ol-tab" type="button" role="tab" id="tab-containerd" aria-controls="panel-containerd" aria-selected="false" tabindex="-1"><span data-l="en">containerd</span><span data-l="zh" lang="zh-CN">containerd</span></button>
+      <button class="ol-tab" type="button" role="tab" id="tab-k3s" aria-controls="panel-k3s" aria-selected="false" tabindex="-1"><span data-l="en">k3s / RKE2</span><span data-l="zh" lang="zh-CN">k3s / RKE2</span></button>
+      <button class="ol-tab" type="button" role="tab" id="tab-podman" aria-controls="panel-podman" aria-selected="false" tabindex="-1"><span data-l="en">Podman / CRI-O</span><span data-l="zh" lang="zh-CN">Podman / CRI-O</span></button>
+      <button class="ol-tab" type="button" role="tab" id="tab-k8s" aria-controls="panel-k8s" aria-selected="false" tabindex="-1"><span data-l="en">Kubernetes tools</span><span data-l="zh" lang="zh-CN">Kubernetes 工具</span></button>
+    </div>
+
+    <div class="ol-tab-panel site-panel" role="tabpanel" id="panel-docker" aria-labelledby="tab-docker">
+      <h3 class="ol-heading-sm only-nojs"><span data-l="en">Docker</span><span data-l="zh" lang="zh-CN">Docker</span></h3>
+      <ol class="ol-steps">
+        <li>
+          <h4 class="ol-step-title"><span data-l="en">Add the mirror to the Docker daemon</span><span data-l="zh" lang="zh-CN">给 Docker 守护进程加上镜像加速</span></h4>
+          <p class="ol-muted"><span data-l="en">In <code>/etc/docker/daemon.json</code>. If the file has content already, merge <code>registry-mirrors</code> into it instead of replacing it.</span><span data-l="zh" lang="zh-CN">编辑 <code>/etc/docker/daemon.json</code>。文件里已有内容时，把 <code>registry-mirrors</code> 合并进去，不要整体覆盖。</span></p>
+          <div class="ol-code">
+            <div class="ol-code-label"><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-file-text"/></svg>/etc/docker/daemon.json</div>
+            <pre><code id="code-docker-daemon">{
+  "registry-mirrors": ["https://<span data-d="docker">docker.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>"]
+}</code></pre>
+            <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="code-docker-daemon" aria-label="Copy" title="Copy" data-zh-aria-label="复制" data-zh-title="复制"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+          </div>
+          <div class="ol-alert ol-alert-warning site-only-hub"><svg class="ol-icon" aria-hidden="true"><use href="#i-triangle-alert"/></svg><div class="ol-alert-body"><p class="ol-alert-title"><span data-l="en">Only the Docker Hub mirror goes here</span><span data-l="zh" lang="zh-CN">这里只填 Docker Hub 的加速地址</span></p><p><span data-l="en">The other addresses mirror other registries. Listed in <code>registry-mirrors</code>, they make Docker try each of them first, and fail, on every Docker Hub pull.</span><span data-l="zh" lang="zh-CN">其他地址加速的是别的仓库。写进 <code>registry-mirrors</code> 后，每次拉取 Docker Hub 的镜像，Docker 都会先在它们上面各试一次、失败一次。</span></p></div></div>
+        </li>
+        <li>
+          <h4 class="ol-step-title"><span data-l="en">Restart Docker</span><span data-l="zh" lang="zh-CN">重启 Docker</span></h4>
+          <p class="ol-muted"><span data-l="en">Running containers restart with it, unless <code>live-restore</code> is on.</span><span data-l="zh" lang="zh-CN">正在运行的容器会跟着重启，除非开了 <code>live-restore</code>。</span></p>
+          <div class="ol-code">
+            <pre><code id="code-docker-restart">sudo systemctl restart docker</code></pre>
+            <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="code-docker-restart" aria-label="Copy" title="Copy" data-zh-aria-label="复制" data-zh-title="复制"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+          </div>
+        </li>
+        <li>
+          <h4 class="ol-step-title"><span data-l="en">Pull as usual</span><span data-l="zh" lang="zh-CN">照常拉取</span></h4>
+          <p class="ol-muted"><span data-l="en">Only Docker Hub goes through <code>registry-mirrors</code>. For the other registries, <a href="#convert">convert the image's address</a> first.</span><span data-l="zh" lang="zh-CN">只有 Docker Hub 会经过 <code>registry-mirrors</code>；其他仓库的镜像，请先<a href="#convert">转换地址</a>再拉取。</span></p>
+          <div class="ol-code">
+            <pre><code id="code-docker-pull">docker pull nginx:1.27</code></pre>
+            <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="code-docker-pull" aria-label="Copy" title="Copy" data-zh-aria-label="复制" data-zh-title="复制"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="ol-tab-panel site-panel" role="tabpanel" id="panel-containerd" aria-labelledby="tab-containerd">
+      <h3 class="ol-heading-sm only-nojs"><span data-l="en">containerd</span><span data-l="zh" lang="zh-CN">containerd</span></h3>
+      <ol class="ol-steps">
+        <li>
+          <h4 class="ol-step-title"><span data-l="en">Point containerd at its hosts directory</span><span data-l="zh" lang="zh-CN">让 containerd 读取 hosts 目录</span></h4>
+          <p class="ol-muted"><span data-l="en">In <code>/etc/containerd/config.toml</code>, for containerd 2.x:</span><span data-l="zh" lang="zh-CN">在 <code>/etc/containerd/config.toml</code> 中，containerd 2.x 写法：</span></p>
+          <div class="ol-code">
+            <div class="ol-code-label"><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-file-text"/></svg>config.toml, containerd 2.x</div>
+            <pre><code id="code-containerd-config">[plugins.&quot;io.containerd.cri.v1.images&quot;.registry]
+  config_path = &quot;/etc/containerd/certs.d&quot;</code></pre>
+            <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="code-containerd-config" aria-label="Copy" title="Copy" data-zh-aria-label="复制" data-zh-title="复制"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+          </div>
+          <div class="ol-code">
+            <div class="ol-code-label"><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-file-text"/></svg>config.toml, containerd 1.x</div>
+            <pre><code id="code-containerd-config1">[plugins.&quot;io.containerd.grpc.v1.cri&quot;.registry]
+  config_path = &quot;/etc/containerd/certs.d&quot;</code></pre>
+            <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="code-containerd-config1" aria-label="Copy" title="Copy" data-zh-aria-label="复制" data-zh-title="复制"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+          </div>
+        </li>
+        <li>
+          <h4 class="ol-step-title"><span data-l="en">Add a hosts.toml for each registry</span><span data-l="zh" lang="zh-CN">为每个仓库写一个 hosts.toml</span></h4>
+          <p class="ol-muted"><span data-l="en">Run these commands. If this site is unavailable, containerd falls back to the registry itself.</span><span data-l="zh" lang="zh-CN">直接运行下面的命令。本站不可用时，containerd 会自动退回直连上游。</span></p>
+          <div class="ol-code">
+            <pre><code id="code-containerd-hosts">sudo mkdir -p /etc/containerd/certs.d/docker.io
+sudo tee /etc/containerd/certs.d/docker.io/hosts.toml &gt;/dev/null &lt;&lt;'EOF'
+server = &quot;https://registry-1.docker.io&quot;
+
+[host.&quot;https://<span data-d="docker">docker.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>&quot;]
+  capabilities = [&quot;pull&quot;, &quot;resolve&quot;]
+EOF
+
+sudo mkdir -p /etc/containerd/certs.d/gcr.io
+sudo tee /etc/containerd/certs.d/gcr.io/hosts.toml &gt;/dev/null &lt;&lt;'EOF'
+server = &quot;https://gcr.io&quot;
+
+[host.&quot;https://<span data-d="gcr">gcr.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>&quot;]
+  capabilities = [&quot;pull&quot;, &quot;resolve&quot;]
+EOF
+
+sudo mkdir -p /etc/containerd/certs.d/ghcr.io
+sudo tee /etc/containerd/certs.d/ghcr.io/hosts.toml &gt;/dev/null &lt;&lt;'EOF'
+server = &quot;https://ghcr.io&quot;
+
+[host.&quot;https://<span data-d="ghcr">ghcr.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>&quot;]
+  capabilities = [&quot;pull&quot;, &quot;resolve&quot;]
+EOF
+
+sudo mkdir -p /etc/containerd/certs.d/registry.k8s.io
+sudo tee /etc/containerd/certs.d/registry.k8s.io/hosts.toml &gt;/dev/null &lt;&lt;'EOF'
+server = &quot;https://registry.k8s.io&quot;
+
+[host.&quot;https://<span data-d="k8s">k8s.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>&quot;]
+  capabilities = [&quot;pull&quot;, &quot;resolve&quot;]
+EOF
+
+sudo mkdir -p /etc/containerd/certs.d/quay.io
+sudo tee /etc/containerd/certs.d/quay.io/hosts.toml &gt;/dev/null &lt;&lt;'EOF'
+server = &quot;https://quay.io&quot;
+
+[host.&quot;https://<span data-d="quay">quay.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>&quot;]
+  capabilities = [&quot;pull&quot;, &quot;resolve&quot;]
+EOF</code></pre>
+            <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="code-containerd-hosts" aria-label="Copy" title="Copy" data-zh-aria-label="复制" data-zh-title="复制"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+          </div>
+        </li>
+        <li>
+          <h4 class="ol-step-title"><span data-l="en">Restart containerd</span><span data-l="zh" lang="zh-CN">重启 containerd</span></h4>
+          <div class="ol-code">
+            <pre><code id="code-containerd-restart">sudo systemctl restart containerd</code></pre>
+            <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="code-containerd-restart" aria-label="Copy" title="Copy" data-zh-aria-label="复制" data-zh-title="复制"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="ol-tab-panel site-panel" role="tabpanel" id="panel-k3s" aria-labelledby="tab-k3s">
+      <h3 class="ol-heading-sm only-nojs"><span data-l="en">k3s / RKE2</span><span data-l="zh" lang="zh-CN">k3s / RKE2</span></h3>
+      <ol class="ol-steps">
+        <li>
+          <h4 class="ol-step-title"><span data-l="en">Add the mirrors on every node</span><span data-l="zh" lang="zh-CN">在每个节点上配置镜像加速</span></h4>
+          <p class="ol-muted"><span data-l="en">In <code>/etc/rancher/k3s/registries.yaml</code> (<code>/etc/rancher/rke2/registries.yaml</code> for RKE2):</span><span data-l="zh" lang="zh-CN">编辑 <code>/etc/rancher/k3s/registries.yaml</code>（RKE2 是 <code>/etc/rancher/rke2/registries.yaml</code>）：</span></p>
+          <div class="ol-code">
+            <div class="ol-code-label"><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-file-text"/></svg>registries.yaml</div>
+            <pre><code id="code-k3s">mirrors:
+  docker.io:
+    endpoint:
+      - "https://<span data-d="docker">docker.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>"
+  gcr.io:
+    endpoint:
+      - "https://<span data-d="gcr">gcr.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>"
+  ghcr.io:
+    endpoint:
+      - "https://<span data-d="ghcr">ghcr.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>"
+  registry.k8s.io:
+    endpoint:
+      - "https://<span data-d="k8s">k8s.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>"
+  quay.io:
+    endpoint:
+      - "https://<span data-d="quay">quay.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>"</code></pre>
+            <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="code-k3s" aria-label="Copy" title="Copy" data-zh-aria-label="复制" data-zh-title="复制"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+          </div>
+        </li>
+        <li>
+          <h4 class="ol-step-title"><span data-l="en">Restart the service on each node</span><span data-l="zh" lang="zh-CN">在每个节点上重启服务</span></h4>
+          <div class="ol-code">
+            <pre><code id="code-k3s-restart">sudo systemctl restart k3s        # server
+sudo systemctl restart k3s-agent  # agent</code></pre>
+            <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="code-k3s-restart" aria-label="Copy" title="Copy" data-zh-aria-label="复制" data-zh-title="复制"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="ol-tab-panel site-panel" role="tabpanel" id="panel-podman" aria-labelledby="tab-podman">
+      <h3 class="ol-heading-sm only-nojs"><span data-l="en">Podman / CRI-O</span><span data-l="zh" lang="zh-CN">Podman / CRI-O</span></h3>
+      <ol class="ol-steps">
+        <li>
+          <h4 class="ol-step-title"><span data-l="en">Add the mirrors</span><span data-l="zh" lang="zh-CN">配置镜像加速</span></h4>
+          <p class="ol-muted"><span data-l="en">Append to <code>/etc/containers/registries.conf</code>, or put it in a new file in <code>/etc/containers/registries.conf.d/</code>:</span><span data-l="zh" lang="zh-CN">追加到 <code>/etc/containers/registries.conf</code>，或者在 <code>/etc/containers/registries.conf.d/</code> 下新建一个文件：</span></p>
+          <div class="ol-code">
+            <div class="ol-code-label"><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-file-text"/></svg>registries.conf</div>
+            <pre><code id="code-podman">[[registry]]
+prefix = &quot;docker.io&quot;
+location = &quot;docker.io&quot;
+
+[[registry.mirror]]
+location = &quot;<span data-d="docker">docker.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>"
+
+[[registry]]
+prefix = &quot;gcr.io&quot;
+location = &quot;gcr.io&quot;
+
+[[registry.mirror]]
+location = &quot;<span data-d="gcr">gcr.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>"
+
+[[registry]]
+prefix = &quot;ghcr.io&quot;
+location = &quot;ghcr.io&quot;
+
+[[registry.mirror]]
+location = &quot;<span data-d="ghcr">ghcr.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>"
+
+[[registry]]
+prefix = &quot;registry.k8s.io&quot;
+location = &quot;registry.k8s.io&quot;
+
+[[registry.mirror]]
+location = &quot;<span data-d="k8s">k8s.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>"
+
+[[registry]]
+prefix = &quot;quay.io&quot;
+location = &quot;quay.io&quot;
+
+[[registry.mirror]]
+location = &quot;<span data-d="quay">quay.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>"</code></pre>
+            <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="code-podman" aria-label="Copy" title="Copy" data-zh-aria-label="复制" data-zh-title="复制"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+          </div>
+        </li>
+        <li>
+          <h4 class="ol-step-title"><span data-l="en">Apply</span><span data-l="zh" lang="zh-CN">生效</span></h4>
+          <p class="ol-muted"><span data-l="en">Podman reads it right away; CRI-O needs a restart:</span><span data-l="zh" lang="zh-CN">Podman 立即生效；CRI-O 需要重启：</span></p>
+          <div class="ol-code">
+            <pre><code id="code-podman-apply">sudo systemctl restart crio</code></pre>
+            <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="code-podman-apply" aria-label="Copy" title="Copy" data-zh-aria-label="复制" data-zh-title="复制"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="ol-tab-panel site-panel" role="tabpanel" id="panel-k8s" aria-labelledby="tab-k8s">
+      <h3 class="ol-heading-sm only-nojs"><span data-l="en">Kubernetes tools</span><span data-l="zh" lang="zh-CN">Kubernetes 工具</span></h3>
+      <ol class="ol-steps">
+        <li>
+          <h4 class="ol-step-title"><span data-l="en">Pull the control plane through the mirror</span><span data-l="zh" lang="zh-CN">控制面镜像经由本站拉取</span></h4>
+          <p class="ol-muted"><span data-l="en">With kubeadm, on the command line or as <code>imageRepository</code> in <code>ClusterConfiguration</code>:</span><span data-l="zh" lang="zh-CN">kubeadm 在命令行里指定，或者写成 <code>ClusterConfiguration</code> 的 <code>imageRepository</code>：</span></p>
+          <div class="ol-code">
+            <pre><code id="code-kubeadm">sudo kubeadm init --image-repository <span data-d="k8s">k8s.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span></code></pre>
+            <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="code-kubeadm" aria-label="Copy" title="Copy" data-zh-aria-label="复制" data-zh-title="复制"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+          </div>
+        </li>
+        <li>
+          <h4 class="ol-step-title"><span data-l="en">Use the containerd mirrors in kind</span><span data-l="zh" lang="zh-CN">kind 使用 containerd 的镜像加速</span></h4>
+          <p class="ol-muted"><span data-l="en">kind's nodes run containerd: mount the <code>certs.d</code> directory from the containerd tab into them and point containerd at it.</span><span data-l="zh" lang="zh-CN">kind 的节点用的是 containerd：把 containerd 标签页里的 <code>certs.d</code> 目录挂进节点，并让 containerd 读取它。</span></p>
+          <div class="ol-code">
+            <div class="ol-code-label"><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-file-text"/></svg>kind-config.yaml</div>
+            <pre><code id="code-kind">kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+containerdConfigPatches:
+  - |-
+    [plugins.&quot;io.containerd.grpc.v1.cri&quot;.registry]
+      config_path = &quot;/etc/containerd/certs.d&quot;
+nodes:
+  - role: control-plane
+    extraMounts:
+      - hostPath: /etc/containerd/certs.d
+        containerPath: /etc/containerd/certs.d</code></pre>
+            <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="code-kind" aria-label="Copy" title="Copy" data-zh-aria-label="复制" data-zh-title="复制"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+          </div>
+        </li>
+        <li>
+          <h4 class="ol-step-title"><span data-l="en">Other distributions</span><span data-l="zh" lang="zh-CN">其他发行版</span></h4>
+          <p class="ol-muted"><span data-l="en">If the nodes run containerd or CRI-O, follow that tab.</span><span data-l="zh" lang="zh-CN">节点用的是 containerd 或 CRI-O 时，按对应的标签页配置即可。</span></p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="ol-site-section ol-site-section-band" id="convert" aria-labelledby="convert-title">
+    <div class="ol-site-section-header">
+      <h2 class="ol-site-section-title" id="convert-title"><span data-l="en">Convert an image</span><span data-l="zh" lang="zh-CN">转换镜像地址</span></h2>
+      <p class="ol-site-section-description"><span data-l="en">Paste an image from any registry this site mirrors to get the name that pulls it through the mirror.</span><span data-l="zh" lang="zh-CN">粘贴本站加速的任一仓库的镜像地址，得到经由本站拉取时的写法。</span></p>
+    </div>
+    <p class="ol-muted only-nojs"><span data-l="en">Replace the registry in an image's name with its mirror below; Docker Hub's official images need <code>library/</code>, as in <code>library/nginx</code>.</span><span data-l="zh" lang="zh-CN">把镜像地址里的仓库换成下面对应的加速地址即可；Docker Hub 的官方镜像要写成 <code>library/</code> 开头，例如 <code>library/nginx</code>。</span></p>
+    <div class="ol-panel only-js">
+      <div class="ol-panel-body ol-stack">
+        <form class="ol-input-group" id="convert-form" autocomplete="off">
+          <label class="ol-sr-only" for="convert-input"><span data-l="en">Image</span><span data-l="zh" lang="zh-CN">镜像</span></label>
+          <input class="ol-input ol-input-lg ol-input-mono" id="convert-input" type="text" spellcheck="false" autocapitalize="off" placeholder="Image, e.g. nginx:1.27 or ghcr.io/org/app:tag" data-zh-placeholder="输入镜像，例如 nginx:1.27、ghcr.io/org/app:tag">
+          <button class="ol-btn ol-btn-primary ol-btn-lg" type="submit"><svg class="ol-icon" aria-hidden="true"><use href="#i-arrow-right-left"/></svg><span data-l="en">Convert</span><span data-l="zh" lang="zh-CN">转换</span></button>
+        </form>
+        <div class="site-result" id="convert-result" aria-live="polite"></div>
+      </div>
+      <div class="ol-panel-footer"><span><span data-l="en">Try</span><span data-l="zh" lang="zh-CN">试试</span></span><span class="ol-cluster" id="convert-examples"></span></div>
+    </div>
+  </section>
+
+  <section class="ol-site-section" id="mirrors" aria-labelledby="mirrors-title">
+    <div class="ol-site-section-header">
+      <h2 class="ol-site-section-title" id="mirrors-title"><span data-l="en">Mirrors</span><span data-l="zh" lang="zh-CN">加速地址</span></h2>
+      <p class="ol-site-section-description"><span data-l="en">One address for each registry. Official Docker Hub images are written as <code>library/&lt;name&gt;</code>; k8s.gcr.io was frozen in 2023, so use registry.k8s.io.</span><span data-l="zh" lang="zh-CN">每个仓库一个地址。Docker Hub 的官方镜像要写成 <code>library/&lt;名称&gt;</code>；k8s.gcr.io 已于 2023 年冻结，请改用 registry.k8s.io。</span></p>
+    </div>
+    <ul class="ol-grid ol-grid-3">
+      <li class="ol-card" data-key="docker">
+        <div class="ol-card-row">
+          <span class="ol-card-title ol-mono site-mirror" id="mirror-0"><span data-d="docker">docker.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span></span>
+          <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="mirror-0" aria-label="Copy the address" title="Copy the address" data-zh-aria-label="复制地址" data-zh-title="复制地址"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+        </div>
+        <div class="ol-card-row">
+          <span class="ol-muted ol-text-sm">Docker Hub <span class="ol-subtle">(docker.io)</span></span>
+          <span class="ol-badge ol-badge-accent" data-this-site hidden><span data-l="en">This site</span><span data-l="zh" lang="zh-CN">当前</span></span>
+        </div>
+        <div class="ol-card-row">
+          <span class="ol-card-meta ol-mono site-example">docker pull <span data-d="docker">docker.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>/<wbr>library/<wbr>nginx:1.27</span>
+        </div>
+      </li>
+      <li class="ol-card" data-key="gcr">
+        <div class="ol-card-row">
+          <span class="ol-card-title ol-mono site-mirror" id="mirror-1"><span data-d="gcr">gcr.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span></span>
+          <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="mirror-1" aria-label="Copy the address" title="Copy the address" data-zh-aria-label="复制地址" data-zh-title="复制地址"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+        </div>
+        <div class="ol-card-row">
+          <span class="ol-muted ol-text-sm">gcr.io</span>
+          <span class="ol-badge ol-badge-accent" data-this-site hidden><span data-l="en">This site</span><span data-l="zh" lang="zh-CN">当前</span></span>
+        </div>
+        <div class="ol-card-row">
+          <span class="ol-card-meta ol-mono site-example">docker pull <span data-d="gcr">gcr.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>/<wbr>distroless/<wbr>static:nonroot</span>
+        </div>
+      </li>
+      <li class="ol-card" data-key="ghcr">
+        <div class="ol-card-row">
+          <span class="ol-card-title ol-mono site-mirror" id="mirror-2"><span data-d="ghcr">ghcr.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span></span>
+          <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="mirror-2" aria-label="Copy the address" title="Copy the address" data-zh-aria-label="复制地址" data-zh-title="复制地址"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+        </div>
+        <div class="ol-card-row">
+          <span class="ol-muted ol-text-sm">ghcr.io</span>
+          <span class="ol-badge ol-badge-accent" data-this-site hidden><span data-l="en">This site</span><span data-l="zh" lang="zh-CN">当前</span></span>
+        </div>
+        <div class="ol-card-row">
+          <span class="ol-card-meta ol-mono site-example">docker pull <span data-d="ghcr">ghcr.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>/<wbr>containerd/<wbr>busybox:1.36</span>
+        </div>
+      </li>
+      <li class="ol-card" data-key="k8s">
+        <div class="ol-card-row">
+          <span class="ol-card-title ol-mono site-mirror" id="mirror-3"><span data-d="k8s">k8s.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span></span>
+          <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="mirror-3" aria-label="Copy the address" title="Copy the address" data-zh-aria-label="复制地址" data-zh-title="复制地址"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+        </div>
+        <div class="ol-card-row">
+          <span class="ol-muted ol-text-sm">registry.k8s.io</span>
+          <span class="ol-badge ol-badge-accent" data-this-site hidden><span data-l="en">This site</span><span data-l="zh" lang="zh-CN">当前</span></span>
+        </div>
+        <div class="ol-card-row">
+          <span class="ol-card-meta ol-mono site-example">docker pull <span data-d="k8s">k8s.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>/<wbr>pause:3.10</span>
+        </div>
+      </li>
+      <li class="ol-card" data-key="quay">
+        <div class="ol-card-row">
+          <span class="ol-card-title ol-mono site-mirror" id="mirror-4"><span data-d="quay">quay.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span></span>
+          <button class="ol-btn ol-btn-ghost ol-btn-sm ol-btn-icon ol-copy only-js" type="button" data-copy="mirror-4" aria-label="Copy the address" title="Copy the address" data-zh-aria-label="复制地址" data-zh-title="复制地址"><span data-copy-icon><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-copy"/></svg></span><span data-copied-icon hidden><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+        </div>
+        <div class="ol-card-row">
+          <span class="ol-muted ol-text-sm">quay.io</span>
+          <span class="ol-badge ol-badge-accent" data-this-site hidden><span data-l="en">This site</span><span data-l="zh" lang="zh-CN">当前</span></span>
+        </div>
+        <div class="ol-card-row">
+          <span class="ol-card-meta ol-mono site-example">docker pull <span data-d="quay">quay.<span data-l="en">&lt;your-domain&gt;</span><span data-l="zh" lang="zh-CN">&lt;你的域名&gt;</span></span>/<wbr>coreos/<wbr>etcd:v3.5.0</span>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <section class="ol-site-section" id="status" aria-labelledby="status-title" data-if="status" hidden>
+    <div class="ol-site-section-header">
+      <h2 class="ol-site-section-title" id="status-title"><span data-l="en">Status</span><span data-l="zh" lang="zh-CN">服务状态</span></h2>
+      <p class="ol-site-section-description"><span data-l="en">A separate status page watches these mirrors from outside: whether each one answers, and how it has done lately.</span><span data-l="zh" lang="zh-CN">这些加速地址由独立的状态页从外部监测：现在能否访问，以及最近的情况。</span></p>
+    </div>
+    <div class="ol-panel">
+      <div class="ol-panel-body site-status">
+        <span class="site-status-icon"><svg class="ol-icon" aria-hidden="true"><use href="#i-activity"/></svg></span>
+        <div class="site-status-text"><p class="ol-card-title ol-mono" data-link-host="status"></p><p class="ol-hint"><span data-l="en">Status page</span><span data-l="zh" lang="zh-CN">状态页</span></p></div>
+        <a class="ol-btn ol-btn-secondary" data-link="status" rel="noopener"><span data-l="en">Open the status page</span><span data-l="zh" lang="zh-CN">打开状态页</span><svg class="ol-icon ol-icon-sm" aria-hidden="true"><use href="#i-external-link"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="ol-site-section" id="faq" aria-labelledby="faq-title">
+    <div class="ol-site-section-header">
+      <h2 class="ol-site-section-title" id="faq-title"><span data-l="en">Questions</span><span data-l="zh" lang="zh-CN">常见问题</span></h2>
+    </div>
+    <div>
+      <details class="ol-accordion" name="faq"><summary><span data-l="en">A pull fails with 404, manifest unknown, or 503</span><span data-l="zh" lang="zh-CN">拉取时报 404、manifest unknown 或 503</span></summary><p><span data-l="en">Usually the name is wrong. Official Docker Hub images are <code>library/&lt;name&gt;</code>, as in <code>library/nginx</code>; for other images, check that the name and tag exist in the registry. <a href="#convert">Convert an image</a> checks the name for you.</span><span data-l="zh" lang="zh-CN">多半是镜像名写错了：Docker Hub 的官方镜像要写成 <code>library/&lt;名称&gt;</code>，例如 <code>library/nginx</code>；其他镜像请确认仓库里确实有这个名称和标签。<a href="#convert">转换镜像地址</a>会帮你检查名称。</span></p></details>
+      <details class="ol-accordion" name="faq"><summary><span data-l="en">429 Too Many Requests</span><span data-l="zh" lang="zh-CN">报 429 Too Many Requests</span></summary><p><span data-v="cache"><span data-l="en">The registry, Docker Hub in particular, limits this site's address. Cached images are not affected; for others, try again later.</span><span data-l="zh" lang="zh-CN">仓库（尤其是 Docker Hub）按本站的出口地址限流。已缓存的镜像不受影响，没缓存过的请稍后重试。</span></span><span data-v="direct"><span data-l="en">The registry, Docker Hub in particular, limits this site's address, and every user shares that limit. Try again later.</span><span data-l="zh" lang="zh-CN">仓库（尤其是 Docker Hub）按本站的出口地址限流，所有用户共用这个额度，请稍后重试。</span></span></p></details>
+      <details class="ol-accordion" name="faq"><summary><span data-l="en">5xx, timeouts, or downloads that break off</span><span data-l="zh" lang="zh-CN">报 5xx、超时或下载中断</span></summary><p><span data-l="en">Usually a passing problem with the registry or the network; try again.<span data-if="status" hidden> See also the <a data-link="status" rel="noopener">status page</a>.</span></span><span data-l="zh" lang="zh-CN">一般是仓库或网络的临时波动，重试即可。<span data-if="status" hidden>也可以看看<a data-link="status" rel="noopener">状态页</a>。</span></span></p></details>
+      <details class="ol-accordion" name="faq"><summary><span data-l="en">Are images cached?</span><span data-l="zh" lang="zh-CN">镜像会缓存吗？</span></summary><p><span data-v="cache"><span data-l="en">Yes. The first pull fetches the image from the registry and caches it; later pulls are served from here. Images nobody has pulled for 7 days are removed, and a tag is checked with the registry again after 5 minutes at most.</span><span data-l="zh" lang="zh-CN">会。首次拉取时从仓库取回并缓存，之后直接从本站返回；7 天内没人拉过的镜像会自动清理。同一个标签最多 5 分钟就会再向仓库确认一次是否更新。</span></span><span data-v="direct"><span data-l="en">No. Nothing is stored here: every pull is fetched from the registry and passed through.</span><span data-l="zh" lang="zh-CN">不会。本站不保存镜像，每次拉取都从仓库取回，再转发给你。</span></span></p></details>
+      <details class="ol-accordion" name="faq"><summary><span data-l="en">I get an old version after a tag was updated</span><span data-l="zh" lang="zh-CN">标签更新后拉到的是旧版本？</span></summary><p><span data-v="cache"><span data-l="en">Tags that change, such as latest, can lag the registry by up to 5 minutes. Pull by digest (<code>@sha256:…</code>) when you need an exact version.</span><span data-l="zh" lang="zh-CN">latest 这类会变的标签，仓库更新后最多 5 分钟才能拉到新版本。需要确定版本时，请按 digest（<code>@sha256:…</code>）拉取。</span></span><span data-v="direct"><span data-l="en">Every pull goes to the registry, so you get its current version. Pull by digest (<code>@sha256:…</code>) when you need an exact one.</span><span data-l="zh" lang="zh-CN">本站每次都回源，拉到的就是仓库当前的版本。需要确定版本时，请按 digest（<code>@sha256:…</code>）拉取。</span></span></p></details>
+      <details class="ol-accordion" name="faq"><summary><span data-l="en">Can I push or search?</span><span data-l="zh" lang="zh-CN">能推送镜像或搜索吗？</span></summary><p><span data-l="en">No. This site only pulls: <code>docker push</code>, <code>docker search</code> and listing repositories are not supported.</span><span data-l="zh" lang="zh-CN">不能。本站只放行拉取：<code>docker push</code>、<code>docker search</code> 和列出仓库都不支持。</span></p></details>
+      <details class="ol-accordion" name="faq"><summary><span data-l="en">What is logged?</span><span data-l="zh" lang="zh-CN">会记录什么？</span></summary><p><span data-l="en">Access logs (client address, image, time, status), used only to run the service and to stop abuse.<span data-if="privacy" hidden> See the <a data-link="privacy" rel="noopener">privacy notice</a>.</span></span><span data-l="zh" lang="zh-CN">会记录访问日志（来源地址、镜像、时间、状态），只用于运维和防止滥用。<span data-if="privacy" hidden>详见<a data-link="privacy" rel="noopener">隐私说明</a>。</span></span></p></details>
+    </div>
+  </section>
+</main>
+
+<footer class="ol-site-footer">
+  <div>
+    <a class="ol-brand" href="#main"><img src="/assets/brands/linkos-mirrors/logo.svg" alt="" width="24" height="24" class="site-logo-light" data-mark="logo.svg"><img src="/assets/brands/linkos-mirrors/logo-dark.svg" alt="" width="24" height="24" class="site-logo-dark" data-mark="logo-dark.svg"><span data-name>LinkOS Mirrors</span></a>
+    <p data-if="operator" hidden><span data-l="en"><span data-name></span> is run by <span data-operator></span>.</span><span data-l="zh" lang="zh-CN"><span data-name></span> 由 <span data-operator></span> 运营。</span></p>
+    <p class="ol-site-footer-note"><span data-l="en">Docker, Kubernetes, GitHub, Google, Red Hat and other names and marks belong to their owners; this service is not affiliated with them. <span data-v="cache">Runs on <a href="https://github.com/openlinkos/registry-mirrors" rel="noopener">registry-mirrors</a> (Caddy and zot).</span><span data-v="direct">Runs on <a href="https://github.com/openlinkos/registry-mirrors-caddy" rel="noopener">registry-mirrors-caddy</a>.</span></span><span data-l="zh" lang="zh-CN">Docker、Kubernetes、GitHub、Google、Red Hat 等名称和商标归各自所有者，本服务与它们没有关联。<span data-v="cache">基于 <a href="https://github.com/openlinkos/registry-mirrors" rel="noopener">registry-mirrors</a>（Caddy 和 zot）。</span><span data-v="direct">基于 <a href="https://github.com/openlinkos/registry-mirrors-caddy" rel="noopener">registry-mirrors-caddy</a>。</span></span></p>
+  </div>
+  <nav class="ol-site-footer-links" id="footer-links" aria-label="Links" data-zh-aria-label="链接" hidden></nav>
+</footer>
+</body>
+</html>

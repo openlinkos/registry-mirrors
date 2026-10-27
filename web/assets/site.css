@@ -1,0 +1,148 @@
+/*
+ * The usage page's few additions to the design system (ui.css, loaded first). They use only design system
+ * variables and sit outside the layers, so they take precedence.
+ */
+
+/* The page carries both languages; the one not in use is hidden. */
+html:lang(zh) [data-l="en"],
+html:not(:lang(zh)) [data-l="zh"] {
+  display: none;
+}
+
+/* Some answers differ between the edition that caches (registry-mirrors) and the one that does not
+   (registry-mirrors-caddy); data-variant on <html> says which this is. */
+html:not([data-variant="direct"]) [data-v="direct"],
+html[data-variant="direct"] [data-v="cache"] {
+  display: none;
+}
+
+/* What needs the script is hidden without it, and what stands in for it is hidden with it (head.js marks
+   the page). */
+html:not(.js) .only-js,
+html.js .only-nojs {
+  display: none;
+}
+
+/* The brand's logo for the colour scheme in use. */
+.site-logo-dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .site-logo-light {
+    display: none;
+  }
+
+  html:not([data-theme="light"]) .site-logo-dark {
+    display: block;
+  }
+}
+
+html[data-theme="dark"] .site-logo-light {
+  display: none;
+}
+
+html[data-theme="dark"] .site-logo-dark {
+  display: block;
+}
+
+/* Without the script every runtime's steps follow one another, each under its name. */
+html:not(.js) .site-panel + .site-panel {
+  margin-block-start: var(--ol-space-10);
+}
+
+.site-panel > .ol-heading-sm {
+  margin-block-end: var(--ol-space-4);
+}
+
+/* Steps: the code under a step's text, and a warning under the code. */
+.ol-steps .ol-code {
+  margin-block-start: var(--ol-space-1);
+}
+
+.ol-steps .ol-alert {
+  margin-block-start: var(--ol-space-3);
+}
+
+/* The note that the addresses are placeholders sits between the section's heading and the tabs. */
+.site-placeholder {
+  margin-block-end: var(--ol-space-6);
+}
+
+/* Mirrors: long addresses wrap rather than widen the card. */
+.site-mirror,
+.site-example {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.site-mirror {
+  flex: 1 1 0;
+}
+
+/* The mirror of the host this page is on. */
+.ol-card[data-current] {
+  border-color: var(--ol-color-accent-border);
+  box-shadow: 0 0 0 3px var(--ol-color-accent-bg);
+}
+
+/* Convert: the result under the input. */
+.site-result:empty {
+  display: none;
+}
+
+.site-result-grid {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--ol-space-2) var(--ol-space-4);
+  align-items: center;
+  font-size: var(--ol-font-size-sm);
+}
+
+.site-result-grid > dt {
+  color: var(--ol-color-fg-muted);
+}
+
+.site-result-grid > dd {
+  display: flex;
+  align-items: center;
+  gap: var(--ol-space-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .site-result-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--ol-space-1);
+  }
+
+  .site-result-grid > dd + dt {
+    margin-block-start: var(--ol-space-2);
+  }
+}
+
+/* Status: where the status page is, and a way there. */
+.site-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ol-space-4);
+}
+
+.site-status-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--ol-size-control-lg);
+  block-size: var(--ol-size-control-lg);
+  border-radius: var(--ol-radius-full);
+  background: var(--ol-color-accent-bg);
+  color: var(--ol-color-accent-text);
+}
+
+.site-status-text {
+  flex: 1 1 12rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

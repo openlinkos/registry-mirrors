@@ -1,0 +1,3 @@
+The OpenLinkOS and LinkOS names and marks in this directory (except neutral/) are not covered by the
+licence of the code. They are for OpenLinkOS and LinkOS services; see the brand guidelines at
+https://openlinkos.com/brand.

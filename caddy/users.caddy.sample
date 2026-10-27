@@ -1,0 +1,5 @@
+# 需要登录的入口的用户，复制为 users.caddy 后修改：cp caddy/users.caddy.sample caddy/users.caddy
+# 一行一个：<用户名> <bcrypt 哈希>。生成哈希：docker compose run --rm caddy caddy hash-password
+# 已有的 htpasswd 文件可以直接转换：sed 's/:/ /' htpasswd > caddy/users.caddy
+# 例如：
+# alice $2a$14$<caddy hash-password 输出的其余部分>

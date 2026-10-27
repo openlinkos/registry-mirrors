@@ -1,0 +1,91 @@
+# 一个上游的站点逻辑，由 mode-tls.caddy（按域名）和 mode-http.caddy（按端口）共用。
+# 参数 {args[0]} 是这个上游在 zot 里的前缀：docker.io、gcr.io、ghcr.io、registry.k8s.io、quay.io。
+#
+#   1. 只放行拉取：GET、HEAD，其他方法返回 405；请求体最多 1 KB。
+#   2. 只转发拉取用到的路径：/v2/、/v2/<仓库>/manifests/<引用>、/v2/<仓库>/blobs/<摘要>、
+#      /v2/<仓库>/tags/list。/v2/_catalog（会列出所有拉过的仓库）、zot 自己的接口一律 404。
+#   3. 给仓库加上前缀再交给 zot：docker.<域名>/v2/library/nginx/... → /v2/docker.io/library/nginx/...
+#      前缀总由这里加，客户端写什么都出不了这个上游。
+#   4. 浏览器打开 / 看到用法页（web/），/healthz 给监控探活；其他路径 404。
+#   5. zot 不发认证质询，客户端不需要令牌，和直接用 Docker Hub 匿名拉取一样。
+#      需要登录的入口（auth-*.caddy）在这里之前先由 Caddy 校验口令；客户端的 Authorization 头不转给 zot。
+#   6. zot 重启时（升级、改配置、换存储）新请求等它回来再转发，不返回 502。
+
+# 转给 zot 的公共设置（在 reverse_proxy 块内使用）
+(to_zot) {
+	header_up -Authorization
+	# zot 重启的几秒内端口连不上：每 250 毫秒重试一次，最多等 30 秒。
+	# 只重试还没连上 zot 的请求，正在下载的连接断开后由客户端重试
+	lb_try_duration 30s
+	lb_try_interval 250ms
+}
+
+(mirror) {
+	route {
+		request_body {
+			max_size 1KB
+		}
+		@not_pull not method GET HEAD
+		handle @not_pull {
+			header Allow "GET, HEAD"
+			respond 405
+		}
+		handle /v2/ {
+			reverse_proxy {$ZOT_ADDR:127.0.0.1:5100} {
+				import to_zot
+			}
+		}
+		@repo path_regexp repo ^/v2/(.+/(?:manifests|blobs)/[^/]+|.+/tags/list)$
+		handle @repo {
+			rewrite * /v2/{args[0]}/{re.repo.1}
+			reverse_proxy {$ZOT_ADDR:127.0.0.1:5100} {
+				import to_zot
+				# tags/list 的分页链接里带着前缀，改回客户端看到的路径
+				header_down Link "</v2/{args[0]}/" "</v2/"
+			}
+		}
+		# 探活：Caddy 和 zot 都正常时返回 200，给 Upptime 等监控用
+		handle /healthz {
+			rewrite * /readyz
+			reverse_proxy {$ZOT_ADDR:127.0.0.1:5100} {
+				import to_zot
+			}
+		}
+		# 浏览器打开域名时看到的用法页（仓库的 web/ 目录），只提供这几个文件和 assets/ 下的样式、脚本、字体、标志。
+		# 页面只加载自己的文件，CSP 不允许内联脚本和样式；标志 SVG 里带着自己的 <style>，单独放宽。
+		@web path / /index.html /favicon.svg /favicon.ico /robots.txt /site.json /assets/*
+		handle @web {
+			root * {$WEB_ROOT:/srv/web}
+			header {
+				Cache-Control "no-cache"
+				X-Content-Type-Options "nosniff"
+				Referrer-Policy "no-referrer"
+			}
+			@page path / /index.html
+			header @page {
+				Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; require-trusted-types-for 'script'; trusted-types 'none'"
+				X-Frame-Options "DENY"
+			}
+			@svg path *.svg
+			header @svg Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+			# 有的系统（例如 Windows）没有 .woff2 的类型
+			@font path *.woff2
+			header @font Content-Type "font/woff2"
+			file_server
+		}
+		handle {
+			respond 404
+		}
+	}
+}
+
+# 访问日志：JSON，按大小轮转，保留 30 天。目录默认 /var/log/caddy，可用环境变量 LOG_DIR 覆盖
+(access_log) {
+	log {
+		output file {$LOG_DIR:/var/log/caddy}/access.log {
+			roll_size 100MiB
+			roll_keep 10
+			roll_keep_for 720h
+		}
+	}
+}
