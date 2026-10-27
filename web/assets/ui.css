@@ -1,4 +1,4 @@
-/*! @openlinkos/ui 0.5.0 | MIT | https://github.com/openlinkos/design */
+/*! @openlinkos/ui 0.5.1 | MIT | https://github.com/openlinkos/design */
 
 @layer ol.reset, ol.tokens, ol.base, ol.layout, ol.components, ol.utilities;
 
@@ -2804,6 +2804,12 @@
     min-height: var(--ol-size-control-md);
   }
 
+  /* A toolbar that is a panel's body, or the last thing in its box, leaves the spacing to the box. */
+  .ol-panel-body.ol-toolbar,
+  .ol-toolbar:last-child {
+    margin-block-end: 0;
+  }
+
   /* Results below a toolbar. */
   .ol-toolbar + .ol-section {
     margin-block-start: var(--ol-space-8);
@@ -4330,6 +4336,13 @@
   .ol-code-wrap pre {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+  }
+
+  /* Without a label the copy button sits beside the code: the code scrolls in a narrower box, so a long
+     line never slides under the button. */
+  .ol-code:has(> .ol-copy):not(:has(> .ol-code-label)) > pre {
+    margin-inline-end: var(--ol-space-10);
+    padding-inline-end: 0;
   }
 
   /* Words quoted from a source. */

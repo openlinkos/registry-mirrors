@@ -122,13 +122,6 @@ html:not(.js) .site-panel + .site-panel {
   }
 }
 
-/* A code block without a label keeps its text clear of the copy button: the code scrolls inside a narrower
-   box, so a long line never slides under the button. */
-.ol-code:has(> .ol-copy):not(:has(> .ol-code-label)) > pre {
-  margin-inline-end: var(--ol-space-10);
-  padding-inline-end: 0;
-}
-
 /* Status: where the status page is, and a way there. */
 .site-status {
   display: flex;

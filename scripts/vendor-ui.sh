@@ -9,7 +9,7 @@
 # Usage: scripts/vendor-ui.sh [version]. Requires curl, tar and openssl.
 set -euo pipefail
 
-VERSION="${1:-0.5.0}"
+VERSION="${1:-0.5.1}"
 DEST="${DEST:-web/assets}"
 
 work="$(mktemp -d)"
