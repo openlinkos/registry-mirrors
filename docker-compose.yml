@@ -2,7 +2,7 @@
 # Caddy 使用宿主机网络（仅 Linux）：tls 模式监听 80、443，http 模式监听 5001–5005，
 # 需要登录的入口（AUTH_MODE=http）另外监听 15001–15005；
 # 指标只在 127.0.0.1:9180，管理接口只在 localhost:2019。
-# zot 只在 127.0.0.1:5100 上给 Caddy 用，镜像缓存在 ./data/zot。配置项见 .env.sample。
+# zot 只在 127.0.0.1:5100 上给 Caddy 用，镜像缓存在 ZOT_DATA（默认 ./data/zot）。配置项见 .env.sample。
 x-logging: &logging
   driver: json-file
   options:
@@ -52,5 +52,5 @@ services:
       - 127.0.0.1:${ZOT_PORT:-5100}:5000
     volumes:
       - ./zot/config.yaml:/etc/zot/config.yaml:ro
-      - ./data/zot:/var/lib/registry
+      - ${ZOT_DATA:-./data/zot}:/var/lib/registry
     logging: *logging

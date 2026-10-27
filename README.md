@@ -59,7 +59,7 @@ docker pull k8s.linkos.org/<镜像>:<标签>               # 对应 registry.k8s
 
 本仓库只有两个容器：
 
-- **[zot](https://zotregistry.dev)**（CNCF 项目）：一个进程按需代理五个上游，有人拉取时才去上游取，取到后缓存在 `./data/zot`。每个上游的镜像放在自己的前缀下（`docker.io/`、`gcr.io/` 等），互不相通。7 天内没人拉过的镜像自动清理。
+- **[zot](https://zotregistry.dev)**（CNCF 项目）：一个进程按需代理五个上游，有人拉取时才去上游取，取到后缓存在 `./data/zot`（可用 `.env` 的 `ZOT_DATA` 改到数据盘）。每个上游的镜像放在自己的前缀下（`docker.io/`、`gcr.io/` 等），互不相通。7 天内没人拉过的镜像自动清理。
 - **Caddy**：自动 HTTPS；只放行拉取（GET、HEAD），关闭 `/v2/_catalog`；按访问的域名或端口给请求加上上游前缀，再交给 zot。
 
 客户端的用法和上面「快速使用」完全一样，不需要登录。
