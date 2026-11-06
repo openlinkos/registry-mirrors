@@ -6,7 +6,7 @@
 
 免费的公共容器镜像加速服务，由 [LinkOS 团队](https://linkos.io) 运营；本仓库同时是它的开源部署配置，你也可以用它自建一套。
 
-服务主页：[linkos.org](https://linkos.org/zh/mirrors) · 服务状态：[uptime.linkos.org](https://uptime.linkos.org)
+服务主页：[linkos.org](https://linkos.org/zh/mirrors) · 服务状态：[status.linkos.org](https://status.linkos.org)
 
 ## 服务列表
 
